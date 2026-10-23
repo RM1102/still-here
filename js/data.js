@@ -127,6 +127,11 @@ window.RC = window.RC || {};
   // Who's with you (audit section 6, #1, #2 and #7): a child already with Sunita, from next door
   RC.withMeSuggest = { name: "Aarav Malhotra", age: 7, from: "C-7/110, next door", why: "Both his parents' phones stopped at 14:32:07. He came to your flat last night.", ration: "5 kg a month", code: "7K3Q" };
 
+  // Is it true? A forwarded message checked against official notices and on-the-spot confirmations (audit section 6, #11)
+  RC.rumour = { text: "URGENT: a second Snap at 15:00 today. Stay indoors and don't open the door to anyone. Forward to 10 people.", verdict: "No official notice says this", why: "NDMA's last notice was at 06:00 and says nobody has vanished since 14:32. No phone has gone silent since the Snap. Nobody at any spot has confirmed it. Messages that ask you to forward them are how rumours spread." };
+  // Kamla's medicines (audit section 6, #6): from her health record and pharmacy history
+  RC.meds = [{ name: "Metformin 500 mg", left: "about 9 days left", from: "bought 12 Oct" }, { name: "Amlodipine 5 mg", left: "about 4 days left", from: "bought 30 Sep" }];
+
   RC.notices = [
     { from: "NDMA · Government of India", t: "06:00", text: "At 14:32:07 yesterday, half of all living people vanished. No further vanishings have been recorded since. Stay where you are unless someone needs you. Open Still Here.", official: true, confirms: null },
     { from: "Delhi Disaster Management Authority", t: "06:45", text: "Water point: Govt Sr Sec School, Sector 7 (police present). 2,000 L tanker from 08:00.", official: true, confirms: 14, denies: 0, confirmedAt: "07:02" },

@@ -170,7 +170,10 @@
     else if (s.state === "claimed") body = `${sect("You're on your way")}<div class="group"><div class="r t">${tile("clock", "orange")}<div class="tt"><b>Claimed at 07:20 · there by 07:45</b><span>Shalini and Anita can see it. It reopens at 08:45, an hour after your arrival time, if you don't confirm.</span></div>${st("orange", "On the way")}</div></div>
       <div class="btn-row" style="display:flex;gap:10px"><button class="btn" data-action="kamla-release">I Can't Make It</button><button class="btn btn-prominent" style="flex:1" data-action="kamla-reached">I'm With Her</button></div>
       <p class="foot">If something stops you on the way, say so here. The case goes back to Anita and Shalini at once instead of waiting until 08:45.</p>`;
-    else if (s.state === "reached") body = `${sect("You're with her")}<div class="group"><div class="r t">${tile("check", "green")}<div class="tt"><b>Confirmed at 07:55</b><span>By your tap and your phone at the address. Her health record (diabetes, blood pressure tablets) is open to you at any care point.</span></div>${st("green", "With you")}</div></div>`;
+    else if (s.state === "reached") body = `${sect("You're with her")}<div class="group"><div class="r t">${tile("check", "green")}<div class="tt"><b>Confirmed at 07:55</b><span>By your tap and your phone at the address. Her health record is open to you at any care point.</span></div>${st("green", "With you")}</div></div>
+      ${sect("Her medicines")}<div class="group tiles">${RC.meds.map(m => `<div class="r t">${tile("heart-pulse", "red")}<div class="tt"><b>${esc(m.name)}</b><span>${esc(m.left)} · ${esc(m.from)}</span></div>${st(/4 days/.test(m.left) ? "orange" : "green", /4 days/.test(m.left) ? "Refill soon" : "Enough for now")}</div>`).join("")}
+        <div class="r t">${tile("map-pin", "blue")}<div class="tt"><b>Apollo Pharmacy, Sec 8 · 1.1 km</b><span>A pharmacist has been there since 06:58, and it has both in stock</span></div></div></div>
+      <p class="foot">From her health record and pharmacy history, shown only to the person now caring for her.</p>`;
     else if (s.state === "cant") body = `${sect("Sent to the next nearest")}<div class="group"><div class="r t">${tile("users", "orange")}<div class="tt"><b>Anita Verma and Shalini Gupta notified</b><span>Anita is 2.6 km away and active. Kiran, the ward's ASHA worker 0.8 km away, is on standby.</span></div></div></div>
       <div class="btn-row"><button class="btn btn-block" data-action="kamla-going">Actually, I'm Going</button></div>`;
     return `${head("Kamla Devi", "C-7/112, Rohini Sector 7, Delhi", ["#cases", "Cases"])}
@@ -257,6 +260,8 @@
     return RC.notices.map((n, i) => { const v = S.noticeVotes[i] || { c: 0, d: 0 };
       return `<div class="group"><div class="r t">${tile("landmark", "gray")}<div class="tt"><b>${esc(n.from)}</b><span>${n.t}</span></div></div><div class="pad" style="font-size:15px">${esc(n.text)}</div>
         ${n.confirms == null ? "" : `<div class="pad"><div class="okline">${I("check", 16)}<span>${n.confirms + v.c} people at the spot confirmed it · ${n.denies + v.d} said it's wrong · last ${n.confirmedAt}</span></div><div class="btn-row" style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-compact" data-action="vote" data-i="${i}" data-v="c">I'm There, It's True</button><button class="btn btn-compact btn-plain" data-action="vote" data-i="${i}" data-v="d">Not True</button></div></div>`}</div>`; }).join("")
+      + `${sect("Is it true?")}<div class="group"><div class="pad"><div class="fn" style="margin-bottom:6px">A forward you received</div><div style="font-size:15px;font-style:italic">"${esc(RC.rumour.text)}"</div></div>
+        ${S.checkedRumour ? `<div class="r t">${tile("x-circle", "red")}<div class="tt"><b>${esc(RC.rumour.verdict)}</b><span>${esc(RC.rumour.why)}</span></div>${st("red", "Not confirmed")}</div>` : `<div class="pad"><button class="btn btn-compact" data-action="checkrumour">Check This Message</button></div>`}</div>`
       + disc("How a notice gets verified", "An official declaration plus confirmations from phones physically at the spot. Every report carries a name. Facts fade after two hours without a new confirmation.");
   }
   V["#map"] = () => {
@@ -436,6 +441,7 @@
       addLog("meera", "07:50", d.v === "care" ? "Moved to Govt Primary School, Marol (police present). Adult on duty: R. Iyer. Lata stays until the handover." : "Stays with Lata Pawar at Flat 402. Handover to Sunita Sharma planned for week two. Ration moved to Lata; guardian pass 4F2K.");
       thread("Still Here", d.v === "care" ? "Thank you, Lata. Please take Meera to Govt Primary School, Marol (400 m). R. Iyer is on duty. Your guardian pass is 4F2K." : "Thank you, Lata. You're Meera's temporary custodian. Her ration is now collectable by you, and your guardian pass is 4F2K. Sunita will message you here.", "07:50", "out"); markStep(6); },
     sendcp() { if (S.cases.meera.sent) return; S.cases.meera.sent = true; addLog("meera", "07:52", "Record sent to CHILDLINE 1098 and the Mumbai Child Welfare Committee, in Primero's format."); toast("Sent to CHILDLINE and the Mumbai Child Welfare Committee"); },
+    checkrumour() { S.checkedRumour = true; },
     notright(d) { S.notRight[d.id] = true; toast("Thanks. The carrier rechecks, and if they're here, one tap of I'm here clears it."); },
     calldesk(d) { S.called[d.id] = true; toast("Calling Safdarjung Hospital's help desk…"); },
     "withme-add"() { if (!S.withMe.length) S.withMe.push({ name: RC.withMeSuggest.name, t: "07:12" }); markStep(9); toast("Aarav's alone flag is closed. His circle was told."); },
