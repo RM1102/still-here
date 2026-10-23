@@ -6,8 +6,8 @@
   --hair: rgb(0 0 0 / .08); --fill: rgb(120 120 128 / .12); --fill2: rgb(120 120 128 / .2); --thumb: #FFFFFF;
   --accent: var(--apple-blue); --red: var(--apple-red); --orange: var(--apple-orange); --green: var(--apple-green); --gray: var(--apple-gray);
   --group-shadow: 0 1px 2px rgb(0 0 0 / .05);
-  --s0: #df4b4b; --s1: #e0901f; --s2: #6cc9b3; --s3: #1b8a4d; --nodata: #c7c7cc;
-  --land: #e5e5ea; --edge: #ffffff; --outline: #3a3a3c; --sel: #1D1D1F; --bg-map: #FFFFFF;
+  --q0: #EEF8F1; --q1: #BFE6CB; --q2: #8ED2A4; --q3: #55B77B; --q4: #2C9757; --q5: #15703C; --nodata: #D8D8DC; --nodata-line: #C2C2C8; --flow: #0088FF; --st-reached: var(--apple-green); --st-going: var(--apple-orange); --st-nobody: var(--apple-red); --group-solid: #FFFFFF;
+  --land: #E5E5EA; --edge: rgb(0 0 0 / .2); --outline: #8E8E93; --sel: #1D1D1F; --bg-map: #FFFFFF;
   --wa-bg: #efeae2; --wa-in: #ffffff; --wa-out: #d9fdd3; --wa-sys: #fff3c4; --wa-ink: #111b21; --wa-ink2: #667781; --wa-sys-ink: #54410b; --mesh-bg: #0c1220; --mesh-in: #16213a; --mesh-out: #1f3b2d;
   --btn-prominent-bg: #1D1D1F; --btn-prominent-fg: #FFFFFF; --ease: cubic-bezier(.32, .72, 0, 1);
   color-scheme: light dark;
@@ -15,13 +15,13 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --canvas: #08080A; --group: rgb(255 255 255 / .055); --elev: #1C1C1E; --label: #F5F5F7; --label2: rgb(235 235 245 / .62); --label3: rgb(235 235 245 / .36);
   --hair: rgb(255 255 255 / .08); --fill: rgb(120 120 128 / .24); --fill2: rgb(120 120 128 / .36); --thumb: #48484A; --group-shadow: none;
-  --s0: #df4b4b; --s1: #ee9f2e; --s2: #86d7c4; --s3: #1b8a4d; --nodata: #48484d; --land: #2c2c30; --edge: #111113; --outline: #a3a3a8; --sel: #F5F5F7; --bg-map: #141416;
+  --q0: #1C2B21; --q1: #1D4830; --q2: #236C44; --q3: #2E9459; --q4: #4BBA72; --q5: #89DEA3; --nodata: #3A3A3E; --nodata-line: #4A4A50; --flow: #0091FF; --group-solid: #1C1C1E; --land: #2c2c30; --edge: rgb(0 0 0 / .55); --outline: #636366; --sel: #F5F5F7; --bg-map: #141416;
   --wa-bg: #0b141a; --wa-in: #202c33; --wa-out: #005c4b; --wa-sys: #182229; --wa-ink: #e9edef; --wa-ink2: #8696a0; --wa-sys-ink: #ffd279; --btn-prominent-bg: #F5F5F7; --btn-prominent-fg: #1D1D1F;
 } }
 :root[data-theme="dark"] {
   --canvas: #08080A; --group: rgb(255 255 255 / .055); --elev: #1C1C1E; --label: #F5F5F7; --label2: rgb(235 235 245 / .62); --label3: rgb(235 235 245 / .36);
   --hair: rgb(255 255 255 / .08); --fill: rgb(120 120 128 / .24); --fill2: rgb(120 120 128 / .36); --thumb: #48484A; --group-shadow: none;
-  --s0: #df4b4b; --s1: #ee9f2e; --s2: #86d7c4; --s3: #1b8a4d; --nodata: #48484d; --land: #2c2c30; --edge: #111113; --outline: #a3a3a8; --sel: #F5F5F7; --bg-map: #141416;
+  --q0: #1C2B21; --q1: #1D4830; --q2: #236C44; --q3: #2E9459; --q4: #4BBA72; --q5: #89DEA3; --nodata: #3A3A3E; --nodata-line: #4A4A50; --flow: #0091FF; --group-solid: #1C1C1E; --land: #2c2c30; --edge: rgb(0 0 0 / .55); --outline: #636366; --sel: #F5F5F7; --bg-map: #141416;
   --wa-bg: #0b141a; --wa-in: #202c33; --wa-out: #005c4b; --wa-sys: #182229; --wa-ink: #e9edef; --wa-ink2: #8696a0; --wa-sys-ink: #ffd279; --btn-prominent-bg: #F5F5F7; --btn-prominent-fg: #1D1D1F;
 }
 * { box-sizing: border-box; }
@@ -120,6 +120,7 @@ a.r:hover, button.r:hover, summary.r:hover { background: rgb(120 120 128 / .07);
 
 /* stats */
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.stats.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .stat { background: var(--group); border-radius: 18px; box-shadow: var(--group-shadow); padding: 14px 16px; position: relative; }
 .stat .l { font-size: 13px; color: var(--label2); padding-right: 18px; line-height: 1.3; }
 .stat .v { font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; margin-top: 4px; }
@@ -230,7 +231,7 @@ body.phone .device .mapbox { height: 380px; min-height: 0; }
 /* layout breakpoints (decided by available width, never device) */
 .msgbtn, .only-narrow { display: none !important; }
 @container (max-width: 560px) {
-  .stats { grid-template-columns: 1fr 1fr; } .stats > .stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .stats, .stats.four { grid-template-columns: 1fr 1fr; } .stats > .stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .spark { display: none; } .stat .v { font-size: 24px; }
 }
 @media (max-width: 1279px) {
@@ -249,6 +250,7 @@ body.phone .device .mapbox { height: 380px; min-height: 0; }
   .topbar .status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
   .mobilenav { display: flex; }
   .title { font-size: 30px; }
+  .mapbox { height: 52vh; min-height: 300px; max-height: 440px; }
 }
 @media (min-width: 760px) { .mobilenav { display: none !important; } }
 body.pre .mobilenav, body.pre .tabbar { display: none !important; }
@@ -256,3 +258,38 @@ body.pre .mobilenav, body.pre .tabbar { display: none !important; }
 .mobilenav a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10.5px; font-weight: 600; color: var(--label2); padding: 6px 2px; border-radius: 20px; min-height: 46px; justify-content: center; }
 .mobilenav a.on { color: var(--accent); background: var(--fill); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* map controls and scale (map redesign, 24 Oct) */
+.mapbox { position: relative; touch-action: pan-y; }
+.mapbox.zoomed { cursor: grab; touch-action: none; }
+.mapbox.zoomed:active { cursor: grabbing; }
+.mapzoom { position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; background: var(--glass-bg); -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); box-shadow: var(--glass-edge), var(--glass-shadow); z-index: 2; }
+.mapzoom button { width: 36px; height: 36px; border: 0; background: transparent; color: var(--label); display: grid; place-items: center; cursor: pointer; position: relative; }
+.mapzoom button + button::before { content: ""; position: absolute; top: 0; left: 8px; right: 8px; height: 1px; background: var(--hair); }
+.mapzoom button:hover { background: var(--fill); }
+.mapzoom button:disabled { color: var(--label3); cursor: default; background: transparent; }
+.legend .lt { color: var(--label); font-weight: 500; }
+.legend .ramp { display: inline-flex; border-radius: 4px; overflow: hidden; height: 10px; }
+.legend .ramp i { width: 28px; height: 10px; margin: 0; border-radius: 0; }
+.legend .ends { display: inline-flex; gap: 6px; font-variant-numeric: tabular-nums; }
+.legend .ends span:first-child::after { content: "to"; margin-left: 6px; color: var(--label3); }
+.legend .nd i { background: repeating-linear-gradient(45deg, var(--nodata) 0 3px, var(--nodata-line) 3px 5px); }
+.projband { fill: var(--fill); opacity: .35; }
+.trendline { font-size: 15px; color: var(--label); margin: 0 0 10px; line-height: 1.45; }
+.trendline b { font-weight: 600; }
+.mapsearch { position: relative; margin: 0 0 12px; }
+.mapsearch .field { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 12px; background: var(--fill); color: var(--label2); }
+.mapsearch input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 16px; color: var(--label); outline: none; }
+.mapsearch input::placeholder { color: var(--label3); }
+.mapsearch input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
+.mapsearch .clear[hidden] { display: none; }
+.mapsearch .clear { border: 0; background: transparent; color: var(--label3); padding: 0; display: grid; place-items: center; cursor: pointer; }
+.mapsearch .results { position: absolute; left: 0; right: 0; top: 46px; z-index: 12; background: var(--elev); border-radius: 14px; box-shadow: 0 0 0 1px var(--hair), 0 18px 40px rgb(0 0 0 / .18); max-height: 360px; overflow-y: auto; display: none; }
+.mapsearch.open .results { display: block; }
+.mapsearch .results .r { cursor: pointer; min-height: 48px; }
+.mapsearch .results .r.on, .mapsearch .results .r:hover { background: var(--fill); }
+.mapsearch .results .hd { padding: 10px 16px 4px; font-size: 13px; color: var(--label2); }
+.crumbs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 14px; color: var(--label2); margin: 0 0 10px; }
+.crumbs button { border: 0; background: transparent; color: var(--accent); font: inherit; font-size: 14px; padding: 0; cursor: pointer; }
+.crumbs b { color: var(--label); font-weight: 600; }
+.flowlist .n { width: 22px; height: 22px; border-radius: 50%; background: var(--flow); color: #fff; font-size: 12px; font-weight: 700; display: grid; place-items: center; flex: none; }

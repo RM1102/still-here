@@ -23,14 +23,17 @@ window.RC = window.RC || {};
   const TOTAL = RC.country.flagged;
 
   const units = [], byKey = {}, byState = {};
+  const POP = { "Maharashtra|Mumbai": 0.111, "Maharashtra|Pune": 0.084, "Karnataka|Bengaluru Urban": 0.157, "Tamil Nadu|Chennai": 0.064, "West Bengal|Kolkata": 0.049, "Telangana|Hyderabad": 0.113 };
   // districts
   const dByState = {}; G.india.districts.forEach(d => (dByState[d.s] = dByState[d.s] || []).push(d));
   Object.entries(dByState).forEach(([st, ds]) => {
     const b = base[st]; if (!b) return;
     const A = b.f / wsum * TOTAL, mS = b.r / wr;
     if (st === "Delhi") return; // Delhi is modelled by ward below
-    const ws = ds.map(d => 0.45 + hash(d.n + st)); const tw = ws.reduce((a, x) => a + x, 0);
-    ds.forEach((d, i) => { const u = { key: d.id, kind: "district", state: st, name: d.n, A: A * ws[i] / tw, m: mS * (0.65 + 0.7 * hash(d.n + "m")), nodata: !!b.nodata }; units.push(u); byKey[u.key] = u; (byState[st] = byState[st] || []).push(u); });
+    // Big-city districts take their census share of the state (2011); the rest share what is left by a stable pseudo-random weight.
+    const fixed = ds.map(d => POP[st + "|" + d.n] || 0), left = 1 - fixed.reduce((a, x) => a + x, 0);
+    const ws = ds.map((d, i) => fixed[i] ? 0 : 0.45 + hash(d.n + st)); const tw = ws.reduce((a, x) => a + x, 0) || 1;
+    ds.forEach((d, i) => { const u = { key: d.id, kind: "district", state: st, name: d.n, A: A * (fixed[i] || left * ws[i] / tw), m: mS * (0.65 + 0.7 * hash(d.n + "m")), nodata: !!b.nodata }; units.push(u); byKey[u.key] = u; (byState[st] = byState[st] || []).push(u); });
   });
   // Delhi wards
   const dl = base["Delhi"], DLA = dl.f / wsum * TOTAL, DLm = dl.r / wr;
@@ -42,6 +45,19 @@ window.RC = window.RC || {};
     const u = { key: "W" + w.id, kind: "ward", state: "Delhi", name: w.n, A: w === MYWARD ? 1240 : (DLA - 1240) * ww[i] / (tww - ww[wardsG.indexOf(MYWARD)]), m: DLm * (o ? o[1] : 0.6 + 0.8 * hash(w.n + "m")), nodata: w.n.indexOf("Rithala") === 0, mine: w === MYWARD, wid: w.id };
     units.push(u); byKey[u.key] = u; (byState.Delhi = byState.Delhi || []).push(u);
   });
+
+  // City wards: each city's wards replace its district, so state and India totals stay exact. Pune's wards cover a third of its district; the rest stays as one hidden unit.
+  const CITIES = {};
+  Object.entries(G.cities || {}).forEach(([ck, c]) => {
+    const d = byKey[c.did]; if (!d) return;
+    units.splice(units.indexOf(d), 1); byState[c.state].splice(byState[c.state].indexOf(d), 1);
+    const wts = c.wards.map(w => 0.6 + 0.8 * hash(w.n + ck)), tw = wts.reduce((a, x) => a + x, 0);
+    const kids = c.wards.map((w, i) => { const u = { key: w.id, kind: "ward", state: c.state, city: ck, name: w.n, A: d.A * c.share * wts[i] / tw, m: d.m * (0.7 + 0.6 * hash(w.n + "m" + ck)), nodata: d.nodata }; units.push(u); byKey[u.key] = u; byState[c.state].push(u); return u; });
+    if (c.share < 1) { const rest = { key: d.key + "-rest", kind: "district", state: c.state, name: d.name + " outside the city", A: d.A * (1 - c.share), m: d.m, nodata: d.nodata, hidden: true }; units.push(rest); byKey[rest.key] = rest; byState[c.state].push(rest); kids.push(rest); }
+    byKey[d.key] = { key: d.key, kind: "district", state: c.state, name: d.name, virtual: true, children: kids, city: ck };
+    CITIES[ck] = { key: ck, name: c.name, state: c.state, did: d.key, wards: kids.filter(k => k.kind === "ward") };
+  });
+  CITIES.delhi = { key: "delhi", name: "Delhi", state: "Delhi", did: null, wards: byState.Delhi };
 
   function solve(target, f) { let lo = 0.0001, hi = 5; for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; if (f(mid) < target) lo = mid; else hi = mid; } return (lo + hi) / 2; }
   const sumAt = k => units.reduce((a, u) => a + (u.nodata ? 0 : u.A * (1 - Math.exp(-k * u.m * NOW))), 0);
@@ -65,14 +81,16 @@ window.RC = window.RC || {};
     india: h => agg(units, h),
     delhi: h => agg(byState.Delhi, h),
     state: (st, h) => agg(byState[st] || [], h),
-    unit: (key, h) => byKey[key] ? Object.assign(agg([byKey[key]], h), { unit: byKey[key] }) : null
+    unit: (key, h) => { const u = byKey[key]; if (!u) return null; return Object.assign(agg(u.virtual ? u.children : [u], h), { unit: u }); },
+    city: (ck, h) => CITIES[ck] ? agg(CITIES[ck].wards, h) : null
   };
   function series(fn, step) { const out = []; for (let h = 0; h <= 50; h += step || 1) out.push(Object.assign({ h }, fn(h))); return out; }
-  const BINS = [{ max: 0.25, c: "var(--s0)", l: "Under 25% reached" }, { max: 0.5, c: "var(--s1)", l: "25–50%" }, { max: 0.75, c: "var(--s2)", l: "50–75%" }, { max: 1.01, c: "var(--s3)", l: "Over 75%" }];
+  // Uneven steps so the map reads at 07:10 (most areas 3–15%) and on Day 2 (most over 50%).
+  const BINS = [{ max: 0.04, c: "var(--q0)", l: "Under 4%" }, { max: 0.08, c: "var(--q1)", l: "4–8%" }, { max: 0.15, c: "var(--q2)", l: "8–15%" }, { max: 0.35, c: "var(--q3)", l: "15–35%" }, { max: 0.65, c: "var(--q4)", l: "35–65%" }, { max: 1.01, c: "var(--q5)", l: "Over 65%" }];
   function color(v) { if (!v || v.nodata) return "var(--nodata)"; return BINS.find(b => v.share < b.max).c; }
   function hourLabel(h) { if (h < 18) { const t = 6 + h; const hh = Math.floor(t), mm = Math.round((t - hh) * 60); return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`; } const d = 1 + Math.floor((h + 6) / 24), t = (h + 6) % 24; return `Day ${d} ${String(Math.floor(t)).padStart(2, "0")}:00`; }
   function compact(n) { n = Math.round(n); if (Math.abs(n) >= 1e7) return (n / 1e6).toFixed(1) + " M"; if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(2) + " M"; if (Math.abs(n) >= 1e5) return Math.round(n / 1e3) + " K"; return n.toLocaleString("en-IN"); }
   const pct = x => Math.round(x * 100) + "%";
 
-  RC.Model = { TIMES, NOW, units, byKey, byState, at, agg, scopes, series, BINS, color, hourLabel, compact, pct, myWard: byKey["W" + MYWARD.id], kR, kQ };
+  RC.Model = { TIMES, NOW, units, byKey, byState, CITIES, at, agg, scopes, series, BINS, color, hourLabel, compact, pct, myWard: byKey["W" + MYWARD.id], kR, kQ };
 })(window.RC);

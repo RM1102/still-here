@@ -5,8 +5,8 @@
   --canvas: #08080A; --group: rgb(255 255 255 / .055); --group2: rgb(255 255 255 / .085); --elev: #1C1C1E; --label: #F5F5F7; --label2: rgb(235 235 245 / .62); --label3: rgb(235 235 245 / .36);
   --hair: rgb(255 255 255 / .08); --fill: rgb(120 120 128 / .24); --fill2: rgb(120 120 128 / .36); --thumb: #48484A;
   --accent: var(--apple-blue); --red: var(--apple-red); --orange: var(--apple-orange); --amber: var(--apple-orange); --green: var(--apple-green); --grey: var(--apple-gray); --blue: var(--apple-blue);
-  --s0: #df4b4b; --s1: #ee9f2e; --s2: #86d7c4; --s3: #1b8a4d; --nodata: #48484d;
-  --land: #2c2c30; --edge: #111113; --outline: #a3a3a8; --sel: #F5F5F7; --bg-map: #0e0e10;
+  --q0: #1C2B21; --q1: #1D4830; --q2: #236C44; --q3: #2E9459; --q4: #4BBA72; --q5: #89DEA3; --nodata: #3A3A3E; --nodata-line: #4A4A50; --flow: #0091FF; --group-solid: #1C1C1E; --st-reached: var(--apple-green); --st-going: var(--apple-orange); --st-nobody: var(--apple-red); --s0: #df4b4b; --s3: #1b8a4d;
+  --land: #2c2c30; --edge: rgb(0 0 0 / .55); --outline: #636366; --sel: #F5F5F7; --bg-map: #0e0e10;
   --btn-prominent-bg: #F5F5F7; --btn-prominent-fg: #1D1D1F; --ease: cubic-bezier(.32, .72, 0, 1);
   --hdr: 60px; --filters: 52px; --kpis: 118px;
   color-scheme: dark;
@@ -112,7 +112,7 @@ button { font: inherit; color: inherit; }
 .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
 .legend .info { position: static; }
 .overlay { position: absolute; border-radius: 14px; padding: 8px 12px; background: var(--glass-bg); -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); box-shadow: var(--glass-edge), var(--glass-shadow); }
-.ov-trend { left: 12px; bottom: 12px; width: 310px; padding: 10px 12px 6px; }
+.ov-trend { left: 12px; bottom: 12px; width: 380px; padding: 10px 12px 6px; }
 .ov-trend .t { font-size: 13px; color: var(--label2); margin-bottom: 2px; }
 .ov-trend .t b { color: var(--label); font-weight: 600; }
 
@@ -209,3 +209,21 @@ table.t td.n, table.t th.n { text-align: right; font-variant-numeric: tabular-nu
   .page { height: auto; } .world { grid-template-columns: 1fr; height: auto; } .world .wmap { height: 420px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* map controls and scale (map redesign, 24 Oct) */
+.mapsvg { touch-action: pan-y; }
+.mapsvg.zoomed { cursor: grab; touch-action: none; }
+.mapzoom { position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; background: var(--glass-bg); -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); box-shadow: var(--glass-edge), var(--glass-shadow); z-index: 4; }
+
+.mapzoom button { width: 34px; height: 34px; border: 0; background: transparent; color: var(--label); display: grid; place-items: center; cursor: pointer; position: relative; }
+.mapzoom button + button::before { content: ""; position: absolute; top: 0; left: 8px; right: 8px; height: 1px; background: var(--hair); }
+.mapzoom button:hover { background: var(--fill); }
+.mapzoom button:disabled { color: var(--label3); cursor: default; }
+.legend .lt { color: var(--label); font-weight: 500; }
+.legend .ramp { display: inline-flex; border-radius: 4px; overflow: hidden; height: 10px; }
+.legend .ramp i { width: 24px; height: 10px; margin: 0; border-radius: 0; }
+.legend .ends { display: inline-flex; gap: 6px; font-variant-numeric: tabular-nums; }
+.legend .ends span:first-child::after { content: "to"; margin-left: 6px; color: var(--label3); }
+.legend .nd i { background: repeating-linear-gradient(45deg, var(--nodata) 0 3px, var(--nodata-line) 3px 5px); }
+.projband { fill: var(--fill); opacity: .35; }
+.trendline { font-size: 13px; color: var(--label); margin: 2px 0 6px; line-height: 1.4; }

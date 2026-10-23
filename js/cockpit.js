@@ -66,7 +66,7 @@
     if (S.state) return `<button data-back="1">‹ India</button> › <b>${esc(S.state)}</b> · its districts`;
     return `<b>India</b> · click a state for its districts`;
   }
-  function chips() { return [["people", "People", "var(--s3)"], ["problems", "Problems", "var(--red)"], ["help", "Supplies", "var(--blue)"], ["hazards", "Hazards", "var(--amber)"]].map(([k, l, c]) => `<button class="chip ${S.layers[k] ? "on" : ""}" data-layer="${k}"><i style="background:${c}"></i>${l}</button>`).join(""); }
+  function chips() { return [["people", "People", "var(--q3)"], ["problems", "Problems", "var(--red)"], ["help", "Supplies", "var(--blue)"], ["hazards", "Hazards", "var(--amber)"]].map(([k, l, c]) => `<button class="chip ${S.layers[k] ? "on" : ""}" data-layer="${k}"><i style="background:${c}"></i>${l}</button>`).join(""); }
   function situation() {
     return `<div class="filters"><span class="lab">Area</span><div class="seg"><button class="${S.scope === "delhi" ? "on" : ""}" data-scope="delhi">Delhi</button><button class="${S.scope === "india" ? "on" : ""}" data-scope="india">India</button></div>${timeSeg()}</div>
       <div class="kpis">${kpis()}</div>
@@ -74,7 +74,7 @@
         <section class="mapzone ${S.sel ? "has-drawer" : ""}"><div class="map-tools"><span class="crumb">${crumb()}</span>${chips()}</div>
           <div class="stage"><div class="mapsvg" id="map"></div>
             <div class="overlay" style="left:12px;top:12px">${MAP.legend()}</div>
-            <div class="overlay ov-trend"><div class="t">Is it getting better? <b id="trendname"></b></div><div id="trend"></div></div>
+            <div class="overlay ov-trend"><div class="t"><b>Is it getting better?</b> <span id="trendname"></span></div><p class="trendline" id="trendtxt"></p><div id="trend"></div></div>
           </div>${drawer()}</section></div>`;
   }
   function regionAgg(sel) { if (!sel) return null; if (sel.kind === "state") return M.scopes.state(sel.key, H()); return M.scopes.unit(sel.key, H()); }
@@ -137,14 +137,15 @@
     const el = $("#trend"); if (!el) return;
     const s = S.sel && S.sel.type === "region" ? S.sel : null, fn = s ? (h => regionAgg(Object.assign({}, s)) && (s.kind === "state" ? M.scopes.state(s.key, h) : M.scopes.unit(s.key, h))) : scopeAgg;
     $("#trendname").textContent = s ? regionName(s) : scopeName();
-    drawTrend(el, fn, 120);
+    $("#trendtxt").textContent = CH.trendSentence(fn, M.NOW, s ? regionName(s) : scopeName());
+    drawTrend(el, fn, 130);
     const dc = $("#drchart"); if (dc && s) drawTrend(dc, h => s.kind === "state" ? M.scopes.state(s.key, h) : M.scopes.unit(s.key, h), 140);
   }
   function drawTrend(el, fn, height) {
     const pts = M.series(fn, 2);
-    CH.line(el, { height, xmin: 0, xmax: 50, ymax: 1, yfmt: y => Math.round(y * 100) + "%", xlabel: h => M.hourLabel(h), marker: H(), markerLabel: T().short,
-      xticks: [{ x: 0, l: "Day 1" }, { x: 26, l: "Day 2" }, { x: 50, l: "Day 3" }],
-      series: [{ name: "Reached", color: "var(--s3)", pts: pts.map(p => ({ x: p.h, y: p.share })) }, { name: "Nobody yet", color: "var(--s0)", pts: pts.map(p => ({ x: p.h, y: p.unclaimedShare })) }] });
+    CH.line(el, { height, xmin: 0, xmax: 50, ymax: 1, yfmt: y => Math.round(y * 100) + "%", ytitle: "Share of people with no adult left", xlabel: h => M.hourLabel(h), marker: M.NOW, markerLabel: "Now", split: M.NOW, right: 96,
+      xticks: [{ x: 14, l: "20:00" }, { x: 26, l: "Day 2" }, { x: 50, l: "Day 3" }],
+      series: [{ name: "Reached", color: "var(--st-reached)", area: true, pts: pts.map(p => ({ x: p.h, y: p.share })) }, { name: "Nobody yet", color: "var(--st-nobody)", pts: pts.map(p => ({ x: p.h, y: p.unclaimedShare })) }] });
   }
 
   /* ---------- resources ---------- */
