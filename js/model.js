@@ -1,0 +1,78 @@
+/* Still Here — one model behind every number on both endpoints (audit D2, D3).
+   Units: every Indian district, except Delhi, which is split into its 290 real wards.
+   Reached share R(h) = 1 − e^(−kR·m·h) and reached-or-claimed Q(h) = 1 − e^(−kQ·m·h), h = hours since the 06:00 broadcast.
+   kR and kQ are solved so that India at 07:10 shows 2.14 M reached and 6.8 M claimed of 43.1 M alone.
+   About 4% of alone people have no reachable circle (2-pager appendix A1); a third of them are under five.
+   All numbers are simulated. Only the boundaries are real. */
+window.RC = window.RC || {};
+(function (RC) {
+  const TIMES = [
+    { id: "now", label: "Now · 07:10", short: "Now", h: 7 / 6 },
+    { id: "noon", label: "12:00", short: "12:00", h: 6 },
+    { id: "eve", label: "20:00", short: "20:00", h: 14 },
+    { id: "d2", label: "Day 2 · 08:00", short: "Day 2", h: 26 },
+    { id: "d3", label: "Day 3 · 08:00", short: "Day 3", h: 50 }
+  ];
+  const NOW = TIMES[0].h, NC = 0.04, U5 = 1 / 3, KN = 0.07;
+  function hash(s) { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return ((x >>> 0) % 100000) / 100000; }
+
+  const G = RC.GEO, codeToState = {};
+  Object.entries(G.india.states).forEach(([n, s]) => codeToState[s.code] = n);
+  const base = {}; RC.country.states.forEach(s => base[codeToState[s.n] || s.n] = s);
+  const wsum = RC.country.states.reduce((a, s) => a + s.f, 0), wr = RC.country.states.reduce((a, s) => a + s.f * s.r, 0) / wsum;
+  const TOTAL = RC.country.flagged;
+
+  const units = [], byKey = {}, byState = {};
+  // districts
+  const dByState = {}; G.india.districts.forEach(d => (dByState[d.s] = dByState[d.s] || []).push(d));
+  Object.entries(dByState).forEach(([st, ds]) => {
+    const b = base[st]; if (!b) return;
+    const A = b.f / wsum * TOTAL, mS = b.r / wr;
+    if (st === "Delhi") return; // Delhi is modelled by ward below
+    const ws = ds.map(d => 0.45 + hash(d.n + st)); const tw = ws.reduce((a, x) => a + x, 0);
+    ds.forEach((d, i) => { const u = { key: d.id, kind: "district", state: st, name: d.n, A: A * ws[i] / tw, m: mS * (0.65 + 0.7 * hash(d.n + "m")), nodata: !!b.nodata }; units.push(u); byKey[u.key] = u; (byState[st] = byState[st] || []).push(u); });
+  });
+  // Delhi wards
+  const dl = base["Delhi"], DLA = dl.f / wsum * TOTAL, DLm = dl.r / wr;
+  const OVR = [["Rohini", 2.4], ["Pitampura", 1.7], ["Pitampur", 1.7], ["Shalimar", 1.5], ["Mangol", 0.45], ["Sultanpur", 0.4], ["Bawana", 0.35], ["Budh Vihar", 0.5], ["Kirari", 0.4], ["Narela", 0.55], ["Alipur", 0.6]];
+  const wardsG = G.delhi.wards, ww = wardsG.map(w => 0.6 + 0.8 * hash(w.n)), tww = ww.reduce((a, x) => a + x, 0);
+  const MYWARD = wardsG.find(w => w.n === "Rohini") || wardsG[0];
+  wardsG.forEach((w, i) => {
+    const o = OVR.find(([k]) => w.n.indexOf(k) === 0);
+    const u = { key: "W" + w.id, kind: "ward", state: "Delhi", name: w.n, A: w === MYWARD ? 1240 : (DLA - 1240) * ww[i] / (tww - ww[wardsG.indexOf(MYWARD)]), m: DLm * (o ? o[1] : 0.6 + 0.8 * hash(w.n + "m")), nodata: w.n.indexOf("Rithala") === 0, mine: w === MYWARD, wid: w.id };
+    units.push(u); byKey[u.key] = u; (byState.Delhi = byState.Delhi || []).push(u);
+  });
+
+  function solve(target, f) { let lo = 0.0001, hi = 5; for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; if (f(mid) < target) lo = mid; else hi = mid; } return (lo + hi) / 2; }
+  const sumAt = k => units.reduce((a, u) => a + (u.nodata ? 0 : u.A * (1 - Math.exp(-k * u.m * NOW))), 0);
+  const kR = solve(RC.country.reached, sumAt), kQ = solve(RC.country.reached + RC.country.claimed, sumAt);
+
+  function at(u, h) {
+    if (u.nodata) return { A: u.A, reached: 0, claimed: 0, unclaimed: 0, u5: 0, nodata: true };
+    const R = 1 - Math.exp(-kR * u.m * h), Q = 1 - Math.exp(-kQ * u.m * h);
+    return { A: u.A, reached: u.A * R, claimed: u.A * (Q - R), unclaimed: u.A * (1 - Q), u5: u.A * NC * U5 * Math.exp(-KN * u.m * h) };
+  }
+  function agg(list, h) {
+    const o = { A: 0, reached: 0, claimed: 0, unclaimed: 0, u5: 0, known: 0 };
+    list.forEach(u => { const v = at(u, h); o.A += v.A; if (!v.nodata) { o.known += v.A; o.reached += v.reached; o.claimed += v.claimed; o.unclaimed += v.unclaimed; o.u5 += v.u5; } });
+    o.share = o.known ? o.reached / o.known : 0; o.claimedShare = o.known ? o.claimed / o.known : 0; o.unclaimedShare = o.known ? o.unclaimed / o.known : 0;
+    o.nodata = o.known === 0;
+    const prev = h > 1 ? list.reduce((a, u) => a + (u.nodata ? 0 : at(u, h - 1).reached), 0) : 0;
+    o.lastHour = o.reached - prev;
+    return o;
+  }
+  const scopes = {
+    india: h => agg(units, h),
+    delhi: h => agg(byState.Delhi, h),
+    state: (st, h) => agg(byState[st] || [], h),
+    unit: (key, h) => byKey[key] ? Object.assign(agg([byKey[key]], h), { unit: byKey[key] }) : null
+  };
+  function series(fn, step) { const out = []; for (let h = 0; h <= 50; h += step || 1) out.push(Object.assign({ h }, fn(h))); return out; }
+  const BINS = [{ max: 0.25, c: "var(--s0)", l: "Under 25% reached" }, { max: 0.5, c: "var(--s1)", l: "25–50%" }, { max: 0.75, c: "var(--s2)", l: "50–75%" }, { max: 1.01, c: "var(--s3)", l: "Over 75%" }];
+  function color(v) { if (!v || v.nodata) return "var(--nodata)"; return BINS.find(b => v.share < b.max).c; }
+  function hourLabel(h) { if (h < 18) { const t = 6 + h; const hh = Math.floor(t), mm = Math.round((t - hh) * 60); return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`; } const d = 1 + Math.floor((h + 6) / 24), t = (h + 6) % 24; return `Day ${d} ${String(Math.floor(t)).padStart(2, "0")}:00`; }
+  function compact(n) { n = Math.round(n); if (Math.abs(n) >= 1e7) return (n / 1e6).toFixed(1) + " M"; if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(2) + " M"; if (Math.abs(n) >= 1e5) return Math.round(n / 1e3) + " K"; return n.toLocaleString("en-IN"); }
+  const pct = x => Math.round(x * 100) + "%";
+
+  RC.Model = { TIMES, NOW, units, byKey, byState, at, agg, scopes, series, BINS, color, hourLabel, compact, pct, myWard: byKey["W" + MYWARD.id], kR, kQ };
+})(window.RC);

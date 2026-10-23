@@ -1,0 +1,189 @@
+/* Apple materials tokens — MATERIALS GATE (CRITICAL). Source of every value is stated.
+ * HIG       = developer.apple.com/design/human-interface-guidelines/materials (2025-09-09 revision).
+ * APPLE-WEB = measured on apple.com (references/apple-web/site-patterns.md).
+ * FN        = field notes (validated production values).
+ * UIKIT     = UIKit label colours (not stated on any HIG page).
+ * CONV      = this skill's web convention.
+ * The HIG gives NO blur radii or tint opacities. Only the 35 % dimming layer is an Apple number.
+ *
+ * Two families — every translucent surface must use exactly one of them:
+ *   .glass / .glass-clear         Liquid Glass → FUNCTIONAL layer only (fixed/sticky bars, toolbars,
+ *                                 tab bars, sidebars, popovers, menus, dialogs, sheets, media overlays)
+ *   .material-{ultrathin|thin|regular|thick}
+ *                                 standard materials → CONTENT layer structure
+ * Import once; never hand-write backdrop-filter or rgba() tints per screen.
+ * Reduce Transparency / Increase Contrast / dark mode fallbacks are built in below. */
+
+:root {
+  /* HIG: dark dimming layer at 35 % opacity behind CLEAR glass over bright content. */
+  --material-dim: rgb(0 0 0 / 0.35);
+
+  /* APPLE-WEB: apple.com frosted bar = saturate(180%) blur(20px). Blur is strong at every
+     thickness (HIG images materials-04/05); thickness = tint opacity. */
+  --material-blur: 20px;
+  --material-saturate: 180%;
+  --material-filter: saturate(var(--material-saturate)) blur(var(--material-blur));
+
+  /* Standard materials, light (CONV calibrated to HIG materials-04/05: ultraThin shows colour,
+     thick is near-opaque). Regular = APPLE-WEB nav bar tint rgba(250,250,252,.8). */
+  --material-ultrathin-bg: rgb(255 255 255 / 0.40);
+  --material-thin-bg: rgb(255 255 255 / 0.60);
+  --material-regular-bg: rgb(250 250 252 / 0.80);
+  --material-thick-bg: rgb(250 250 252 / 0.92);
+  --material-opaque-bg: #FAFAFC;             /* APPLE-WEB flyout — Reduce Transparency fallback */
+
+  /* Liquid Glass (web approximation). regular: CONV from FN principles §12
+     (blur + low-opacity tint + 1px light top edge). clear: CONV, "highly translucent" (HIG),
+     background stays recognisable (materials-02). */
+  --glass-bg: rgb(250 250 252 / 0.68);
+  --glass-filter: saturate(180%) blur(16px);
+  --glass-clear-bg: rgb(255 255 255 / 0.10);
+  --glass-clear-filter: saturate(150%) blur(6px);
+  --glass-edge: inset 0 1px 0 rgb(255 255 255 / 0.65), inset 0 0 0 1px rgb(255 255 255 / 0.30);
+  --glass-shadow: 0 8px 32px -8px rgb(0 0 0 / 0.18);
+  --glass-hc-border: rgb(0 0 0 / 0.28);     /* Increase Contrast: visible edge */
+
+  /* Vibrant label ladder for text/glyphs ON materials (HIG: use vibrant colours on materials;
+     never gray palette colours like systemGray3 — materials-03 ✗).
+     label/secondary light = APPLE-WEB text colours (pass 4.5:1); tertiary/quaternary = UIKIT.
+     tertiary: inactive elements only. quaternary: never on thin/ultraThin (HIG). */
+  --on-material-label: #1D1D1F;
+  --on-material-secondary: #6E6E73;
+  --on-material-tertiary: rgb(60 60 67 / 0.30);
+  --on-material-quaternary: rgb(60 60 67 / 0.18);
+  --on-material-separator: rgb(60 60 67 / 0.29);
+
+  /* Scroll edge effect (HIG: blur + fade content under bars). CONV height. */
+  --scroll-edge-size: 24px;
+
+  /* Page veil behind menus/sheets (APPLE-WEB curtain: blur(10px); light tint CONV). */
+  --veil-bg: rgb(255 255 255 / 0.30);
+  --veil-filter: blur(10px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --material-ultrathin-bg: rgb(22 22 23 / 0.40);
+    --material-thin-bg: rgb(22 22 23 / 0.60);
+    --material-regular-bg: rgb(22 22 23 / 0.80);   /* APPLE-WEB dark nav rgba(22,22,23,.8) */
+    --material-thick-bg: rgb(22 22 23 / 0.92);
+    --material-opaque-bg: #161617;                 /* APPLE-WEB flyout dark */
+    --glass-bg: rgb(22 22 23 / 0.62);
+    --glass-clear-bg: rgb(0 0 0 / 0.10);
+    --glass-edge: inset 0 1px 0 rgb(255 255 255 / 0.14), inset 0 0 0 1px rgb(255 255 255 / 0.08); /* FN ring-white/[0.08] */
+    --glass-shadow: 0 8px 32px -8px rgb(0 0 0 / 0.6);
+    --glass-hc-border: rgb(255 255 255 / 0.40);
+    --on-material-label: #F5F5F7;
+    --on-material-secondary: rgb(235 235 245 / 0.60);   /* UIKIT secondaryLabel dark */
+    --on-material-tertiary: rgb(235 235 245 / 0.30);
+    --on-material-quaternary: rgb(235 235 245 / 0.16);
+    --on-material-separator: rgb(84 84 88 / 0.60);
+    --veil-bg: rgb(0 0 0 / 0.40);                   /* APPLE-WEB curtain dark */
+  }
+}
+:root[data-theme="dark"] {
+  --material-ultrathin-bg: rgb(22 22 23 / 0.40);
+  --material-thin-bg: rgb(22 22 23 / 0.60);
+  --material-regular-bg: rgb(22 22 23 / 0.80);
+  --material-thick-bg: rgb(22 22 23 / 0.92);
+  --material-opaque-bg: #161617;
+  --glass-bg: rgb(22 22 23 / 0.62);
+  --glass-clear-bg: rgb(0 0 0 / 0.10);
+  --glass-edge: inset 0 1px 0 rgb(255 255 255 / 0.14), inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  --glass-shadow: 0 8px 32px -8px rgb(0 0 0 / 0.6);
+  --glass-hc-border: rgb(255 255 255 / 0.40);
+  --on-material-label: #F5F5F7;
+  --on-material-secondary: rgb(235 235 245 / 0.60);
+  --on-material-tertiary: rgb(235 235 245 / 0.30);
+  --on-material-quaternary: rgb(235 235 245 / 0.16);
+  --on-material-separator: rgb(84 84 88 / 0.60);
+  --veil-bg: rgb(0 0 0 / 0.40);
+}
+
+/* ---- Standard materials (content layer) ---- */
+.material-ultrathin, .material-thin, .material-regular, .material-thick {
+  -webkit-backdrop-filter: var(--material-filter);
+  backdrop-filter: var(--material-filter);
+  color: var(--on-material-label);
+}
+.material-ultrathin { background-color: var(--material-ultrathin-bg); }
+.material-thin      { background-color: var(--material-thin-bg); }
+.material-regular   { background-color: var(--material-regular-bg); }
+.material-thick     { background-color: var(--material-thick-bg); }
+
+/* ---- Liquid Glass (functional layer only) ---- */
+.glass, .glass-clear {
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  background-color: var(--glass-bg);
+  box-shadow: var(--glass-edge), var(--glass-shadow);
+  color: var(--on-material-label);
+}
+.glass-clear {
+  -webkit-backdrop-filter: var(--glass-clear-filter);
+  backdrop-filter: var(--glass-clear-filter);
+  background-color: var(--glass-clear-bg);
+  color: #FFFFFF;                              /* over media; add .material-dim when media is bright */
+}
+/* Transient glass (HIG exception): slider thumbs / switch knobs look like glass only while active. */
+.glass-transient:active, .glass-transient[data-active="true"] {
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  background-color: var(--glass-bg);
+  box-shadow: var(--glass-edge), var(--glass-shadow);
+}
+
+/* HIG: 35 % dark dimming layer between bright media and clear glass. */
+.material-dim { background-color: var(--material-dim); }
+
+/* Page veil behind a menu/sheet (APPLE-WEB). */
+.veil {
+  -webkit-backdrop-filter: var(--veil-filter);
+  backdrop-filter: var(--veil-filter);
+  background-color: var(--veil-bg);
+}
+
+/* Scroll edge effect: content fades under a pinned bar instead of a hard border (HIG + FN §12). */
+.scroll-edge-top, .scroll-edge-bottom { position: relative; }
+.scroll-edge-top::after, .scroll-edge-bottom::before {
+  content: ""; position: absolute; inset-inline: 0; height: var(--scroll-edge-size);
+  pointer-events: none;
+}
+.scroll-edge-top::after    { top: 100%;    background: linear-gradient(var(--material-regular-bg), transparent); }
+.scroll-edge-bottom::before { bottom: 100%; background: linear-gradient(transparent, var(--material-regular-bg)); }
+
+/* Text ladder helpers. */
+.on-material-secondary  { color: var(--on-material-secondary); }
+.on-material-tertiary   { color: var(--on-material-tertiary); }    /* inactive only */
+.on-material-quaternary { color: var(--on-material-quaternary); }  /* never on thin/ultrathin */
+
+/* ---- Accessibility (HIG: glass responds to Reduce Transparency / Increase Contrast) ---- */
+@media (prefers-contrast: more) {
+  :root {
+    --material-ultrathin-bg: rgb(255 255 255 / 0.70);
+    --material-thin-bg: rgb(255 255 255 / 0.82);
+    --material-regular-bg: rgb(250 250 252 / 0.92);
+    --material-thick-bg: rgb(250 250 252 / 0.97);
+    --glass-bg: rgb(250 250 252 / 0.90);
+  }
+  .glass, .glass-clear, .material-ultrathin, .material-thin, .material-regular, .material-thick { outline: 1px solid var(--glass-hc-border); outline-offset: -1px; }
+}
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --material-ultrathin-bg: rgb(22 22 23 / 0.70);
+    --material-thin-bg: rgb(22 22 23 / 0.82);
+    --material-regular-bg: rgb(22 22 23 / 0.92);
+    --material-thick-bg: rgb(22 22 23 / 0.97);
+    --glass-bg: rgb(22 22 23 / 0.90);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .glass-clear, .glass-transient:active, .glass-transient[data-active="true"],
+  .material-ultrathin, .material-thin, .material-regular, .material-thick, .veil {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--material-opaque-bg);
+  }
+  .glass-clear { color: var(--on-material-label); }
+  .veil { background-color: rgb(0 0 0 / 0.5); }
+}

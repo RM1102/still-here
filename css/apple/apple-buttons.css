@@ -1,0 +1,66 @@
+/* Button tokens — HIG Buttons page (CRITICAL). Numbers and rules: apple-buttons.json (source-tagged).
+   Tags: HIG = stated by Apple · WCAG = W3C · CONV = apple-skill convention · FN = Nonplo field note.
+   Colours come from apple-system-colors.css. This file is structure + states only.
+   Use with a real <button> (or <a href> for navigation). One or two .btn-prominent per view (HIG);
+   Nonplo's own rule is stricter: exactly one filled button per screen (FN). */
+
+:root {
+  --btn-hit: 44px;                 /* HIG: hit region ≥ 44 x 44 (visionOS 60) */
+  --btn-gap: 8px;                  /* CONV: ≥ 8 px between standalone buttons */
+  --btn-radius: 999px;             /* capsule = the platform-standard shape on watchOS/visionOS/iOS */
+  --btn-pad-inline: 1.125rem;      /* CONV (FN pills use 18 px) */
+  --btn-neutral: rgb(120 120 128 / 0.16);          /* CONV: quiet neutral fill (system-fill grey at low alpha) */
+  --btn-neutral-hover: rgb(120 120 128 / 0.24);
+  --btn-neutral-active: rgb(120 120 128 / 0.34);
+  --btn-bg: var(--btn-neutral); --btn-bg-hover: var(--btn-neutral-hover); --btn-bg-active: var(--btn-neutral-active);
+  --btn-fg: inherit;
+  --btn-prominent-bg: #1E6EF4;     /* WCAG: 4.57:1 with white (system blue #0088FF is only 3.52:1) — FN/color.md */
+  --btn-prominent-fg: #fff;
+  --btn-destructive-fg: #C4132A;   /* WCAG ≥ 4.9:1 on the neutral fill (system red is only 3.57:1 on white) */
+  --btn-focus: var(--color-accent, #0088FF);
+  --btn-disabled-opacity: 0.4;     /* FN (disabled text black/30-40; exempt from contrast, always explain why) */
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --btn-neutral: rgb(120 120 128 / 0.32); --btn-neutral-hover: rgb(120 120 128 / 0.42); --btn-neutral-active: rgb(120 120 128 / 0.54); --btn-destructive-fg: #FF6B70; } }
+:root[data-theme="dark"] { --btn-neutral: rgb(120 120 128 / 0.32); --btn-neutral-hover: rgb(120 120 128 / 0.42); --btn-neutral-active: rgb(120 120 128 / 0.54); --btn-destructive-fg: #FF6B70; }
+
+/* Base: real <button>. min block-size gives the 44 px hit region on touch widths. */
+.btn {
+  box-sizing: border-box; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  min-block-size: var(--btn-hit); min-inline-size: var(--btn-hit);
+  padding-inline: var(--btn-pad-inline); border: 0; border-radius: var(--btn-radius);
+  background: var(--btn-bg); color: var(--btn-fg);
+  font: inherit; font-weight: 500; line-height: 1.2; text-align: center; cursor: default; /* HIG: buttons keep the arrow; the pointing hand is for links */
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  transition: background-color 0.12s, transform 0.12s, filter 0.12s;
+}
+
+/* Roles (HIG). Primary = accent fill; destructive = red LABEL on a neutral fill; cancel = normal look. */
+.btn-prominent, .btn[data-role="primary"] { --btn-bg: var(--btn-prominent-bg); --btn-bg-hover: var(--btn-prominent-bg); --btn-bg-active: var(--btn-prominent-bg); --btn-fg: var(--btn-prominent-fg); }
+.btn-destructive, .btn[data-role="destructive"] { --btn-fg: var(--btn-destructive-fg); }   /* never combined with .btn-prominent (HIG) */
+.btn-plain { --btn-bg: transparent; --btn-bg-hover: var(--btn-neutral); --btn-bg-active: var(--btn-neutral-hover); }   /* still has hover/press tones */
+
+/* Shape / size variants that stay ≥ 44 px in hit region (HIG; FN pills are 36 / 30 px visually). */
+.btn-compact { min-block-size: 36px; }
+.btn-compact::after, .btn-icon::after { content: ""; position: absolute; inset: -4px; }   /* extends the hit region to ≥ 44 px */
+.btn-icon { padding: 0; inline-size: var(--btn-hit); block-size: var(--btn-hit); }
+.btn-icon > svg { inline-size: 1.25rem; block-size: 1.25rem; flex: none; }
+.btn-block { display: flex; inline-size: 100%; }                 /* watchOS/iOS: full-width primary actions (HIG watchOS) */
+
+/* States (HIG: always include a press state for a custom button). */
+@media (hover: hover) { .btn:hover:not(:disabled):not([aria-disabled="true"]) { background-color: var(--btn-bg-hover); } .btn-prominent:hover:not(:disabled), .btn[data-role="primary"]:hover:not(:disabled) { filter: brightness(1.08); } }
+.btn:active:not(:disabled):not([aria-disabled="true"]) { background-color: var(--btn-bg-active); transform: scale(0.97); }
+.btn-prominent:active:not(:disabled), .btn[data-role="primary"]:active:not(:disabled) { filter: brightness(0.9); }
+.btn:focus-visible { outline: 2px solid var(--btn-focus); outline-offset: 2px; }              /* WCAG 2.4.7; never outline:none without this */
+.btn:disabled, .btn[aria-disabled="true"] { opacity: var(--btn-disabled-opacity); cursor: not-allowed; }   /* unavailable; pair with a reason (.fb-reason) */
+.btn[aria-pressed="true"], .btn[aria-current="true"] { --btn-bg: var(--btn-neutral-active); }   /* selected/toggled — a tone, not white-on-black (visionOS reserves that) */
+
+/* Busy (iOS activity indicator): spinner replaces the icon, label may change ("Checking out…"), no double submit. */
+.btn[aria-busy="true"] { cursor: progress; }
+.btn__spinner { inline-size: 1rem; block-size: 1rem; border: 2px solid currentColor; border-inline-end-color: transparent; border-radius: 50%; flex: none; }
+@media (prefers-reduced-motion: no-preference) { .btn[aria-busy="true"] .btn__spinner { animation: btn-spin 0.8s linear infinite; } @keyframes btn-spin { to { transform: rotate(360deg); } } }
+
+/* Groups: consistent gap; same height in a row, same width in a stack (HIG: style, not size, marks the preferred choice). */
+.btn-row { display: flex; flex-wrap: wrap; gap: var(--btn-gap); align-items: stretch; }
+.btn-row > .btn { flex: 0 1 auto; }
+.btn-stack { display: grid; gap: var(--btn-gap); }
+.btn-stack > .btn { inline-size: 100%; }

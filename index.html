@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Still Here</title>
+<meta name="description" content="Still Here: who's still here, who's alone, who's closest. A prototype for the day after the Snap.">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#08080A" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="css/apple/apple-system-colors.css">
+<link rel="stylesheet" href="css/apple/apple-materials.css">
+<link rel="stylesheet" href="css/apple/apple-buttons.css">
+<link rel="stylesheet" href="css/apple/apple-feedback.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" aria-label="Navigation">
+    <div class="brand"><span class="mark"><i></i></span><div><b>Still Here</b><span>Day 1 · 07:10 · Delhi</span></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="aside-foot">Statuses come from carriers and platforms, not from anyone's report. <span data-help="simulated" style="color:var(--accent)">Simulated data</span></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="status" data-help="vanish" id="topstatus"></div>
+      <div class="tools">
+        <div class="seg" id="modeseg" role="group" aria-label="View as"><button class="on" data-mode="desktop">Desktop</button><button data-mode="phone">Phone</button></div>
+        <button class="btn btn-compact btn-plain msgbtn" data-action="msgs">Messages<span class="badge" style="display:none"></span></button>
+        <button class="btn btn-compact btn-icon btn-plain" data-action="share" aria-label="Share Still Here" title="Share">__SHARE__</button>
+        <button class="btn btn-compact" data-action="reset">Reset</button>
+      </div>
+    </div>
+    <div class="content content-desktop" id="view"></div>
+
+    <div class="device" aria-label="Phone">
+      <div class="island"></div>
+      <div class="screen">
+        <div class="sbar"><span>07:10</span><span>4G</span></div>
+        <div id="pview" class="pcontent"></div>
+        <nav class="tabbar glass" id="tabbar"></nav>
+      </div>
+    </div>
+    <nav class="mobilenav glass" id="mobilenav"></nav>
+  </main>
+
+  <aside class="inspector" aria-label="Messages">
+    <div class="tabs"><div class="seg"><button class="on" data-tab="thread">Messages</button><button data-tab="demo">Demo Path</button></div><span style="flex:1"></span><button class="btn btn-compact btn-plain closer" data-action="msgs" aria-label="Close messages">Close</button></div>
+    <div class="pane" id="pane-thread">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px"><div class="h3" id="thread-title">WhatsApp · Still Here</div><button class="switch" id="meshtoggle" aria-pressed="false"><i></i>Towers down</button></div>
+      <div class="fn" style="margin-bottom:10px" id="thread-sub">The same case, seen from Lata's phone. Replies here update the app.</div>
+      <div id="thread" class="thread"></div>
+      <div id="replies" class="reply-row"></div>
+    </div>
+    <div class="pane" id="pane-demo" style="display:none">
+      <div class="h3" style="margin-bottom:6px">The three-minute path</div>
+      <div id="steps" class="steps"></div>
+      <p class="fn" style="margin-top:10px">Everything can be clicked in any order. Meera's case is SH-7731.</p>
+    </div>
+  </aside>
+</div>
+<script src="js/icons.js"></script>
+<script src="js/geo.js"></script>
+<script src="js/data.js"></script>
+<script src="js/model.js"></script>
+<script src="js/map.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  }
+</script>
+</body>
+</html>

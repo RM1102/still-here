@@ -1,0 +1,147 @@
+/* Apple system colours — exact HIG values (captured 2026-09-28; Apple values updated 2025-06-09).
+   Source: developer.apple.com/design/human-interface-guidelines/color#Specifications
+   GENERATED — do not hand-edit values. Four modes: light, dark, and Increase Contrast for each.
+   Use the semantic aliases at the bottom in UI code, not the raw hues, wherever a meaning exists. */
+
+:root {
+  --apple-red: #FF383C;
+  --apple-orange: #FF8D28;
+  --apple-yellow: #FFCC00;
+  --apple-green: #34C759;
+  --apple-mint: #00C8B3;
+  --apple-teal: #00C3D0;
+  --apple-cyan: #00C0E8;
+  --apple-blue: #0088FF;
+  --apple-indigo: #6155F5;
+  --apple-purple: #CB30E0;
+  --apple-pink: #FF2D55;
+  --apple-brown: #AC7F5E;
+  --apple-gray: #8E8E93;
+  --apple-gray2: #AEAEB2;
+  --apple-gray3: #C7C7CC;
+  --apple-gray4: #D1D1D6;
+  --apple-gray5: #E5E5EA;
+  --apple-gray6: #F2F2F7;
+}
+
+/* Dark appearance: system preference unless the page forces light; or explicit data-theme */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --apple-red: #FF4245;
+    --apple-orange: #FF9230;
+    --apple-yellow: #FFD600;
+    --apple-green: #30D158;
+    --apple-mint: #00DAC3;
+    --apple-teal: #00D2E0;
+    --apple-cyan: #3CD3FE;
+    --apple-blue: #0091FF;
+    --apple-indigo: #6D7CFF;
+    --apple-purple: #DB34F2;
+    --apple-pink: #FF375F;
+    --apple-brown: #B78A66;
+    --apple-gray: #8E8E93;
+    --apple-gray2: #636366;
+    --apple-gray3: #48484A;
+    --apple-gray4: #3A3A3C;
+    --apple-gray5: #2C2C2E;
+    --apple-gray6: #1C1C1E;
+  }
+}
+:root[data-theme="dark"] {
+  --apple-red: #FF4245;
+  --apple-orange: #FF9230;
+  --apple-yellow: #FFD600;
+  --apple-green: #30D158;
+  --apple-mint: #00DAC3;
+  --apple-teal: #00D2E0;
+  --apple-cyan: #3CD3FE;
+  --apple-blue: #0091FF;
+  --apple-indigo: #6D7CFF;
+  --apple-purple: #DB34F2;
+  --apple-pink: #FF375F;
+  --apple-brown: #B78A66;
+  --apple-gray: #8E8E93;
+  --apple-gray2: #636366;
+  --apple-gray3: #48484A;
+  --apple-gray4: #3A3A3C;
+  --apple-gray5: #2C2C2E;
+  --apple-gray6: #1C1C1E;
+}
+
+/* Increase Contrast (prefers-contrast: more) */
+@media (prefers-contrast: more) {
+  :root:not([data-theme="dark"]) {
+    --apple-red: #E9152D;
+    --apple-orange: #C55300;
+    --apple-yellow: #A16A00;
+    --apple-green: #008932;
+    --apple-mint: #008575;
+    --apple-teal: #008198;
+    --apple-cyan: #007EAE;
+    --apple-blue: #1E6EF4;
+    --apple-indigo: #564ADE;
+    --apple-purple: #B02FC2;
+    --apple-pink: #E7124D;
+    --apple-brown: #956D51;
+    --apple-gray: #6C6C70;
+    --apple-gray2: #8E8E93;
+    --apple-gray3: #AEAEB2;
+    --apple-gray4: #BCBCC0;
+    --apple-gray5: #D8D8DC;
+    --apple-gray6: #EBEBF0;
+  }
+}
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --apple-red: #FF6165;
+    --apple-orange: #FFA056;
+    --apple-yellow: #FEDF43;
+    --apple-green: #4AD968;
+    --apple-mint: #54DFCB;
+    --apple-teal: #3BDDEC;
+    --apple-cyan: #6DD9FF;
+    --apple-blue: #5CB8FF;
+    --apple-indigo: #A7AAFF;
+    --apple-purple: #EA8DFF;
+    --apple-pink: #FF8AC4;
+    --apple-brown: #DBA679;
+    --apple-gray: #AEAEB2;
+    --apple-gray2: #7C7C80;
+    --apple-gray3: #545456;
+    --apple-gray4: #444446;
+    --apple-gray5: #363638;
+    --apple-gray6: #242426;
+  }
+}
+@media (prefers-contrast: more) {
+  :root[data-theme="dark"] {
+    --apple-red: #FF6165;
+    --apple-orange: #FFA056;
+    --apple-yellow: #FEDF43;
+    --apple-green: #4AD968;
+    --apple-mint: #54DFCB;
+    --apple-teal: #3BDDEC;
+    --apple-cyan: #6DD9FF;
+    --apple-blue: #5CB8FF;
+    --apple-indigo: #A7AAFF;
+    --apple-purple: #EA8DFF;
+    --apple-pink: #FF8AC4;
+    --apple-brown: #DBA679;
+    --apple-gray: #AEAEB2;
+    --apple-gray2: #7C7C80;
+    --apple-gray3: #545456;
+    --apple-gray4: #444446;
+    --apple-gray5: #363638;
+    --apple-gray6: #242426;
+  }
+}
+
+/* Semantic aliases — one meaning per colour (HIG: never the same colour for different things) */
+:root {
+  --color-accent: var(--apple-blue);          /* interactive: links, selected tab, focus */
+  --color-destructive: var(--apple-red);      /* delete, errors */
+  --color-success: var(--apple-green);        /* success status (always with icon/text) */
+  --color-warning: var(--apple-orange);       /* warnings (always with icon/text) */
+  --color-separator-opaque: var(--apple-gray4);
+  --color-fill-quiet: var(--apple-gray6);
+}
