@@ -314,6 +314,7 @@
         <div class="r t">${tile("smartphone", "ink")}<div class="tt"><b>Install Still Here</b><span>${standalone ? "Installed. It opens like any app." : deferredInstall ? "Adds it to your home screen like an app. No app store, no account." : "On iPhone: Share, then Add to Home Screen. On Android: the browser menu, then Install app."}</span></div>${standalone ? st("green", "Installed") : deferredInstall ? `<button class="btn btn-compact" data-action="install">Install</button>` : ""}</div>
         <div class="r t">${tile("hard-drive", "blue")}<div class="tt"><b>Works without a connection</b><span>${!online ? "Open the online link once to save it on this phone." : saved ? "Saved. Every screen and map loads with no signal." : "Saving now. Reload once and it's ready offline."}</span></div>${saved ? st("green", "Saved") : st("", online ? "Saving" : "Online only")}</div>
         <a class="r t" href="lite.html">${tile("wifi-off", "gray")}<div class="tt"><b>Still Here Lite</b><span>One small page that loads on 2G and old phones, with what to do, what's open and first aid.</span></div><span class="val">about 8 KB</span>${chev()}</a>
+        <a class="r t" href="lite-hi.html" lang="hi">${tile("globe", "gray")}<div class="tt"><b>Still Here लाइट, हिन्दी में</b><span>वही छोटा पेज, हिन्दी में।</span></div><span class="val">about 14 KB</span>${chev()}</a>
       </div>
       ${sect("Apps that work without towers")}
       <div class="group tiles">${RC.kit.map(kitRow).join("")}</div>
@@ -398,7 +399,7 @@
     const tabs = [["#home", "Here", "house"], ["#cases", "Cases", "users"], ["#map", "Map", "map-pinned"], ["#help", "Help", "truck"], ["#kit", "Kit", "download"]];
     $("#tabbar").innerHTML = tabs.map(t => `<a href="${t[0]}">${I(t[2], 20)}${t[1]}</a>`).join("");
     $("#mobilenav").innerHTML = tabs.concat([["#about", "About", "info"]]).map(t => `<a href="${t[0]}">${I(t[2], 20)}${t[1]}</a>`).join("");
-    $("#topstatus").innerHTML = `${I("shield-check", 17)}<span>No new vanishings since 14:32</span><span class="long fn" style="font-weight:400">· checked with your carrier every minute</span>`;
+    $("#topstatus").innerHTML = `${I("shield-check", 17)}<span class="full">No new vanishings since 14:32</span><span class="short">No new vanishings</span><span class="long fn" style="font-weight:400">· checked with your carrier every minute</span>`;
     const sh = document.querySelector('[data-action="share"]'); if (sh) sh.innerHTML = I("share-2", 17);
   }
   const STEPS = ["Tap I'm Still Here on the alert", "See who's gone and check in on someone", "Cases, then Meera, then No, I Can't", "Send one message to her circle", "In Messages, reply as Lata: GOING", "Reply as Lata: HAVE HER, then choose where she stays", "Kamla: I'm Going, then I'm With Her", "Map: your ward, then India, then Day 2", "Ward: services, notices, groups, places", "Help is coming: departures and communities", "Near you and the offline kit", "About, then open the government view"];

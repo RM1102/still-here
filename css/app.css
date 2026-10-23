@@ -64,6 +64,7 @@ h1, h2, h3 { margin: 0; }
 .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 8px 24px; background: var(--glass-bg); -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); border-bottom: 1px solid var(--hair); }
 .topbar .status { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 500; min-width: 0; }
 .topbar .status .ic { color: var(--green); }
+.topbar .status .short { display: none; }
 .topbar .tools { display: flex; align-items: center; gap: 8px; flex: none; }
 .content { max-width: 46rem; margin: 0 auto; padding: 30px 24px 80px; container-type: inline-size; }
 .content.wide { max-width: 62rem; }
@@ -247,6 +248,7 @@ body.phone .device .mapbox { height: 380px; min-height: 0; }
   .sidebar { display: none; }
   .topbar { padding: 8px 14px; } .content { padding: 20px 16px 96px; }
   #modeseg, .topbar .tools [data-action="reset"] { display: none; }
+  .topbar .status .full { display: none; } .topbar .status .short { display: inline; }
   .topbar .status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
   .mobilenav { display: flex; }
   .title { font-size: 30px; }
