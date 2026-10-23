@@ -404,7 +404,7 @@
 
   V["#about"] = () => `
     ${head("About this prototype", "Still Here, for the day after the Snap.")}
-    <div class="stats" style="margin-top:24px">${stat("Children with no adult at home, the morning after", "~240 M")}${stat("Of them under five", "~80 M")}${stat("With someone in their circle who goes on Day 1", "68–98%", "68% if only half of those alive go")}</div>
+    <div class="stats" style="margin-top:24px">${stat("Children with no adult at home, the morning after", "~240 M")}${stat("Of them under five", "~80 M")}${stat("With someone in their circle who goes on Day 1", "68–82%", "if only half of those alive go; the rest go to a paid anganwadi worker")}</div>
     ${sect("The idea")}
     <div class="group"><div class="pad"><div class="h3">The one signal</div><p class="sub" style="margin:6px 0 0">The Snap leaves no bodies. Its only mark is that the phones of half of everyone went silent in the same second. Carriers and platforms already hold that. Still Here turns it into who's gone, who's alone, who's closest, who's going, and who has them.</p></div>
     <div class="pad"><div class="h3">The test every feature passed</div><p class="sub" style="margin:6px 0 0">Would a self-interested survivor want it that morning, with data and behaviour that exist that morning, that governments and existing apps won't provide in the first days, without anyone having to be kind?</p></div>
