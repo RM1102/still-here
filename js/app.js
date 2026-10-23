@@ -187,7 +187,7 @@
         <div class="r t">${tile("shield", "blue")}<div class="tt"><b>Guardian pass</b><span>Code ${esc(g.code)}, valid to Day 14. Police, hospitals and schools can check it with CHILDLINE.</span></div></div>
         <div class="r t">${tile("heart-pulse", "red")}<div class="tt"><b>Welfare check</b><span>Kiran, the ward's ASHA worker, visits on Day 3.</span></div></div></div>`
       : `<div class="group"><div class="r t">${tile("baby", "orange")}<div class="tt"><b>Is ${esc(g.name.split(" ")[0])} with you?</b><span>${esc(g.name)}, ${g.age}, from ${esc(g.from)}. ${esc(g.why)}</span></div>${st("red", "Flagged alone")}</div></div>
-        <div class="btn-row" style="display:flex;gap:10px"><button class="btn" data-action="addsomeone">Add Someone Else</button><button class="btn btn-prominent" style="flex:1" data-action="withme-add">Yes, ${esc(g.name.split(" ")[0])} Is With Me</button></div>`;
+        <div class="btn-row" style="display:flex;gap:10px"><button class="btn" data-action="addsomeone">Add Someone Else</button><button class="btn btn-prominent" style="flex:1" data-action="withme-add">Yes, He's With Me</button></div>`;
     return `${head("Who's with you", "Children or elders now in your care.")}
       <div style="margin-top:22px">${card}</div>
       <p class="foot">Adding someone stops them being flagged alone, so nobody walks to an empty flat or takes a child from an adult who is already caring for them.</p>
