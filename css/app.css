@@ -295,3 +295,5 @@ body.pre .mobilenav, body.pre .tabbar { display: none !important; }
 .crumbs button { border: 0; background: transparent; color: var(--accent); font: inherit; font-size: 14px; padding: 0; cursor: pointer; }
 .crumbs b { color: var(--label); font-weight: 600; }
 .flowlist .n { width: 22px; height: 22px; border-radius: 50%; background: var(--flow); color: #fff; font-size: 12px; font-weight: 700; display: grid; place-items: center; flex: none; }
+.btn-pair { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-pair .btn { flex: 1 1 220px; }
