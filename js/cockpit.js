@@ -51,7 +51,7 @@
   }
   function queueHtml() {
     const its = sorted(), n = its.filter(i => !i.done).length;
-    const head = `<div class="q-head"><b>Needs action</b><div class="seg"><button class="${S.qtab === "problems" ? "on" : ""}" data-qtab="problems">Problems ${n}</button><button class="${S.qtab === "updates" ? "on" : ""}" data-qtab="updates">Updates</button></div></div>`;
+    const head = `<div class="q-head"><b>Needs action</b><button class="btn btn-compact btn-plain" data-export="1" title="Save the queue and every action taken as a file">${I("file-down", 15)}Export</button><div class="seg"><button class="${S.qtab === "problems" ? "on" : ""}" data-qtab="problems">Problems ${n}</button><button class="${S.qtab === "updates" ? "on" : ""}" data-qtab="updates">Updates</button></div></div>`;
     let list = "";
     if (S.qtab === "updates") list = GV.updates.map(u => `<div class="upd"><div class="m">${u.t} · <b>${esc(u.from)}</b> · ${esc(u.what)}</div><div>${esc(u.text)}</div></div>`).join("");
     else list = its.map(q => { const sel = S.sel && S.sel.type === "q" && S.sel.id === q.id; const d = q.done ? (q[q.done] || q.act) : null;
@@ -208,6 +208,15 @@
       click: iso => { S.wsel = iso; render(); }, clickEmpty: () => { if (S.wsel) { S.wsel = null; render(); } } });
   }
 
+  function exportLog() {
+    const rows = sorted().map(q => ({ id: q.id, severity: q.sev, raised_at: q.t, where: q.where, title: q.title, what_happened: q.what, why_it_matters: q.why,
+      status: q.done ? "handled" : "open", action_taken: q.done ? (q[q.done] || q.act).label : null, outcome: q.done ? (q[q.done] || q.act).done || null : null, source: q.src }));
+    const out = { record_type: "incident_log", note: "Situation queue from the Still Here government view. Simulated data.", authority: GV.persona.org, scope: scopeName(), exported_at: "Day 1 07:10", items: rows,
+      teams_sent_to_wards: Object.keys(S.wardTeam).map(k => (M.byKey[k] || {}).name || k) };
+    const b = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" }), a = document.createElement("a");
+    a.href = URL.createObjectURL(b); a.download = "still-here-incident-log.json"; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+
   /* ---------- render ---------- */
   function render() {
     MAP.hide(); header();
@@ -218,8 +227,9 @@
     save();
   }
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-page],[data-scope],[data-ti],[data-qtab],[data-layer],[data-do],[data-undo],[data-q],[data-close],[data-back],[data-team],[data-siteask],[data-ask],[data-mirror],[data-wsel]");
+    const t = e.target.closest("[data-export],[data-page],[data-scope],[data-ti],[data-qtab],[data-layer],[data-do],[data-undo],[data-q],[data-close],[data-back],[data-team],[data-siteask],[data-ask],[data-mirror],[data-wsel]");
     if (!t) return; const d = t.dataset;
+    if (d.export) { exportLog(); return; }
     if (d.page) { S.page = d.page; S.sel = null; }
     else if (d.scope) { S.scope = d.scope; S.state = null; S.sel = null; }
     else if (d.ti != null) S.ti = +d.ti;
