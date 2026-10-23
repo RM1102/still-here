@@ -31,4 +31,4 @@ python3 -m http.server 8765
 
 Plain HTML, CSS and JavaScript. The design follows Apple's Human Interface Guidelines through the web tokens in `css/apple/`.
 One model in `js/model.js` drives every number on every screen, so the counts agree with each other.
-Maps are inline SVG generated from open data. Credits and licences are in [NOTICE.md](NOTICE.md).
+Maps are inline SVG generated from open data: India's states and districts, and ward maps for Delhi, Mumbai, Bengaluru, Chennai, Kolkata, Hyderabad and Pune. Credits and licences are in [NOTICE.md](NOTICE.md).
