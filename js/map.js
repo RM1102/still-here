@@ -192,7 +192,7 @@ window.RC = window.RC || {};
     const now = fn(h), d2 = fn(26), d3 = fn(50), P = x => Math.round(x * 100) + "%";
     if (now.nodata) return `No phone network in ${name}, so there is nothing to measure yet.`;
     const lastHour = now.lastHour, word = lastHour > 0 ? "Getting better." : "Not moving.";
-    return `${word} ${P(now.share)} of people with no adult left in ${name} have been reached. At this pace: ${P(d2.share)} by Day 2 morning, ${P(d3.share)} by Day 3.`;
+    return `${word} ${P(now.share)} of children with no adult left in ${name} have been reached. At this pace: ${P(d2.share)} by Day 2 morning, ${P(d3.share)} by Day 3.`;
   }
 
   RC.Map = { pi, pd, pw, render, legend, fmt, esc, hide, statusColor: null };

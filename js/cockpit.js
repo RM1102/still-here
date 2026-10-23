@@ -3,7 +3,7 @@
   const M = RC.Model, MAP = RC.Map, CH = RC.Chart, GV = RC.gov, esc = MAP.esc, C = M.compact, P = M.pct, I = RC.icon;
   const KEY = "stillhere-gov-v1", $ = s => document.querySelector(s);
   const SEVL = { urgent: "Urgent", high: "High", watch: "Watch" }, SEVC = { urgent: "var(--apple-red)", high: "var(--apple-orange)", watch: "var(--apple-gray)" }, SEVR = { urgent: 0, high: 1, watch: 2 };
-  const SEVS = { urgent: "red", high: "orange", watch: "", done: "green" }, sev = (q) => `<span class="st ${SEVS[q.done ? "done" : q.sev]}">${q.done ? "Handled" : SEVL[q.sev]}</span>`;
+  const SEVS = { urgent: "red", high: "orange", watch: "", done: "green" }, sev = (q) => q.inprog ? `<span class="st orange">In progress</span>` : `<span class="st ${SEVS[q.done ? "done" : q.sev]}">${q.done ? "Handled" : SEVL[q.sev]}</span>`;
   const SMALL = new Set(["a", "an", "the", "to", "of", "in", "on", "for", "and", "or", "at", "by", "as", "with", "from"]);
   const tc = t => String(t).split(" ").map((w, i) => (i && SMALL.has(w)) ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
   const done = t => `<span class="donetext">${I("check", 15)}${esc(t)}</span>`;
@@ -24,12 +24,13 @@
     const h = H();
     return GV.queue.filter(q => S.scope === "india" || q.scope === "delhi").map(q => {
       const o = Object.assign({}, q);
-      if (q.dyn === "children") { const v = M.scopes.delhi(h), top = wardRank(h).slice(0, 3); o.title = `${C(v.u5)} small children nobody is coming for`; o.what = `Under five, in Delhi, and nobody in their circle has answered for two hours. Worst wards: ${top.map(x => `${x.u.name} (${Math.round(x.v.u5)})`).join(", ")}.`; }
+      if (q.dyn === "children") { const v = M.scopes.delhi(h), top = wardRank(h).slice(0, 3), none = v.u5 * 0.16; o.title = `${C(v.u5)} small children nobody is coming for`; o.what = `Under five, in Delhi. About ${C(none)} have nobody left alive in their circle, known since 06:00; ${C(v.u5 - none)} have a circle that hasn't said it's going. Worst wards: ${top.map(x => `${x.u.name} (${Math.round(x.v.u5)})`).join(", ")}.`; }
       if (q.dyn === "slowest") { const sl = slowest(h); o.title = `${sl.n} is being reached slowest`; o.what = `${P(sl.v.share)} of ${C(sl.v.A)} people alone there have been reached, the lowest of any large state.`; o.state = sl.n; o.where = sl.n; o.lonlat = toLL(RC.GEO.india.states[sl.n].c); }
-      o.done = S.done[q.id] || null; return o;
+      o.done = S.done[q.id] || null; o.inprog = !!(q.keepOpen && o.done); return o;
     });
   }
-  const sorted = () => items().sort((a, b) => (!!a.done - !!b.done) || SEVR[a.sev] - SEVR[b.sev]);
+  // The alone-children item is the product's job, so it always comes first, and it stays open until teams report children reached.
+  const sorted = () => items().sort((a, b) => ((b.dyn === "children") - (a.dyn === "children")) || ((!!a.done && !a.inprog) - (!!b.done && !b.inprog)) || SEVR[a.sev] - SEVR[b.sev]);
 
   /* ---------- header ---------- */
   function header() {
@@ -41,16 +42,16 @@
 
   /* ---------- situation ---------- */
   function kpis() {
-    const h = H(), v = scopeAgg(h), its = items(), open = its.filter(i => i.sev === "urgent" && !i.done).length, all = its.filter(i => !i.done).length;
+    const h = H(), v = scopeAgg(h), its = items(), open = its.filter(i => i.sev === "urgent" && (!i.done || i.inprog)).length, all = its.filter(i => !i.done || i.inprog).length;
     const tile = (help, l, val, d, st) => `<div class="kpi" data-help="${help}"><span class="info">${I("info", 15)}</span><div class="l">${l}</div><div class="v">${val}</div><div class="d">${st ? `<span class="st ${st}">${d}</span>` : d}</div></div>`;
     return tile("vanish", RC.TERMS.vanish, "0", "none since 14:32:07", "green")
       + tile("alone", RC.TERMS.alone, C(v.A), "in " + scopeName())
-      + tile("reached", RC.TERMS.reached, C(v.reached), `${P(v.share)} · +${C(v.lastHour)} last hour`)
-      + tile("nocircle", RC.TERMS.nocircle, C(v.u5), "under 5 · 2 h, no answer", "red")
+      + tile("reached", RC.TERMS.reached, C(v.reached), `${P(v.share)} of them, since 06:00`)
+      + tile("nocircle", RC.TERMS.nocircle, C(v.u5), "under 5 · nobody going yet", "red")
       + tile("urgent", RC.TERMS.urgent, String(open), `${all} open in ${S.scope === "delhi" ? "Delhi" : "India"}`, open ? "red" : "green");
   }
   function queueHtml() {
-    const its = sorted(), n = its.filter(i => !i.done).length;
+    const its = sorted(), n = its.filter(i => !i.done || i.inprog).length;
     const head = `<div class="q-head"><b>Needs action</b><button class="btn btn-compact btn-plain" data-export="1" title="Save the queue and every action taken as a file">${I("file-down", 15)}Export</button><div class="seg"><button class="${S.qtab === "problems" ? "on" : ""}" data-qtab="problems">Problems ${n}</button><button class="${S.qtab === "updates" ? "on" : ""}" data-qtab="updates">Updates</button></div></div>`;
     let list = "";
     if (S.qtab === "updates") list = GV.updates.map(u => `<div class="upd"><div class="m">${u.t} · <b>${esc(u.from)}</b> · ${esc(u.what)}</div><div>${esc(u.text)}</div></div>`).join("");
@@ -143,7 +144,7 @@
   }
   function drawTrend(el, fn, height) {
     const pts = M.series(fn, 2);
-    CH.line(el, { height, xmin: 0, xmax: 50, ymax: 1, yfmt: y => Math.round(y * 100) + "%", ytitle: "Share of people with no adult left", xlabel: h => M.hourLabel(h), marker: M.NOW, markerLabel: "Now", split: M.NOW, right: 96,
+    CH.line(el, { height, xmin: 0, xmax: 50, ymax: 1, yfmt: y => Math.round(y * 100) + "%", ytitle: "Share of children with no adult left", xlabel: h => M.hourLabel(h), marker: M.NOW, markerLabel: "Now", split: M.NOW, right: 96,
       xticks: [{ x: 14, l: "20:00" }, { x: 26, l: "Day 2" }, { x: 50, l: "Day 3" }],
       series: [{ name: "Reached", color: "var(--st-reached)", area: true, pts: pts.map(p => ({ x: p.h, y: p.share })) }, { name: "Nobody yet", color: "var(--st-nobody)", pts: pts.map(p => ({ x: p.h, y: p.unclaimedShare })) }] });
   }
@@ -211,7 +212,7 @@
 
   function exportLog() {
     const rows = sorted().map(q => ({ id: q.id, severity: q.sev, raised_at: q.t, where: q.where, title: q.title, what_happened: q.what, why_it_matters: q.why,
-      status: q.done ? "handled" : "open", action_taken: q.done ? (q[q.done] || q.act).label : null, outcome: q.done ? (q[q.done] || q.act).done || null : null, source: q.src }));
+      status: q.inprog ? "in progress" : q.done ? "handled" : "open", action_taken: q.done ? (q[q.done] || q.act).label : null, outcome: q.done ? (q[q.done] || q.act).done || null : null, source: q.src }));
     const out = { record_type: "incident_log", note: "Situation queue from the Still Here government view. Simulated data.", authority: GV.persona.org, scope: scopeName(), exported_at: "Day 1 07:10", items: rows,
       teams_sent_to_wards: Object.keys(S.wardTeam).map(k => (M.byKey[k] || {}).name || k) };
     const b = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" }), a = document.createElement("a");

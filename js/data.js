@@ -9,17 +9,18 @@ window.RC = window.RC || {};
   RC.me = { name: "Sunita Sharma", age: 50, ward: "Rohini Sector 7", city: "Delhi", phone: "+91 98••• •4410", verifiedResidence: true };
 
   RC.people = [
-    { id: "rajesh", name: "Rajesh Sharma", rel: "Husband", age: 54, city: "Delhi", status: "stopped" },
-    { id: "aman",   name: "Aman Sharma",   rel: "Son", age: 29, city: "Mumbai", status: "stopped" },
-    { id: "priya",  name: "Priya Sharma",  rel: "Daughter-in-law", age: 28, city: "Mumbai", status: "stopped" },
+    { id: "rajesh", name: "Rajesh Sharma", rel: "Husband", age: 54, city: "Delhi", status: "stopped", ev: "On a call at 14:32:07; nothing since" },
+    { id: "aman",   name: "Aman Sharma",   rel: "Son", age: 29, city: "Mumbai", status: "stopped", ev: "Watch heart rate stopped at 14:32:07" },
+    { id: "priya",  name: "Priya Sharma",  rel: "Daughter-in-law", age: 28, city: "Mumbai", status: "stopped", ev: "Phone moving in a taxi at 14:32:07; still since" },
     { id: "meera",  name: "Meera Sharma",  rel: "Granddaughter", age: 3, city: "Mumbai", status: "nodevice", alone: true },
     { id: "kamla",  name: "Kamla Devi",    rel: "Mother", age: 78, city: "Delhi", status: "nodevice", alone: true },
-    { id: "vinod",  name: "Vinod Kumar",   rel: "Brother", age: 47, city: "Delhi", status: "stopped" },
+    { id: "vinod",  name: "Vinod Kumar",   rel: "Brother", age: 47, city: "Delhi", status: "stopped", ev: "Typing a message at 14:32:07; never sent" },
     { id: "ritu",   name: "Ritu Kapoor",   rel: "Daughter", age: 25, city: "Bengaluru", status: "active", last: "4 min ago", checkedIn: false },
     { id: "anita",  name: "Anita Verma",   rel: "Neighbour", age: 52, city: "Delhi", status: "active", last: "22 min ago", checkedIn: false },
     { id: "shalini",name: "Shalini Gupta", rel: "Sister", age: 45, city: "Jaipur", status: "active", last: "1 h ago", checkedIn: false },
     { id: "dr-rao", name: "Dr. Rao",       rel: "Family doctor", age: 61, city: "Delhi", status: "active", last: "15 min ago", checkedIn: true },
-    { id: "pappu",  name: "Pappu (driver)",rel: "Driver", age: 38, city: "Delhi", status: "stopped" },
+    { id: "pappu",  name: "Pappu (driver)",rel: "Driver", age: 38, city: "Delhi", status: "unconfirmed", ev: "Phone idle at 14:32; last used 13:50" },
+    { id: "anil",   name: "Anil Sharma",   rel: "Nephew", age: 31, city: "Delhi", status: "quiet", place: "Safdarjung Hospital", since: "16:40 yesterday" },
     { id: "meena",  name: "Meena (help)",  rel: "Domestic help", age: 41, city: "Delhi", status: "active", last: "8 min ago", checkedIn: true }
   ];
 
@@ -30,14 +31,13 @@ window.RC = window.RC || {};
       why: "Both resident adults (Aman, Priya) stopped at 14:32:07. Child registered at this address (ration card, Little Steps daycare). No adult phone has been active at the address since 14:32.",
       distanceFromMe: "1,410 km",
       circle: [
-        { id: "lata",   name: "Lata Pawar",  rel: "Nanny (weekday)", dist: 1.8, last: "2 min ago", via: "WhatsApp" },
-        { id: "rakesh", name: "Rakesh Mehta", rel: "Uncle (Aman's cousin)", dist: 4.1, last: "10 min ago", via: "WhatsApp" },
-        { id: "farah",  name: "Farah Khan",   rel: "Parent, Little Steps daycare", dist: 0.6, last: "31 min ago", via: "SMS" },
-        { id: "nair",   name: "Dr. Nair",     rel: "Paediatrician", dist: 3.0, last: "6 min ago", via: "App" },
-        { id: "suresh", name: "Suresh (watchman)", rel: "Sunrise Towers security", dist: 0.0, last: "no device", via: "Missed call (society office)" },
-        { id: "society",name: "Sunrise Towers residents", rel: "Society group · 31 of 58 active", dist: 0.0, last: "live", via: "WhatsApp group" },
-        { id: "neha",   name: "Neha Desai",   rel: "Priya's sister", dist: 2.2, last: "stopped at 14:32", via: "—", stopped: true }
+        { id: "lata",   name: "Lata Pawar",  rel: "Nanny (weekday)", calls: 62, dist: 1.8, last: "2 min ago", via: "WhatsApp, in Marathi" },
+        { id: "neha",   name: "Neha Desai",   rel: "Priya's sister", calls: 48, dist: 2.2, last: "stopped at 14:32", via: "—", stopped: true },
+        { id: "rakesh", name: "Rakesh Mehta", rel: "Uncle (Aman's cousin)", calls: 31, dist: 4.1, last: "10 min ago", via: "WhatsApp" },
+        { id: "farah",  name: "Farah Khan",   rel: "Friend, Little Steps daycare", calls: 19, dist: 0.6, last: "31 min ago", via: "SMS, in Hindi" },
+        { id: "nair",   name: "Dr. Nair",     rel: "Paediatrician", calls: 6, dist: 3.0, last: "6 min ago", via: "SMS" }
       ],
+      building: { name: "Sunrise Towers", asked: "The watchman (missed call) and the society group", q: "Is an adult with the child in Flat 402?", answers: "2 replied: no adult seen since yesterday" },
       carePoint: { name: "Govt Primary School, Marol", dist: "400 m", slots: 9, police: true }
     },
     kamla: {
@@ -69,7 +69,7 @@ window.RC = window.RC || {};
 
   // World: share confirmed reached per country (simulated); countries not listed have no data yet
   RC.world = {
-    reached: { IND: 0.05, CHN: 0.06, USA: 0.11, GBR: 0.14, DEU: 0.12, FRA: 0.10, JPN: 0.16, KOR: 0.18, BRA: 0.04, NGA: 0.01, PAK: 0.02, BGD: 0.03, IDN: 0.03, RUS: 0.05, MEX: 0.04, ZAF: 0.03, EGY: 0.02, TUR: 0.06, IRN: 0.02, AUS: 0.15, CAN: 0.12, SAU: 0.07, ARE: 0.19, ITA: 0.09, ESP: 0.10, POL: 0.08, UKR: 0.03, ETH: 0.01, KEN: 0.02, ARG: 0.05, SGP: 0.22, NZL: 0.17, SWE: 0.15, NOR: 0.16, FIN: 0.15, DNK: 0.15, NLD: 0.14, CHE: 0.15, ISR: 0.13, VNM: 0.04, THA: 0.06, PHL: 0.03, MYS: 0.08, LKA: 0.04, NPL: 0.02 },
+    reached: { t: "Reached and safe", b: "Someone replied HAVE HER and their phone is at the address, and family confirmed on a video call or a second person confirmed. A tap alone never counts, so this number is hard to inflate.", s: "Replies by WhatsApp, SMS, missed call or app, plus device location" },
     aid: [ { from: "SGP", to: "IDN", what: "Medical teams · 12 aircraft", t: "06:40" }, { from: "ARE", to: "IND", what: "Water units · 40 t", t: "06:55" }, { from: "KOR", to: "VNM", what: "Grid engineers · 60", t: "07:00" }, { from: "DEU", to: "UKR", what: "Fuel · 18 trucks", t: "07:05" } ],
     labels: ["IND", "CHN", "USA", "BRA", "RUS", "AUS", "NGA", "IDN", "DEU", "JPN", "SAU", "ARG", "CAN", "ZAF", "EGY"]
   };
@@ -84,12 +84,11 @@ window.RC = window.RC || {};
 
   // Help is coming: departures only, two-hour lag, never a route or an arrival time
   RC.flows = [
-    { ic: "🚆", what: "Supply train · 40 t grain and water", from: "Mumbai Central", fromLL: [72.82, 18.97], to: "Delhi", toLL: [77.22, 28.64], dep: "06:10", shownAt: "08:10", kind: "rail" },
-    { ic: "🚚", what: "FCI stock release · 1,200 t", from: "Narela godown", fromLL: [77.09, 28.84], to: "NW Delhi fair price shops", toLL: [77.12, 28.70], dep: "07:00", shownAt: "09:00", kind: "road" },
-    { ic: "🚛", what: "Tanker fleet · 42 units", from: "Haiderpur plant", fromLL: [77.14, 28.72], to: "Rohini, Mangolpuri water points", toLL: [77.07, 28.69], dep: "07:30", shownAt: "09:30", kind: "road" },
-    { ic: "✈️", what: "Medical team · 60 doctors, 4 t supplies", from: "Hyderabad", fromLL: [78.49, 17.39], to: "Patna", toLL: [85.14, 25.59], dep: "05:50", shownAt: "07:50", kind: "air" },
-    { ic: "🚆", what: "Grid crews · 120 engineers", from: "Chennai", fromLL: [80.27, 13.08], to: "Bhubaneswar", toLL: [85.82, 20.30], dep: "06:30", shownAt: "08:30", kind: "rail" },
-    { ic: "🚢", what: "Diesel for towers · 2,000 kL", from: "Kochi", fromLL: [76.27, 9.93], to: "Mangaluru", toLL: [74.86, 12.91], dep: "05:00", shownAt: "07:00", kind: "sea" }
+    { what: "Supply train · 40 t grain and water", from: "Mumbai", fromLL: [72.82, 18.97], to: "Delhi", toLL: [77.22, 28.64], dep: "04:10", shownAt: "06:10", kind: "rail" },
+    { what: "Medical team · 60 doctors, 4 t supplies", from: "Hyderabad", fromLL: [78.49, 17.39], to: "Patna", toLL: [85.14, 25.59], dep: "03:50", shownAt: "05:50", kind: "air" },
+    { what: "Field hospital · 200 beds", from: "Pune", fromLL: [73.86, 18.52], to: "Mumbai", toLL: [72.88, 19.08], dep: "04:40", shownAt: "06:40", kind: "road" },
+    { what: "Grid crews · 120 engineers", from: "Chennai", fromLL: [80.27, 13.08], to: "Bhubaneswar", toLL: [85.82, 20.30], dep: "04:30", shownAt: "06:30", kind: "rail" },
+    { what: "Diesel for towers · 2,000 kL", from: "Kochi", fromLL: [76.27, 9.93], to: "Mangaluru", toLL: [74.86, 12.91], dep: "05:00", shownAt: "07:00", kind: "sea" }
   ];
 
   RC.restoration = [
@@ -112,10 +111,21 @@ window.RC = window.RC || {};
     { name: "Gurudwara Sector 7", kind: "worship", open: true, staff: "langar running · 6 sewadars", dist: "0.9 km", lonlat: [77.115, 28.715], hub: "Project NOMAD on local Wi-Fi" },
     { name: "Shiv Mandir, Sec 8", kind: "worship", open: true, staff: "open · 2 on duty", dist: "1.4 km", lonlat: [77.12, 28.70] },
     { name: "Jama Masjid, Rohini", kind: "worship", open: true, staff: "open · water · 4 on duty", dist: "2.1 km", lonlat: [77.10, 28.73] },
-    { name: "Govt Sr Sec School, Sec 7", kind: "public", open: true, staff: "care point · police present · 9 places", dist: "0.7 km", lonlat: [77.11, 28.71], hub: "Internet-in-a-Box on local Wi-Fi" },
+    { name: "Govt Sr Sec School, Sec 7", kind: "public", open: true, staff: "open · police present · water point", dist: "0.7 km", lonlat: [77.11, 28.71], hub: "Internet-in-a-Box on local Wi-Fi" },
     { name: "Community hall, Sec 11", kind: "public", open: false, staff: "no staff signal", dist: "2.6 km", lonlat: [77.09, 28.72] },
     { name: "Japanese Park", kind: "public", open: true, staff: "open space · tanker 08:00", dist: "1.8 km", lonlat: [77.10, 28.71] }
   ];
+
+  // Open with a person on duty: shops and services where a staff phone is present now (audit section 6, #4 and #5)
+  RC.onDuty = [
+    { name: "Ration shop 112, Sec 7", what: "Dealer present · ePoS 07:02 · distribution open", queue: "about 140 waiting, usually 20", dist: "0.4 km", icon: "package", tile: "green" },
+    { name: "Ration shop 118, Sec 8", what: "Dealer present · ePoS 06:55", queue: "about 30 waiting", dist: "0.6 km", icon: "package", tile: "green" },
+    { name: "SBI ATM, Sec 7 market", what: "Cash loaded 06:50 · guard present", queue: "", dist: "0.9 km", icon: "landmark", tile: "blue" },
+    { name: "Apollo Pharmacy, Sec 8", what: "Pharmacist present since 06:58 · insulin in stock", queue: "", dist: "1.1 km", icon: "heart-pulse", tile: "red" },
+    { name: "IOCL pump, Sec 11", what: "2 attendants · petrol and diesel", queue: "about 60 vehicles", dist: "1.6 km", icon: "truck", tile: "orange" }
+  ];
+  // Who's with you (audit section 6, #1, #2 and #7): a child already with Sunita, from next door
+  RC.withMeSuggest = { name: "Aarav Malhotra", age: 7, from: "C-7/110, next door", why: "Both his parents' phones stopped at 14:32:07. He came to your flat last night.", ration: "5 kg a month", code: "7K3Q" };
 
   RC.notices = [
     { from: "NDMA · Government of India", t: "06:00", text: "At 14:32:07 yesterday, half of all living people vanished. No further vanishings have been recorded since. Stay where you are unless someone needs you. Open Still Here.", official: true, confirms: null },
@@ -128,7 +138,6 @@ window.RC = window.RC || {};
   RC.avoid = [
     { z: "Bawana chemical area", why: "No operators at a chlorine store. Stay 1 km away.", lonlat: [77.03, 28.80], km: 1 },
     { z: "Yamuna east bank", why: "Embankment not yet inspected after tree loss. Keep off it.", lonlat: [77.28, 28.60], km: 1.5 },
-    { z: "Rithala", why: "No phone network. Information here may be out of date.", lonlat: [77.10, 28.72], km: 1 }
   ];
 
   RC.authorities = [
@@ -190,7 +199,7 @@ window.RC = window.RC || {};
   ];
   RC.kitPages = [
     { t: "Dehydration in a child under five", s: "Signs: no tears, dry mouth, sunken eyes, fewer than three wet nappies a day, drowsy. Give oral rehydration solution: one litre of safe water, six level teaspoons of sugar, half a level teaspoon of salt. Small sips every few minutes. If the child cannot drink or is limp, go to the nearest care point now." },
-    { t: "Insulin without a fridge", s: "Unopened insulin keeps for about four weeks at room temperature below 25 °C. Keep it in a clay pot with water, or wrapped in a damp cloth in shade. Never freeze it. Do not stop insulin; ration food instead of the dose if supply is short, and get to a care point." },
+    { t: "Insulin without a fridge", s: "Unopened insulin keeps for about four weeks below 25 °C. Keep it in a clay pot with water, or wrapped in a damp cloth in shade, and never freeze it. Don't stop or change your dose without advice. If you are running short, get to a chemist or care point today." },
     { t: "Making water safe", s: "If it is cloudy, let it settle and pour through a clean cloth. Boil for one minute at a rolling boil, or add household bleach (unscented, 5%): two drops per litre, wait 30 minutes. Store covered." },
     { t: "CPR, adult", s: "Check response, call 112, place the heel of your hand on the centre of the chest, push hard and fast 100–120 a minute, 5 cm deep, let the chest rise fully. Keep going until help arrives or the person breathes." },
     { t: "Moving a bedridden adult", s: "Do not move alone if you can avoid it. Log-roll onto a blanket, two people lift at the hips and shoulders, keep the head supported. Bring medicines, the ABHA number and any oxygen with the person." }
@@ -205,27 +214,30 @@ window.RC = window.RC || {};
 
   /* ---------- Vocabulary and help (audit B1–B14, D1) ---------- */
   RC.TERMS = {
-    vanish: "New vanishings since the Snap", alone: "People with no adult left", reached: "Reached and safe",
+    vanish: "New vanishings since the Snap", alone: "Children with no adult left", reached: "Reached and safe",
     claimed: "Someone on the way", unclaimed: "Nobody yet", nocircle: "Small children nobody is coming for",
     urgent: "Urgent problems not yet handled", short: "Essential sites short of staff"
   };
   RC.HELP = {
+    withme: { t: "Who's with you", b: "Children or elders now in your care. Adding them stops them being flagged alone, tells their circle, and moves their ration and records to you, so looking after them doesn't cost you.", s: "Ration card portability (ONORC) and the case record" },
+    quiet: { t: "Here, not answering", b: "Their phone is active but they haven't replied. Where the phone is shows the type of place, such as a hospital, and only to their household.", s: "Carrier location, type of place only" },
+    unconfirmed: { t: "Unconfirmed", b: "The phone was idle at 14:32, so the carrier can't tell whether its owner vanished. The last activity was before the Snap. Try calling. If they're here, one tap of I'm here clears it.", s: "Carrier signalling" },
     vanish: { t: "New vanishings since the Snap", b: "Phones, watches and accounts that went silent after 14:32:07 yesterday while their network stayed up. At the Snap itself 3.8 billion went silent in the same second. Zero since then means it has not happened again. This is the only evidence anyone has that it was a one-time event.", s: "Carrier signalling and platform presence, checked every minute" },
-    alone: { t: "People with no adult left", b: "Children and care-dependent adults whose every resident adult's phone stopped at 14:32:07. The household comes from family mobile plans, where phones sleep at night, and ration cards.", s: "Carriers and the ration card database (PDS)" },
+    alone: { t: "Children with no adult left", b: "Children under 15 whose every resident adult's phone stopped at 14:32:07. The household comes from where phones sleep at night, family plans, ration cards and anganwadi registers. A flat with a silent father and a mother who has no phone is marked unknown, and the address is asked first. Dependent adults like Kamla are cases too.", s: "Carriers, ration cards (PDS) and anganwadi registers" },
     reached: { t: "Reached and safe", b: "Someone replied \"have her\" or \"I'm with him\", and their phone is physically at the address. A tap alone never counts, so this number is hard to inflate.", s: "Replies by WhatsApp, SMS, missed call or app, plus device location" },
     claimed: { t: "Someone on the way", b: "A person from their circle has said they are going. If they don't confirm by their own arrival time plus an hour, the case reopens and goes out again.", s: "Replies to the case message" },
     unclaimed: { t: "Nobody yet", b: "Flagged as alone, but nobody has said they're going. After two hours the case goes to the police and child helpline with the address.", s: "Case records" },
-    nocircle: { t: "Small children nobody is coming for", b: "Under five, and nobody in their circle has answered within two hours. About 4% of alone people have no relative, neighbour or carer left who can reach them; these addresses go straight to the government list. A third of them are under five.", s: "Circle routing and the two-hour escalation" },
-    circle: { t: "Circle", b: "The people who already know someone: family, neighbours, the nanny, the daycare, the doctor. Found in the contacts of the parents' phones, within 5 km. With four of them alive in the same city, the chance all are gone is 6%.", s: "Contacts on the vanished phones" },
+    nocircle: { t: "Small children nobody is coming for", b: "Under five, and nobody in their circle is going: some have no one left, others have a circle that hasn't answered. If only half of those alive in a circle go on Day 1, 18–32% of alone children have nobody (Appendix A1). They go first to the ward's paid anganwadi or ASHA worker, then to the state.", s: "Circle routing and the anganwadi register" },
+    circle: { t: "Circle", b: "The people a child's parents called most who live in the same city: relatives, the nanny, close neighbours. Ranked by how often they were called and how near they are, from the carriers' call records. Four of them alive in the same city leaves a 6% chance all are gone.", s: "Carrier call records" },
     urgent: { t: "Urgent problems not yet handled", b: "Problems where lives are at risk within hours. Each has a suggested action. The count drops when someone acts on it.", s: "Staff roll calls, satellite passes, official reports" },
     short: { t: "Essential sites short of staff", b: "Hospitals, water plants, substations, police stations and prisons where the staff roll call shows less than half the usual staff. The roll call uses the same phone signal: whose phone is at the site.", s: "Employer rosters matched to device location" },
-    stopped: { t: "Stopped at 14:32:07", b: "This person's phone went silent at the instant of the Snap while the network stayed up. That is how we know they are gone, not just not answering.", s: "Carrier signalling" },
-    nodevice: { t: "No device", b: "This person has no phone of their own, so their status comes from the household: who else lives there and whether those phones are active.", s: "Ration card, school and pension records" },
+    stopped: { t: "Gone at 14:32:07", b: "This person's phone was in use or moving at 14:32:07 and has not moved since, while the network stayed up. If that's wrong, tap Not right, or they tap I'm here on any phone and it clears everywhere.", s: "Carrier signalling" },
+    nodevice: { t: "No phone of their own", b: "This person has no phone, so their status comes from the household: who else lives there and whether those phones are active.", s: "Ration card, school, anganwadi and pension records" },
     active: { t: "Active", b: "Their phone has been used recently. They are here.", s: "Carrier and platform presence" },
     projection: { t: "Projection", b: "Times after now are projected from the rate at which people are being reached in each area right now. They show where this is heading if nothing changes. Only \"Now\" is current.", s: "The same model as every other number" },
-    simulated: { t: "Simulated data", b: "Every person, address and count in this prototype is made up, and every number comes from one model so they add up. The maps are real: Natural Earth for the world and India's outline, india-maps-data for districts, and Delhi's 290 ward boundaries from datameet.", s: "Prototype" },
+    simulated: { t: "Simulated data", b: "Every person, address, number and count in this prototype is made up, and every number comes from one model so they add up. Phone numbers are fictional. The maps are real: Natural Earth, india-maps-data for 719 districts, and DataMeet's ward maps for seven cities.", s: "Prototype" },
     govview: { t: "Government view · restricted", b: "A separate system on a separate network with its own login. The public app never links to it. It holds addresses, routes and staff lists that would help a raider.", s: "Design rule" },
-    scale: { t: "How to read the map", b: "Each area is coloured by the share of its people with no adult left who have been reached and confirmed safe: pale is few, deep green is most. The steps are uneven (4, 8, 15, 35 and 65%) so the map reads in the first hours as well as on Day 2. Hatched grey means no phone network, never bad news. Hover for numbers, click for detail, + and − to zoom.", s: "The model" },
+    scale: { t: "How to read the map", b: "Each area is coloured by the share of its children with no adult left who have been reached and confirmed safe: pale is few, deep green is most. The steps are uneven (4, 8, 15, 35 and 65%) so the map reads in the first hours as well as on Day 2. Hatched grey means no phone network, never bad news. Hover for numbers, click for detail, + and − to zoom.", s: "The model" },
     mirror: { t: "Public mirror", b: "When on, anyone can see how supplies are split against where people are. Switching it off is itself recorded and shown publicly.", s: "Allocation ledger" },
     openzone: { t: "Open zones", b: "Places where every occupant vanished and stock is ownerless. The district can declare them open for taking food and water under Section 65 of the Disaster Management Act 2005, with police at the gate. It gives the raiding instinct a legal target away from homes.", s: "DM Act 2005, s.65" },
     register: { t: "Asked, not conscripted", b: "Survivors on professional registers (doctors, nurses, plant operators) get a message with the site, the shift and what it earns. They choose.", s: "National Medical Commission and nursing registers, employer rosters" },
@@ -245,9 +257,9 @@ window.RC = window.RC || {};
         act: { label: "Send a team to secure it", done: "Rohini police team 1 sent 07:13, arriving 07:35." },
         alt: { label: "Move the weapons out", done: "Transfer to Kingsway Camp approved, convoy 09:00." }, src: "Police staff roll call" },
       { id: "children", scope: "delhi", sev: "urgent", t: "07:10", dyn: "children", title: "Small children nobody is coming for", where: "Across Delhi, worst in the north-west", lonlat: [77.05, 28.70],
-        what: "", why: "They are under five and nobody in their circle has answered in two hours. Their addresses are known. A toddler has two or three days without water.",
-        act: { label: "Send paired teams to the five worst wards", done: "Police and ASHA pairs sent 07:14 to the five worst wards." },
-        alt: { label: "See the list by ward", open: "wards" }, src: "Two-hour escalation from circle routing" },
+        what: "", why: "They are under five, and nobody in their circle is going: some have no one left, others have a circle that hasn't answered. Their addresses are known. A toddler has two or three days without water.", keepOpen: true,
+        act: { label: "Send paired teams to the five worst wards", done: "Police and ASHA pairs sent 07:14 to the five worst wards. Reports due by 09:00; the item stays open until they confirm children reached." },
+        alt: { label: "See the list by ward", open: "wards" }, src: "Circle routing and the anganwadi register" },
       { id: "water", scope: "delhi", sev: "high", t: "06:40", title: "Haiderpur water plant is short of operators", where: "Haiderpur, North West Delhi", lonlat: [77.14, 28.72],
         what: "6 of 11 operators are on site.", why: "Below 5, output drops and about 1.2 million people in north and west Delhi lose water pressure.",
         act: { label: "Ask 4 operators from the register", done: "4 operators asked 07:15. 2 accepted, arriving 08:30." }, src: "Delhi Jal Board roster roll call" },
