@@ -134,8 +134,9 @@ window.RC = window.RC || {};
   function toMap(svg, x, y) { const r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal, sc = Math.max(vb.width / r.width, vb.height / r.height), ox = (r.width - vb.width / sc) / 2, oy = (r.height - vb.height / sc) / 2; return [vb.x + (x - r.left - ox) * sc, vb.y + (y - r.top - oy) * sc]; }
   function lbl(x, y, t, s, anchor, strong) { return `<text x="${x}" y="${y}" text-anchor="${anchor}" class="mlabel${strong ? " strong" : ""}" style="font-size:${(strong ? 12 : 11) * s}px;stroke-width:${3 * s}px">${esc(t)}</text>`; }
 
-  function legend() {
+  function legend(o) {
     const B = RC.Model.BINS;
+    if (o && o.compact) return `<div class="legend compact" data-help="scale"><span class="lt">Reached</span><span>${esc(B[0].l)}</span><span class="ramp">${B.map(b => `<i style="background:${b.c}"></i>`).join("")}</span><span>${esc(B[B.length - 1].l)}</span><span class="nd"><i></i>No network</span></div>`;
     return `<div class="legend" data-help="scale"><span class="lt">Reached and safe</span>${B.map(b => `<span><i style="background:${b.c}"></i>${b.l}</span>`).join("")}<span class="nd"><i></i>No network</span><span class="info" style="display:inline-flex">${RC.icon("info", 15)}</span></div>`;
   }
 

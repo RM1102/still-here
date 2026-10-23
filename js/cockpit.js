@@ -73,7 +73,7 @@
       <div class="sit-body"><aside class="queue">${queueHtml()}</aside>
         <section class="mapzone ${S.sel ? "has-drawer" : ""}"><div class="map-tools"><span class="crumb">${crumb()}</span>${chips()}</div>
           <div class="stage"><div class="mapsvg" id="map"></div>
-            <div class="overlay" style="left:12px;top:12px">${MAP.legend()}</div>
+            <div class="overlay" style="left:12px;top:12px">${MAP.legend({ compact: true })}</div>
             <div class="overlay ov-trend"><div class="t"><b>Is it getting better?</b> <span id="trendname"></span></div><p class="trendline" id="trendtxt"></p><div id="trend"></div></div>
           </div>${drawer()}</section></div>`;
   }
@@ -193,7 +193,7 @@
     const ranked = Object.keys(RC.world.reached).map(iso => ({ iso, n: names[iso] || iso, s: wshare(iso, h) })).sort((a, b) => a.s - b.s);
     const sel = S.wsel ? ranked.find(r => r.iso === S.wsel) : null;
     const aidN = iso => GV.world.aid.filter(a => a.to === iso), aidF = iso => GV.world.aid.filter(a => a.from === iso);
-    return `<div class="filters">${timeSeg()}</div><div class="world"><div class="wmap"><div class="mapsvg" id="wmap" style="position:absolute;inset:10px"></div><div class="overlay" style="left:12px;bottom:12px">${MAP.legend()}</div></div>
+    return `<div class="filters">${timeSeg()}</div><div class="world"><div class="wmap"><div class="mapsvg" id="wmap" style="position:absolute;inset:10px"></div><div class="overlay" style="left:12px;bottom:12px">${MAP.legend({ compact: true })}</div></div>
       <div class="wside">${sel ? `<div class="sec"><h2>${esc(sel.n)}</h2><div class="nums" style="margin-top:8px"><div class="num"><div class="l">Alone people reached</div><div class="v">${P(sel.s)}</div></div><div class="num"><div class="l">Aid arriving</div><div class="v">${aidN(sel.iso).length}</div></div></div>${aidN(sel.iso).map(a => `<p class="sub" style="margin:8px 0 0">From ${esc(names[a.from] || a.from)}: ${esc(a.what)}, left ${a.t}</p>`).join("")}${aidF(sel.iso).map(a => `<p class="sub" style="margin:8px 0 0">Sending to ${esc(names[a.to] || a.to)}: ${esc(a.what)}</p>`).join("")}<button class="btn btn-compact" style="margin-top:12px" data-wsel="">Close</button></div>` : ""}
         <div class="sec"><h2>Furthest behind</h2><p class="sub">Share of people alone who have been reached. Countries doing better send aid to these.</p>${ranked.slice(0, 8).map(r => `<div class="wrow" data-wsel="${r.iso}"><span class="wn">${esc(r.n)}</span><div class="meter" style="flex:1;min-width:0"><div class="bar"><i style="width:${Math.round(r.s * 100)}%;background:${M.color({ share: r.s })}"></i></div><span>${P(r.s)}</span></div></div>`).join("")}</div>
         <div class="sec"><h2>Aid on the way</h2>${GV.world.aid.map(a => `<div class="aid"><b>${esc(names[a.from] || a.from)} → ${esc(names[a.to] || a.to)}</b><span>${esc(a.what)}, left ${a.t}</span></div>`).join("")}</div>
