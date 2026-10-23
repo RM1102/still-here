@@ -251,6 +251,7 @@ body.phone .device .mapbox { height: 380px; min-height: 0; }
   .title { font-size: 30px; }
 }
 @media (min-width: 760px) { .mobilenav { display: none !important; } }
+body.pre .mobilenav, body.pre .tabbar { display: none !important; }
 .mobilenav { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 20; padding: 6px; border-radius: 28px; }
 .mobilenav a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10.5px; font-weight: 600; color: var(--label2); padding: 6px 2px; border-radius: 20px; min-height: 46px; justify-content: center; }
 .mobilenav a.on { color: var(--accent); background: var(--fill); }

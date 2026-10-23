@@ -387,6 +387,7 @@
     if (route === "#map" && !S.mapSel && S.mapArea === "delhi") S.mapSel = { kind: "ward", key: WARD.key };
     const phone = S.mode === "phone" && window.innerWidth >= 760;
     document.body.classList.toggle("phone", phone);
+    document.body.classList.toggle("pre", route === "#alert");
     document.querySelectorAll("#modeseg button").forEach(b => b.classList.toggle("on", b.dataset.mode === S.mode));
     const target = phone ? $("#pview") : $("#view"), other = phone ? $("#view") : $("#pview");
     target.innerHTML = V[route](); other.innerHTML = "";
