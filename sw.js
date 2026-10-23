@@ -1,5 +1,5 @@
 /* Still Here service worker: saves every file of the app on first visit, so it opens with no signal. */
-const CACHE = "stillhere-v6";
+const CACHE = "stillhere-v7";
 const FILES = [
   "./", "index.html", "lite.html", "lite-hi.html", "cockpit.html", "manifest.webmanifest",
   "css/app.css", "css/cockpit.css",
