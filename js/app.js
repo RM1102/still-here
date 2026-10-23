@@ -74,7 +74,7 @@
       <div class="group">${nophone.map(p => `<a class="r" href="#case-${p.id}"><span class="avatar">${initials(p.name)}</span><div class="tt"><b>${esc(p.name)}</b><span>${esc(p.rel)} · ${p.age} · ${esc(p.city)}</span></div>${statusOf(p)}${chev()}</a>`).join("")}</div>
       <div class="h3" style="margin:22px 4px 8px">Gone</div>
       <div class="group">${gone.map(p => person(p, statusOf(p))).join("")}</div>
-      <div class="btn-row"><a class="btn btn-block" href="#request">Add Someone or Raise a Check</a></div>
+      <div class="btn-row"><a class="btn btn-block" href="#request">Ask About Someone</a></div>
       ${disc("How statuses are known", "A phone that stopped all activity at the instant of the Snap, while its network stayed up, belongs to someone who is gone. Carriers see signalling, platforms see presence, watches see heart rate. Nobody has to report anything.")}`;
   };
 
@@ -88,7 +88,7 @@
       <div class="r"><span class="avatar">M</span><div class="tt"><b>Meena's children, 7 and 10</b><span>Sector 8 · Meena is home and active</span></div>${st("green", "With Meena")}</div>
       <div class="r"><span class="avatar">AV</span><div class="tt"><b>Anita Verma's father, 81</b><span>Pitampura · Anita is closer; you're the backup</span></div>${st("orange", "Anita is going")}</div>
     </div>
-    ${sect("Raise a check on anyone")}${requestCard()}`;
+    ${sect("Ask about anyone")}${requestCard()}`;
   function requestCard() {
     const mode = S.requestMode, a = mode === "active";
     const res = !S.requested ? "" : a
@@ -96,10 +96,10 @@
       : `<div class="group" style="margin-top:14px"><div class="r t">${tile("clock", "orange")}<div class="tt"><b>Savitri Devi has no phone, and the other adult is gone</b><span>Sent to four people within 3 km in Jaipur who know her. Nobody has said they're going yet. If nobody does by 09:15, it goes to 112 Jaipur.</span></div>${st("red", "Alone")}</div></div>`;
     return `<div class="seg" style="margin:0 0 12px"><button class="${a ? "on" : ""}" data-action="reqmode" data-v="active">Someone With a Phone</button><button class="${!a ? "on" : ""}" data-action="reqmode" data-v="nodevice">Someone Without</button></div>
       <div class="group"><div class="r"><div class="tt"><span>Name</span><b>${a ? "Shalini Gupta" : "Savitri Devi"}</b></div></div><div class="r"><div class="tt"><span>Age and where</span><b>${a ? "45 · Malviya Nagar, Jaipur" : "82 · Malviya Nagar, Jaipur"}</b></div></div></div>
-      <div class="btn-row"><button class="btn btn-prominent btn-block" data-action="request">Raise a Check</button></div>
+      <div class="btn-row"><button class="btn btn-prominent btn-block" data-action="request">Ask Still Here</button></div>
       <p class="foot">Often it's settled without a visit, because their phone is active.</p>${res}`;
   }
-  V["#request"] = () => `${head("Raise a check", "Ask about anyone you're worried about.", ["#home", "Still Here"])}<div style="margin-top:22px">${requestCard()}</div>`;
+  V["#request"] = () => `${head("Ask about someone", "Anyone you're worried about, even if they aren't in your contacts.", ["#home", "Still Here"])}<div style="margin-top:22px">${requestCard()}</div>`;
 
   V["#case-meera"] = () => {
     const c = RC.cases.meera, s = S.cases.meera;
@@ -139,7 +139,8 @@
     if (s.state === "flagged") body = `${sect("You're the nearest adult")}<p class="sub" style="padding:0 4px">She's 3.1 km away. Nobody else who knows her is closer or active.</p>
       <div class="btn-row" style="display:flex;gap:10px"><button class="btn" data-action="kamla-cant">I Can't</button><button class="btn btn-prominent" style="flex:1" data-action="kamla-going">I'm Going</button></div>`;
     else if (s.state === "claimed") body = `${sect("You're on your way")}<div class="group"><div class="r t">${tile("clock", "orange")}<div class="tt"><b>Claimed at 07:20</b><span>Shalini and Anita can see it. It reopens at 09:20 if you don't confirm.</span></div>${st("orange", "On the way")}</div></div>
-      <div class="btn-row"><button class="btn btn-prominent btn-block" data-action="kamla-reached">I'm With Her</button></div>`;
+      <div class="btn-row" style="display:flex;gap:10px"><button class="btn" data-action="kamla-release">I Can't Make It</button><button class="btn btn-prominent" style="flex:1" data-action="kamla-reached">I'm With Her</button></div>
+      <p class="foot">If something stops you on the way, say so here. The case goes back to Anita and Shalini at once instead of waiting until 09:20.</p>`;
     else if (s.state === "reached") body = `${sect("You're with her")}<div class="group"><div class="r t">${tile("check", "green")}<div class="tt"><b>Confirmed at 07:55</b><span>By your tap and your phone at the address. Her health record (diabetes, blood pressure tablets) is open to you at any care point.</span></div>${st("green", "Reached")}</div></div>`;
     else if (s.state === "cant") body = `${sect("Sent to the next nearest")}<div class="group"><div class="r t">${tile("users", "orange")}<div class="tt"><b>Anita Verma and Shalini Gupta notified</b><span>Anita is 2.6 km away and active. Kiran, the ASHA worker 0.8 km away, is on standby.</span></div></div></div>
       <div class="btn-row"><button class="btn btn-block" data-action="kamla-going">Actually, I'm Going</button></div>`;
@@ -375,6 +376,7 @@
       addLog("meera", "08:20", d.v === "care" ? "Moved to Govt Primary School, Marol (care point, police present). Adult on duty: R. Iyer." : "Temporary custodian: Lata Pawar, at Flat 402. Handover to Sunita Sharma planned for week two.");
       thread("Still Here", d.v === "care" ? "Thank you, Lata. Please take Meera to Govt Primary School, Marol (400 m). Code 4F2K. R. Iyer is on duty." : "Thank you, Lata. You're registered as Meera's temporary custodian. Her grandmother Sunita will message you here.", "08:20", "out"); },
     "kamla-going"() { S.cases.kamla.state = "claimed"; addLog("kamla", "07:20", "Sunita is going. Shalini and Anita were told. Reopens 09:20."); markStep(7); },
+    "kamla-release"() { S.cases.kamla.state = "cant"; addLog("kamla", "07:35", "Sunita released her claim on the way. Sent at once to Anita Verma (2.6 km) and Shalini Gupta; ASHA worker Kiran on standby."); toast("Released. Anita and Shalini were told."); },
     "kamla-cant"() { S.cases.kamla.state = "cant"; addLog("kamla", "07:20", "Sunita can't go. Sent to Anita Verma (2.6 km) and Shalini Gupta; ASHA worker Kiran on standby."); },
     "kamla-reached"() { S.cases.kamla.state = "reached"; S.reachedBoost += 1; addLog("kamla", "07:55", "Sunita is with Kamla Devi, confirmed by her phone at the address. One more reached in Rohini."); markStep(7); },
     maparea(d) { mapGo(d.v === "delhi" ? { area: "city", city: "delhi" } : { area: "india" }); }, maplayer(d) { S.mapLayer = d.v; }, time(d) { S.ti = +d.v; markStep(8); }, mapback() { mapGo({ area: "india" }); },
