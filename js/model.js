@@ -15,8 +15,14 @@ window.RC = window.RC || {};
   ];
   // Two groups (Appendix A1, step 4): 1 − F have someone in their circle who goes on Day 1; F have nobody who goes
   // and are reached by the ward's paid anganwadi or ASHA worker, SLOW times more slowly. A third of alone children are under five.
-  const NOW = TIMES[0].h, F = 0.25, SLOW = 8, U5 = 1 / 3;
-  const two = (k, m, h) => (1 - F) * (1 - Math.exp(-k * m * h)) + F * (1 - Math.exp(-k * m * h / SLOW));
+  // Flagging ramp: the carriers' join finishes between 06:00 and 10:00 (RAMP hours), and each case's clock starts when it is flagged.
+  // The population curve is the per-case curve averaged over flag times, in closed form.
+  const NOW = TIMES[0].h, F = 0.25, SLOW = 20, U5 = 1 / 3, RAMP = 4;
+  const perCase = (k, m, x) => (1 - F) * (1 - Math.exp(-k * m * x)) + F * (1 - Math.exp(-k * m * x / SLOW));
+  const I1 = (b, h, u) => u - (Math.exp(-b * (h - u)) - Math.exp(-b * h)) / b;   // integral of 1 − e^(−b(h − t)) for t in [0, u]
+  const flaggedAt = h => Math.min(Math.max(h, 0), RAMP) / RAMP;
+  const two = (k, m, h) => { if (h <= 0) return 0; const u = Math.min(h, RAMP), a = k * m; return ((1 - F) * I1(a, h, u) + F * I1(a / SLOW, h, u)) / RAMP; };
+  const u5Left = (k, m, h) => { if (h <= 0) return 0; const u = Math.min(h, RAMP), b = k * m / SLOW; return F * U5 * (Math.exp(-b * (h - u)) - Math.exp(-b * h)) / (b * RAMP); };
   function hash(s) { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return ((x >>> 0) % 100000) / 100000; }
 
   const G = RC.GEO, codeToState = {};
@@ -67,13 +73,13 @@ window.RC = window.RC || {};
   const kR = solve(RC.country.reached, sumAt), kQ = solve(RC.country.reached + RC.country.claimed, sumAt);
 
   function at(u, h) {
-    if (u.nodata) return { A: u.A, reached: 0, claimed: 0, unclaimed: 0, u5: 0, nodata: true };
-    const R = two(kR, u.m, h), Q = two(kQ, u.m, h);
-    return { A: u.A, reached: u.A * R, claimed: u.A * (Q - R), unclaimed: u.A * (1 - Q), u5: u.A * F * U5 * Math.exp(-kQ * u.m * h / SLOW) };
+    if (u.nodata) return { A: u.A, reached: 0, claimed: 0, unclaimed: 0, u5: 0, flagged: 0, nodata: true };
+    const R = two(kR, u.m, h), Q = two(kQ, u.m, h), Fl = flaggedAt(h);
+    return { A: u.A, flagged: u.A * Fl, reached: u.A * R, claimed: u.A * (Q - R), unclaimed: u.A * Math.max(0, Fl - Q), u5: u.A * u5Left(kQ, u.m, h) };
   }
   function agg(list, h) {
-    const o = { A: 0, reached: 0, claimed: 0, unclaimed: 0, u5: 0, known: 0 };
-    list.forEach(u => { const v = at(u, h); o.A += v.A; if (!v.nodata) { o.known += v.A; o.reached += v.reached; o.claimed += v.claimed; o.unclaimed += v.unclaimed; o.u5 += v.u5; } });
+    const o = { A: 0, reached: 0, claimed: 0, unclaimed: 0, u5: 0, known: 0, flagged: 0 };
+    list.forEach(u => { const v = at(u, h); o.A += v.A; if (!v.nodata) { o.known += v.A; o.reached += v.reached; o.claimed += v.claimed; o.unclaimed += v.unclaimed; o.u5 += v.u5; o.flagged += v.flagged; } });
     o.share = o.known ? o.reached / o.known : 0; o.claimedShare = o.known ? o.claimed / o.known : 0; o.unclaimedShare = o.known ? o.unclaimed / o.known : 0;
     o.nodata = o.known === 0;
     const prev = h > 1 ? list.reduce((a, u) => a + (u.nodata ? 0 : at(u, h - 1).reached), 0) : 0;
@@ -95,5 +101,5 @@ window.RC = window.RC || {};
   function compact(n) { n = Math.round(n); if (Math.abs(n) >= 1e7) return (n / 1e6).toFixed(1) + " M"; if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(2) + " M"; if (Math.abs(n) >= 1e5) return Math.round(n / 1e3) + " K"; return n.toLocaleString("en-IN"); }
   const pct = x => Math.round(x * 100) + "%";
 
-  RC.Model = { TIMES, NOW, F, units, byKey, byState, CITIES, at, agg, scopes, series, BINS, color, hourLabel, compact, pct, myWard: byKey["W" + MYWARD.id], kR, kQ };
+  RC.Model = { TIMES, NOW, F, RAMP, flaggedAt, perCase: (m, x) => perCase(kR, m, x), units, byKey, byState, CITIES, at, agg, scopes, series, BINS, color, hourLabel, compact, pct, myWard: byKey["W" + MYWARD.id], kR, kQ };
 })(window.RC);

@@ -201,7 +201,7 @@ table.t td.n, table.t th.n { text-align: right; font-variant-numeric: tabular-nu
 
 @media (max-width: 1180px) { .sit-body { grid-template-columns: 310px minmax(0, 1fr); } .who { display: none; } .ov-trend { width: 250px; } .ov-trend #trend { display: none; } .cols { grid-template-columns: 1fr; } .world { grid-template-columns: minmax(0, 1fr) 310px; } }
 @media (max-width: 900px) {
-  body { overflow: auto; } .app { height: auto; min-height: 100vh; }
+  body { overflow-x: hidden; overflow-y: auto; } .app { height: auto; min-height: 100vh; }
   .hdr { height: auto; flex-wrap: wrap; padding: 10px 14px; gap: 10px; } .hdr-r { margin-left: 0; }
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); height: auto; }
   .sit-body { grid-template-columns: 1fr; height: auto; } .queue { height: 440px; } .mapzone { height: 580px; }

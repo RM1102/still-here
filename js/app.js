@@ -11,7 +11,8 @@
   const meeraStart = () => ({ state: "notified", log: [
     { t: "06:52", text: "Flagged: both adults' phones stopped at 14:32:07, and Meera is registered at Flat 402 (ration card, Little Steps daycare)." },
     { t: "06:52", text: "Sent at once to her four closest (Lata, Rakesh, Farah, Dr. Nair) by WhatsApp or SMS, each in their phone's language. The building was asked only: is an adult with the child in Flat 402? Two replied: no adult seen." }] });
-  const threadStart = () => [{ from: "Still Here", text: CASE_MSG, t: "06:52", kind: "out" },
+  const CASE_MR = "मीरा (3) हिला ओळखीच्या मोठ्या व्यक्तीची गरज आहे. तिचे आई-वडील दोघेही गेले. फ्लॅट 402, सनराइज टॉवर्स, अंधेरी पूर्व. दोन तासांत पोहोचू शकाल का? उत्तर द्या: 1 = येत आहे · 2 = जमणार नाही · 3 = ती आधीच कोणाबरोबर आहे. हा मेसेज पुढे पाठवू नका. केस SH-7731.";
+  const threadStart = () => [{ from: "Still Here", text: CASE_MR, gloss: CASE_MSG, t: "06:52", kind: "out" },
     { text: "Sent to Lata, Rakesh, Farah and Dr. Nair · the building was asked only \"Is an adult with the child in Flat 402?\" · nobody going yet", t: "06:52", kind: "sys" }];
   function defaultState() {
     return { entered: false, mode: "desktop", tab: "thread", mesh: false,
@@ -61,9 +62,9 @@
       <div class="alert-row">${tile("siren", "red", true)}<div class="tt"><b>Emergency alert · NDMA · 06:00</b><span style="font-size:15px;color:var(--label);margin-top:4px">At 14:32:07 yesterday, half of all living people vanished. Nobody has vanished since. Stay where you are unless someone needs you.</span></div></div>
       <div class="r t">${tile("smartphone", "gray")}<div class="tt"><b>+91 98••• •4410</b><span>Rohini Sector 7, Delhi, where this phone sleeps at night</span></div>${st("green", "Carrier verified")}</div>
     </div>
-    <p class="foot">Also on WhatsApp, by SMS and by missed call, from one verified sender. Every number in this prototype is fictional.</p>
+    <p class="foot">Also on WhatsApp, by SMS and by missed call, from one verified sender. Personal numbers in this prototype are fictional; 112 and 1098 are the real services cases go to.</p>
     <div class="btn-row"><button class="btn btn-prominent btn-block" data-action="enter">I'm Still Here</button></div>
-    <p class="foot">This lets your carrier show you the people you choose, and shows you only to people who have your number and chose you. Still Here never asks for money, an OTP, an install or a forward. You can check any case with CHILDLINE using its case number.</p>`;
+    <p class="foot">This lets your carrier show you the people you choose, and shows you only to people who have your number and chose you. Still Here never asks for money, an OTP or a forward, and never sends install links: the offline kit is inside the app. You can check any case with CHILDLINE using its case number.</p>`;
 
   V["#home"] = () => {
     const w = myWard(), ind = MD.scopes.india(MD.NOW);
@@ -91,9 +92,9 @@
       ${sect("Across the country")}
       <div class="group" data-help="vanish"><div class="r t">${tile("shield-check", "green")}<div class="tt"><b>No new vanishings since the Snap</b><span>Nobody's phone has gone silent since 14:32 yesterday.</span></div><span class="spark" id="flat2"></span></div></div>
       <div class="stats" style="margin-top:14px">
-        ${stat("Children reached and safe since the 06:00 alert, India", C(ind.reached), P(ind.share) + " of " + C(ind.A), "reached")}
+        ${stat("Children reached and safe since the 06:00 alert, India", C(ind.reached), `${P(ind.share)} of ${C(ind.A)} · ${C(ind.flagged)} flagged so far`, "reached")}
         ${stat("Reached and safe in your ward", `${fmt(w.reached)} <small>of ${fmt(w.A)}</small>`, P(w.reached / w.A) + " · Rohini", "alone")}
-        ${stat("Your people", `${here.length} <small>here</small> · ${gone.length} <small>gone</small>`, `${nophone.length} without a phone`, "stopped")}
+        ${stat("Your people", `${here.length} <small>here</small> · ${gone.filter(p => p.status === "stopped").length} <small>gone</small>`, `${gone.filter(p => p.status === "unconfirmed").length} unconfirmed · ${nophone.length} without a phone`, "stopped")}
       </div>`;
   };
 
@@ -124,7 +125,7 @@
   V["#case-meera"] = () => {
     const c = RC.cases.meera, s = S.cases.meera, b = c.building;
     const named = c.circle.filter(p => !p.stopped), gone = c.circle.filter(p => p.stopped);
-    const rstat = { lata: s.state === "notified" ? "Read 06:55" : "Going", rakesh: S.thread.some(m => m.from === "Rakesh Mehta") ? "Can't" : "Read 07:02", farah: "Delivered", nair: "Delivered" };
+    const rstat = { lata: s.state === "notified" ? "Read 06:55" : "Going", rakesh: S.rakeshCant ? "Can't" : "Read 07:02", farah: "Delivered", nair: "Delivered" };
     const circleGroup = `<div class="group">${named.map(p => `<div class="r"><span class="avatar">${initials(p.name)}</span><div class="tt"><b>${esc(p.name)}</b><span>${esc(p.rel)} · ${p.calls} calls last month · ${p.dist} km · ${esc(p.via)}</span></div>${st(p.id === "lata" && s.state !== "notified" ? "orange" : rstat[p.id] === "Can't" ? "" : "", rstat[p.id])}</div>`).join("")}
       ${gone.map(p => `<div class="r"><span class="avatar">${initials(p.name)}</span><div class="tt"><b style="color:var(--label2)">${esc(p.name)}</b><span>${esc(p.rel)} · ${p.calls} calls last month · gone at 14:32</span></div>${st("red", "Gone")}</div>`).join("")}
       <div class="r t">${tile("building-2", "gray")}<div class="tt"><b>${esc(b.name)}: one question only</b><span>${esc(b.asked)} were asked "${esc(b.q)}" No name, age or address beyond the flat · ${esc(b.answers)}</span></div></div></div>`;
@@ -143,7 +144,7 @@
       <div class="btn-row" style="display:flex;gap:10px"><button class="btn" data-action="meera-wrong">Something's Wrong</button><button class="btn btn-prominent" style="flex:1" data-action="meera-video">Video Call Lata</button></div>
       <p class="foot">Anyone in her circle can raise a concern. It reopens the case and alerts CHILDLINE.</p>`;
     else if (s.state === "concern") body = `${sect("You raised a concern")}
-      <div class="group"><div class="r t">${tile("triangle-alert", "red")}<div class="tt"><b>Sent to CHILDLINE 1098 and her circle at 07:46</b><span>Lata has been asked to take Meera to Govt Primary School, Marol, 400 m away, where a police officer and a vetted adult are on duty, and to wait there with her.</span></div>${st("red", "Under review")}</div></div>
+      <div class="group"><div class="r t">${tile("triangle-alert", "red")}<div class="tt"><b>Sent to CHILDLINE 1098 and her circle</b><span>Lata has been asked to stay at the flat with Meera. A police officer and the ward's anganwadi worker are on their way there; a care point comes after they arrive.</span></div>${st("red", "Under review")}</div></div>
       <div class="btn-row"><button class="btn btn-block" data-action="meera-unwrong">It Was a Mistake</button></div>`;
     else if (s.state === "confirmed") body = `${sect("You saw Meera with Lata")}
       <div class="group"><div class="r t">${tile("check", "green")}<div class="tt"><b>Confirmed on a video call at 07:46</b><span>Meera was at the flat with Lata, fed and calm. Lata is now her temporary custodian.</span></div>${st("green", "With a known adult")}</div></div>
@@ -155,8 +156,8 @@
         <div class="r t">${tile("package", "orange")}<div class="tt"><b>Meera's ration goes with her</b><span>5 kg a month, collectable by Lata at any ration shop from today. Looking after her doesn't cost Lata.</span></div></div>
         <div class="r t">${tile("shield", "blue")}<div class="tt"><b>Guardian pass for Lata</b><span>Code 4F2K, valid to Day 14. Police, hospitals and schools can check it with CHILDLINE.</span></div></div>
         <div class="r t">${tile("heart-pulse", "red")}<div class="tt"><b>Welfare checks</b><span>Lata sends a voice note each evening; the ward's anganwadi worker visits on Day 3.</span></div></div></div>
-      <p class="foot">This is the first written record of who has her. Lata's GOING and HAVE HER count as the report the Juvenile Justice Act asks for within 24 hours (s.32). Child protection verifies it and takes over, in UNICEF Primero's format.</p>
-      <div class="btn-row btn-pair"><button class="btn" data-action="export" data-id="meera">${I("file-down", 17)}Save a Copy Without the Address</button><button class="btn btn-prominent" data-action="sendcp"${S.cases.meera.sent ? " disabled" : ""}>${S.cases.meera.sent ? "Sent to Child Protection" : "Send to Child Protection"}</button></div>`;
+      <p class="foot">This is the first written record of who has her. Lata's HAVE HER counts as the report the Juvenile Justice Act asks for within 24 hours (s.32), and Still Here sent it to CHILDLINE at 07:40, in UNICEF Primero's format. Child protection verifies it and takes over.</p>
+      <div class="btn-row"><button class="btn btn-block" data-action="export" data-id="meera">${I("file-down", 17)}Save a Copy Without the Address</button></div>`;
     return `${head("Meera", "Case SH-7731 · Flat 402, Sunrise Towers, Andheri East, Mumbai", ["#cases", "Cases"])}
       <div class="group" style="margin-top:22px"><div class="r"><span class="avatar">MS</span><div class="tt"><b>Meera Sharma, 3</b><span>You're 1,410 km away</span></div>${caseSt("meera")}</div></div>
       ${disc("How this case was found", esc(c.why) + " Her circle is the people her parents called most who live in Mumbai, ranked by how often they were called and how near they are.")}${body}${logHtml(s, "Case record")}`;
@@ -165,7 +166,7 @@
   V["#case-kamla"] = () => {
     const c = RC.cases.kamla, s = S.cases.kamla;
     let body = "";
-    if (s.state === "flagged") body = `${sect("You're the nearest adult")}<p class="sub" style="padding:0 4px">She's 3.1 km away. Nobody else who knows her is closer or active.</p>
+    if (s.state === "flagged") body = `${sect("You're the nearest adult")}<p class="sub" style="padding:0 4px">She's 3.1 km away. Anita, 3.8 km away, is the next nearest who knows her.</p>
       <div class="btn-row" style="display:flex;gap:10px"><button class="btn" data-action="kamla-cant">I Can't</button><button class="btn btn-prominent" style="flex:1" data-action="kamla-going">I'm Going</button></div>`;
     else if (s.state === "claimed") body = `${sect("You're on your way")}<div class="group"><div class="r t">${tile("clock", "orange")}<div class="tt"><b>Claimed at 07:20 · there by 07:45</b><span>Shalini and Anita can see it. It reopens at 08:45, an hour after your arrival time, if you don't confirm.</span></div>${st("orange", "On the way")}</div></div>
       <div class="btn-row" style="display:flex;gap:10px"><button class="btn" data-action="kamla-release">I Can't Make It</button><button class="btn btn-prominent" style="flex:1" data-action="kamla-reached">I'm With Her</button></div>
@@ -174,27 +175,33 @@
       ${sect("Her medicines")}<div class="group tiles">${RC.meds.map(m => `<div class="r t">${tile("heart-pulse", "red")}<div class="tt"><b>${esc(m.name)}</b><span>${esc(m.left)} · ${esc(m.from)}</span></div>${st(/4 days/.test(m.left) ? "orange" : "green", /4 days/.test(m.left) ? "Refill soon" : "Enough for now")}</div>`).join("")}
         <div class="r t">${tile("map-pin", "blue")}<div class="tt"><b>Apollo Pharmacy, Sec 8 · 1.1 km</b><span>A pharmacist has been there since 06:58, and it has both in stock</span></div></div></div>
       <p class="foot">From her health record and pharmacy history, shown only to the person now caring for her.</p>`;
-    else if (s.state === "cant") body = `${sect("Sent to the next nearest")}<div class="group"><div class="r t">${tile("users", "orange")}<div class="tt"><b>Anita Verma and Shalini Gupta notified</b><span>Anita is 2.6 km away and active. Kiran, the ward's ASHA worker 0.8 km away, is on standby.</span></div></div></div>
+    else if (s.state === "cant") body = `${sect("Sent to the next nearest")}<div class="group"><div class="r t">${tile("users", "orange")}<div class="tt"><b>Anita Verma and Shalini Gupta notified</b><span>Anita is 3.8 km away and active. Kiran, the ward's ASHA worker 0.8 km away, is on standby.</span></div></div></div>
       <div class="btn-row"><button class="btn btn-block" data-action="kamla-going">Actually, I'm Going</button></div>`;
-    return `${head("Kamla Devi", "C-7/112, Rohini Sector 7, Delhi", ["#cases", "Cases"])}
+    return `${head("Kamla Devi", "B-4/57, Rohini Sector 3, Delhi", ["#cases", "Cases"])}
       <div class="group" style="margin-top:22px"><div class="r"><span class="avatar">KD</span><div class="tt"><b>Kamla Devi, 78</b><span>Your mother</span></div>${caseSt("kamla")}</div></div>
       ${disc("How this case was found", esc(c.why))}${body}${logHtml(s, "Record")}`;
   };
 
   /* Who's with you (audit section 6: #1, #2, #7). A child already in your care stops being "alone", and their ration follows them to you. */
   V["#with"] = () => {
-    const g = RC.withMeSuggest, have = S.withMe.length > 0;
-    const card = have ? `<div class="group tiles"><div class="r"><span class="avatar">AM</span><div class="tt"><b>${esc(g.name)}, ${g.age}</b><span>From ${esc(g.from)} · added 07:12</span></div>${st("green", "With you")}</div>
-        <div class="r t">${tile("check", "green")}<div class="tt"><b>His alone flag is closed</b><span>His circle was told he's with you. His aunt in Noida replied that she'll come on Day 2.</span></div></div>
+    const g = RC.withMeSuggest, w = S.withMe[0], st0 = w ? w.status : null;
+    let card;
+    if (!w) card = `<div class="group"><div class="r"><div class="tt"><span>Name</span><b>${esc(g.name)}</b></div></div><div class="r"><div class="tt"><span>Age</span><b>${g.age}</b></div></div><div class="r"><div class="tt"><span>Where he lives</span><b>${esc(g.from)}</b></div></div></div>
+        <p class="foot">What you'd type for a child who is with you. Still Here never shows you which children near you are alone.</p>
+        <div class="btn-row" style="display:flex;gap:10px"><button class="btn" data-action="addsomeone">Add an Elder Instead</button><button class="btn btn-prominent" style="flex:1" data-action="withme-add">Add Him</button></div>`;
+    else if (st0 === "unconfirmed") card = `<div class="group tiles"><div class="r"><span class="avatar">AM</span><div class="tt"><b>${esc(g.name)}, ${g.age}</b><span>From ${esc(g.from)} · added 07:12</span></div>${st("orange", "With you, unconfirmed")}</div>
+        <div class="r t">${tile("users", "orange")}<div class="tt"><b>His circle was asked to confirm</b><span>Still Here matched him to an open case and asked his aunt in Noida to see him with you on a video call. If she can't, Kiran, the ward's ASHA worker, visits by 11:00.</span></div></div></div>
+        <div class="btn-row"><button class="btn btn-block" data-action="withme-confirm">His Aunt Confirms on Video (demo)</button></div>
+        <p class="foot">Until someone who knows him confirms, his case stays open and nothing moves to you.</p>`;
+    else card = `<div class="group tiles"><div class="r"><span class="avatar">AM</span><div class="tt"><b>${esc(g.name)}, ${g.age}</b><span>From ${esc(g.from)} · confirmed by his aunt at 07:20</span></div>${st("green", "With you")}</div>
+        <div class="r t">${tile("check", "green")}<div class="tt"><b>His alone flag is closed</b><span>His aunt saw him with you and will come on Day 2.</span></div></div>
         <div class="r t">${tile("package", "orange")}<div class="tt"><b>His ration follows him</b><span>${esc(g.ration)}, now on your ration card from today.</span></div></div>
         <div class="r t">${tile("shield", "blue")}<div class="tt"><b>Guardian pass</b><span>Code ${esc(g.code)}, valid to Day 14. Police, hospitals and schools can check it with CHILDLINE.</span></div></div>
-        <div class="r t">${tile("heart-pulse", "red")}<div class="tt"><b>Welfare check</b><span>Kiran, the ward's ASHA worker, visits on Day 3.</span></div></div></div>`
-      : `<div class="group"><div class="r t">${tile("baby", "orange")}<div class="tt"><b>Is ${esc(g.name.split(" ")[0])} with you?</b><span>${esc(g.name)}, ${g.age}, from ${esc(g.from)}. ${esc(g.why)}</span></div>${st("red", "Flagged alone")}</div></div>
-        <div class="btn-row" style="display:flex;gap:10px"><button class="btn" data-action="addsomeone">Add Someone Else</button><button class="btn btn-prominent" style="flex:1" data-action="withme-add">Yes, He's With Me</button></div>`;
+        <div class="r t">${tile("heart-pulse", "red")}<div class="tt"><b>Welfare check</b><span>Kiran, the ward's ASHA worker, visits on Day 3.</span></div></div></div>`;
     return `${head("Who's with you", "Children or elders now in your care.")}
       <div style="margin-top:22px">${card}</div>
-      <p class="foot">Adding someone stops them being flagged alone, so nobody walks to an empty flat or takes a child from an adult who is already caring for them.</p>
-      ${disc("Why this costs you nothing", "Looking after a child shouldn't depend on kindness. Their ration moves to your card (One Nation One Ration Card), the guardian pass protects you at checkpoints and hospital desks, and the case record shows who has them.")}`;
+      <p class="foot">Adding someone stops them being flagged alone, so nobody walks to an empty flat or takes a child from an adult who is already caring for them. A number that adds more than one unrelated child is flagged for a check.</p>
+      ${disc("Why this costs you nothing", "Looking after a child shouldn't depend on kindness. Once his family or the ASHA worker confirms, his ration moves to your card (One Nation One Ration Card), the guardian pass protects you at checkpoints and hospital desks, and the case record shows who has him.")}`;
   };
 
   V["#more"] = () => `${head("More", "Everything else in Still Here.")}
@@ -224,6 +231,10 @@
     Object.keys(RC.GEO.india.states).forEach(n => { if (n !== "Delhi") out.push({ t: n, sub: "State · its districts", rank: 1, ic: "map-pinned", go: { area: "india", state: n } }); });
     RC.GEO.india.districts.forEach(d => { if (d.s === "Delhi") return; const ck = cityByDid[d.id]; out.push({ t: d.n, sub: `District · ${d.s}${ck ? " · ward map" : ""}`, rank: 2, ic: "map-pin", go: ck ? { area: "city", city: ck } : { area: "india", state: d.s, sel: { kind: "district", key: d.id } } }); });
     Object.values(MD.CITIES).forEach(c => c.wards.forEach(u => out.push({ t: u.name, sub: `Ward · ${c.name}${u.mine ? " · your ward" : ""}`, rank: 3, ic: "map-pin", go: { area: "city", city: c.key, sel: { kind: "ward", key: u.key } } })));
+    // Old and local names people actually type (audit 2, N-28)
+    [["Andheri", "Ward K/E, Mumbai · Meera's ward", { area: "city", city: "mumbai", sel: { kind: "ward", key: "MUM18" } }], ["Bombay", "Mumbai", { area: "city", city: "mumbai" }], ["Bangalore", "Bengaluru", { area: "city", city: "bengaluru" }],
+     ["Calcutta", "Kolkata", { area: "city", city: "kolkata" }], ["Madras", "Chennai", { area: "city", city: "chennai" }], ["Gurgaon", "Gurugram district, Haryana", { area: "india", state: "Haryana", sel: { kind: "district", key: "HR-378" } }],
+     ["Noida", "Gautam Buddha Nagar district, Uttar Pradesh", { area: "india", state: "Uttar Pradesh", sel: { kind: "district", key: "UP-375" } }]].forEach(([t, sub, go]) => out.push({ t, sub: "Also known as · " + sub, rank: 1, ic: "map-pin", go }));
     const named = out.filter(x => x.t && x.t !== "null"); named.forEach(x => x.low = String(x.t).toLowerCase());
     return (SEARCH = named);
   }
@@ -276,7 +287,7 @@
       body = `<div class="mapsearch" id="mapsearch"><label class="field">${I("search", 17)}<input id="mapq" type="search" autocomplete="off" placeholder="Search a city, district or ward" aria-label="Search a place" aria-controls="mapres"><button type="button" class="clear" data-action="mapclear" aria-label="Clear" hidden>${I("x-circle", 17)}</button></label><div class="results" id="mapres" role="listbox"></div></div>
         ${crumbs()}
         <div class="filters" style="margin-top:0"><div class="seg">${MD.TIMES.map((t, i) => `<button class="${(S.ti || 0) === i ? "on" : ""}" data-action="time" data-v="${i}">${t.short}</button>`).join("")}</div><span class="proj ${isNow() ? "now" : ""}" data-help="projection">${isNow() ? "Now" : "Projection"}</span></div>
-        <div class="stats four" style="margin-bottom:14px">${stat(RC.TERMS.alone, C(v.A), name, "alone")}${stat(RC.TERMS.reached, C(v.reached), P(v.share), "reached")}${stat(RC.TERMS.claimed, C(v.claimed), "", "claimed")}${stat(RC.TERMS.unclaimed, C(v.unclaimed), "", "unclaimed")}</div>
+        <div class="stats four" style="margin-bottom:14px">${stat(RC.TERMS.alone, C(v.A), `${name} · ${v.flagged >= v.A * 0.999 ? "all flagged" : C(v.flagged) + " flagged so far"}`, "alone")}${stat(RC.TERMS.reached, C(v.reached), P(v.share), "reached")}${stat(RC.TERMS.claimed, C(v.claimed), "", "claimed")}${stat(RC.TERMS.unclaimed, C(v.unclaimed), "", "unclaimed")}</div>
         <div class="mapgroup"><div class="mapbox" id="pubmap"></div>${M.legend()}</div>
         ${sel ? `${sect(esc(selName()), sel.nodata ? st("", "No data") : paceSt(sel.share, MD.scopes.india(h).share))}
           <div class="group pad">${sel.nodata ? `<p class="sub" style="margin:0">No phone network here, so there's no data. Shown hatched grey, never as bad news.</p>` : `${CH.stack(sel)}<p class="fn" style="margin:10px 0 0">${C(sel.A)} children with no adult left</p>
@@ -301,7 +312,7 @@
     } else if (view === "india") o.labels = Object.entries(RC.GEO.india.states).map(([n, st]) => ({ at: st.c, t: st.code, strong: S.mapSel && S.mapSel.key === n }));
     else { const ds = RC.GEO.india.districts.filter(d => d.s === S.mapState); o.labels = ds.filter(d => cityDid[d.id]).map(d => ({ k: d.id, t: d.n, strong: true })).concat(ds.map(d => ({ d, v: valOf(d.id) })).sort((a, b) => (b.v ? b.v.A : 0) - (a.v ? a.v.A : 0)).slice(0, 10).map(x => ({ k: x.d.id, t: x.d.n }))); }
     o.hover = k => {
-      if (k === "pin:meera") return `<b>Meera, 3</b><div>Flat 402, Sunrise Towers, Andheri East. Ward K/E.</div><div class="hintl">Your case: open Cases</div>`;
+      if (k === "pin:meera") return `<b>Meera, 3</b><div>Flat 402, Sunrise Towers, Andheri East. Ward K/E.</div><div class="src">Shown only to you and the people on her case</div><div class="hintl">Your case: open Cases</div>`;
       const v = valOf(k); if (!v) return `<b>${esc(nm(k))}</b>`; if (v.nodata) return `<b>${esc(nm(k))}</b><div>No phone network, so no data.</div>`;
       const hint = view === "india" ? (k === "Delhi" ? "Click to open Delhi's 290 wards" : "Click to see its districts") : view === "state" && cityDid[k] ? "Click to open its ward map" : "Click for detail";
       return `<b>${esc(nm(k))}${MD.byKey[k] && MD.byKey[k].mine ? ", your ward" : ""}</b>${row2("Children with no adult left", C(v.A))}${row2("Reached and safe", P(v.share))}${row2("Someone on the way", C(v.claimed))}${row2("Nobody yet", C(v.unclaimed))}${isNow() ? "" : `<div class="src">Projection for ${esc(TT().label)}</div>`}<div class="hintl">${hint}</div>`; };
@@ -348,11 +359,12 @@
 
   V["#radar"] = () => {
     const r = S.radar, ok = r.id && r.live, n = RC.radar.within1km;
-    return `${head("On duty near you", "For ASHA and anganwadi workers, police and teachers on a duty roster.")}
+    return `${head("On duty near you", r.id ? "Seen as Kiran, ASHA worker, Rohini Sector 7 (demo)" : "For ASHA and anganwadi workers, police and teachers on a duty roster.")}
       ${sect("Check you're on a roster")}
       <div class="group tiles"><div class="r t">${tile("smartphone", "gray")}<div class="tt"><b>Phone number</b><span>Checked by your carrier</span></div>${st("green", "Done")}</div>
-      <div class="r t">${tile("list-checks", "gray")}<div class="tt"><b>Duty roster</b><span>Matched against the National Health Mission's ASHA list, the police roster or a school's staff list</span></div>${r.id ? st("green", "ASHA · Rohini Sec 7") : `<button class="btn btn-compact" data-action="verify" data-v="id">Check</button>`}</div>
+      <div class="r t">${tile("list-checks", "gray")}<div class="tt"><b>Duty roster</b><span>Matched against the National Health Mission's ASHA list, the police roster or a school's staff list</span></div>${r.id ? st("green", "Kiran · ASHA, Rohini Sec 7") : st("", "You're not on a roster")}</div>
       <div class="r t">${tile("activity", "gray")}<div class="tt"><b>Face check</b><span>Makes sure it's you holding the phone</span></div>${r.live ? st("green", "Done") : `<button class="btn btn-compact" data-action="verify" data-v="live">Start</button>`}</div></div>
+      ${r.id ? "" : `<p class="foot">You aren't on a duty roster, so nothing here opens for you. Your own circle is where you help.</p><div class="btn-row"><button class="btn btn-block" data-action="askiran">See It as Kiran, the Ward's ASHA Worker (demo)</button></div>`}
       ${disc("Why it's only for people on duty", "A list of children alone is a predator's list, and an ID proves who someone is, not what they intend. So this is only for people who are paid and accountable: the roster before any address, two people for any handover, a care point by default and never a home, every handover recorded, and anyone collecting cases is flagged. Everyone else helps through their own circle.")}
       ${ok ? `${sect("Alone within 1 km")}<div class="stats">${stat("Nobody coming yet", n.unclaimed)}${stat("Under five", n.under5)}${stat("Over 75", n.elderly)}</div>
         <div class="group tiles" style="margin-top:14px">${RC.radar.cases.map(c => `<div class="r t">${tile(c.ageBand === "under 5" ? "baby" : "user-round", "red")}<div class="tt"><b>${esc(c.ageBand)} · alone ${c.hoursSinceT} h</b><span>${esc(c.address)} · goes to ${esc(c.care)}</span></div>${r.taken === c.id ? st("orange", "You and Dr. Rao") : r.taken ? "" : `<button class="btn btn-compact" data-action="take" data-id="${c.id}">Take It</button>`}</div>`).join("")}</div>` : ""}`;
@@ -405,7 +417,9 @@
 
   /* ---------- actions ---------- */
   function addLog(id, t, text) { S.cases[id].log.push({ t, text }); }
-  function thread(from, text, t, kind) { S.thread.push({ from, text, t, kind }); }
+  function thread(from, text, t, kind, gloss) { S.thread.push({ from, text, t, kind, gloss }); }
+  // Log times follow the order of events: never earlier than the last entry (audit 2, N-26)
+  function nextT(id, base) { const last = (S.cases[id].log.slice(-1)[0] || {}).t || base, toM = x => +x.slice(0, 2) * 60 + +x.slice(3), m = Math.max(toM(base), toM(last) + 2); return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); }
   function toast(text) { let t = document.querySelector(".fb-toast"); if (!t) { t = document.createElement("div"); t.className = "fb-toast glass"; t.setAttribute("role", "status"); document.body.appendChild(t); } t.innerHTML = `<span class="fb-icon" data-kind="success" style="color:var(--apple-green)">${I("check", 18)}</span>${esc(text)}`; t.style.display = "flex"; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = "none", 2600); }
   function download(name, obj) { const b = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" }); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
   function caseExport(id) {
@@ -422,32 +436,35 @@
     "call-lata"() { S.called.lata = true; addLog("meera", "07:11", "Sunita called Lata Pawar (2 min). Lata had read the message and was finding her keys."); toast("Calling Lata Pawar…"); },
     addsomeone() { toast("Add a name and number. They get the case too, if the parents' phones knew them."); },
     "reply-lata-going"() { const c = S.cases.meera; if (c.state !== "notified") return; c.state = "claimed";
-      thread("Lata Pawar", "1 GOING. 25 min. I have the spare key.", "07:14", "in");
+      thread("Lata Pawar", "1. 25 मिनिटांत येते. माझ्याकडे जास्तीची चावी आहे.", "07:14", "in", "1 GOING. 25 min. I have the spare key.");
       thread("sys", "Lata Pawar is going · arriving 07:40 · Rakesh, Farah and Dr. Nair can see this · reopens 08:40 if not confirmed", "07:14", "sys");
       addLog("meera", "07:14", "Lata Pawar (nanny, 1.8 km) replied 1 GOING on WhatsApp, arriving 07:40. The rest of the circle was told."); markStep(4); },
-    "reply-rakesh-cant"() { if (S.cases.meera.state !== "notified" && S.cases.meera.state !== "claimed") return; if (S.thread.some(m => m.from === "Rakesh Mehta")) return; thread("Rakesh Mehta", "2 CAN'T. Car wrecked, I'm walking to my mother. Sorry.", "07:12", "in"); },
+    "reply-rakesh-cant"() { if (S.cases.meera.state !== "notified" && S.cases.meera.state !== "claimed") return; if (S.rakeshCant) return; S.rakeshCant = true; thread("sys", "Rakesh Mehta can't go (his car is wrecked) · Lata, Farah and Dr. Nair still asked", "07:12", "sys"); addLog("meera", "07:12", "Rakesh Mehta replied 2 CAN'T: car wrecked, walking to his mother."); },
     "reply-lata-have"() { const c = S.cases.meera; if (c.state !== "claimed") return; c.state = "reached";
-      thread("Lata Pawar", "HAVE HER. She's fine, hungry. At the flat.", "07:40", "in");
-      thread("sys", "Temporary record: Lata Pawar has Meera since 07:40 · her phone is at the address · waiting for family to confirm", "07:40", "sys");
-      addLog("meera", "07:40", "Lata Pawar replied HAVE HER, and her phone is at the address. Temporary record opened; waiting for family to confirm."); markStep(5); },
-    "meera-video"() { const c = S.cases.meera; if (c.state !== "reached") return; c.state = "confirmed";
-      thread("sys", "Sunita saw Meera with Lata on a video call · temporary custody confirmed", "07:46", "sys");
-      addLog("meera", "07:46", "Sunita saw Meera at the flat with Lata on a video call. Lata Pawar is her temporary custodian."); },
-    "meera-wrong"() { const c = S.cases.meera; c.state = "concern";
-      thread("Still Here", "Lata, please take Meera to Govt Primary School, Marol (400 m) and wait with her there. A police officer and a vetted adult are on duty.", "07:46", "out");
-      addLog("meera", "07:46", "Sunita raised a concern about the handover. Sent to CHILDLINE 1098 and the circle; Lata asked to take Meera to the care point."); },
-    "meera-unwrong"() { const c = S.cases.meera; c.state = "reached"; thread("sys", "Concern withdrawn by Sunita · Meera can stay at the flat with Lata", "07:49", "sys"); addLog("meera", "07:49", "Sunita withdrew the concern. Waiting for her to confirm on a video call."); },
-    "meera-place"(d) { const c = S.cases.meera; if (c.state !== "confirmed") return; c.state = "placed"; c.placed = d.v; S.reachedBoost += 1;
-      addLog("meera", "07:50", d.v === "care" ? "Moved to Govt Primary School, Marol (police present). Adult on duty: R. Iyer. Lata stays until the handover." : "Stays with Lata Pawar at Flat 402. Handover to Sunita Sharma planned for week two. Ration moved to Lata; guardian pass 4F2K.");
-      thread("Still Here", d.v === "care" ? "Thank you, Lata. Please take Meera to Govt Primary School, Marol (400 m). R. Iyer is on duty. Your guardian pass is 4F2K." : "Thank you, Lata. You're Meera's temporary custodian. Her ration is now collectable by you, and your guardian pass is 4F2K. Sunita will message you here.", "07:50", "out"); markStep(6); },
+      thread("Lata Pawar", "HAVE HER. ती ठीक आहे, तिला भूक लागली आहे. फ्लॅटवर आहोत.", "07:40", "in", "HAVE HER. She's fine, hungry. At the flat.");
+      thread("sys", "Lata Pawar has Meera since 07:40 · her phone is at the address · reported to CHILDLINE 1098 as a found child · waiting for family to confirm", "07:40", "sys");
+      c.sent = true;
+      addLog("meera", "07:40", "Lata Pawar replied HAVE HER, and her phone is at the address. Lata is her temporary custodian; the record went to CHILDLINE 1098 as the report the Juvenile Justice Act asks for (s.32). Waiting for family to confirm."); markStep(5); },
+    "meera-video"() { const c = S.cases.meera; if (c.state !== "reached") return; c.state = "confirmed"; const t = nextT("meera", "07:46");
+      thread("sys", "Sunita saw Meera with Lata on a video call · custody confirmed", t, "sys");
+      addLog("meera", t, "Sunita saw Meera at the flat with Lata on a video call. Custody confirmed."); },
+    "meera-wrong"() { const c = S.cases.meera; c.state = "concern"; const t = nextT("meera", "07:46");
+      thread("Still Here", "लता, कृपया मीराबरोबर फ्लॅटवरच थांबा. एक पोलीस अधिकारी आणि अंगणवाडी सेविका तुमच्याकडे येत आहेत.", t, "out", "Lata, please stay at the flat with Meera. A police officer and the anganwadi worker are on their way to you.");
+      addLog("meera", t, "Sunita raised a concern about the handover. Sent to CHILDLINE 1098 and the circle; a police officer and the anganwadi worker sent to the flat, where Lata stays with Meera."); },
+    "meera-unwrong"() { const c = S.cases.meera; c.state = "reached"; const t = nextT("meera", "07:49"); thread("sys", "Concern withdrawn by Sunita · the officer still checks in at the flat", t, "sys"); addLog("meera", t, "Sunita withdrew the concern. The officer still checks in. Waiting for her to confirm on a video call."); },
+    "meera-place"(d) { const c = S.cases.meera; if (c.state !== "confirmed") return; c.state = "placed"; c.placed = d.v; S.reachedBoost += 1; const t = nextT("meera", "07:50");
+      addLog("meera", t, d.v === "care" ? "Moved to Govt Primary School, Marol (police present). Adult on duty: R. Iyer. Lata stays until the handover." : "Stays with Lata Pawar at Flat 402. Handover to Sunita Sharma planned for week two. Ration moved to Lata; guardian pass 4F2K.");
+      thread("Still Here", d.v === "care" ? "धन्यवाद, लता. कृपया मीराला सरकारी प्राथमिक शाळा, मरोळ (400 मी.) येथे घेऊन जा. तिथे आर. अय्यर ड्यूटीवर आहेत. तुमचा पालक पास 4F2K आहे." : "धन्यवाद, लता. तुम्ही मीराच्या तात्पुरत्या पालक आहात. तिचे रेशन आता तुम्हाला मिळेल, आणि तुमचा पालक पास 4F2K आहे. सुनीता तुम्हाला इथे मेसेज करतील.", t, "out", d.v === "care" ? "Thank you, Lata. Please take Meera to Govt Primary School, Marol (400 m). R. Iyer is on duty. Your guardian pass is 4F2K." : "Thank you, Lata. You're Meera's temporary custodian. Her ration is now collectable by you, and your guardian pass is 4F2K. Sunita will message you here."); markStep(6); },
     sendcp() { if (S.cases.meera.sent) return; S.cases.meera.sent = true; addLog("meera", "07:52", "Record sent to CHILDLINE 1098 and the Mumbai Child Welfare Committee, in Primero's format."); toast("Sent to CHILDLINE and the Mumbai Child Welfare Committee"); },
     checkrumour() { S.checkedRumour = true; },
     notright(d) { S.notRight[d.id] = true; toast("Thanks. The carrier rechecks, and if they're here, one tap of I'm here clears it."); },
     calldesk(d) { S.called[d.id] = true; toast("Calling Safdarjung Hospital's help desk…"); },
-    "withme-add"() { if (!S.withMe.length) S.withMe.push({ name: RC.withMeSuggest.name, t: "07:12" }); markStep(9); toast("Aarav's alone flag is closed. His circle was told."); },
+    "withme-add"() { if (!S.withMe.length) S.withMe.push({ name: RC.withMeSuggest.name, t: "07:12", status: "unconfirmed" }); markStep(9); toast("Matched to an open case. His aunt was asked to confirm."); },
+    "withme-confirm"() { if (S.withMe[0]) S.withMe[0].status = "confirmed"; toast("Confirmed. His ration and a guardian pass move to you."); },
+    askiran() { S.radar.id = true; markStep(11); },
     "kamla-going"() { S.cases.kamla.state = "claimed"; addLog("kamla", "07:20", "Sunita is going, there by 07:45. Shalini and Anita were told. Reopens 08:45 if not confirmed."); markStep(7); },
-    "kamla-release"() { S.cases.kamla.state = "cant"; addLog("kamla", "07:35", "Sunita released her claim on the way. Sent at once to Anita Verma (2.6 km) and Shalini Gupta; ASHA worker Kiran on standby."); toast("Released. Anita and Shalini were told."); },
-    "kamla-cant"() { S.cases.kamla.state = "cant"; addLog("kamla", "07:20", "Sunita can't go. Sent to Anita Verma (2.6 km) and Shalini Gupta; ASHA worker Kiran on standby."); },
+    "kamla-release"() { S.cases.kamla.state = "cant"; addLog("kamla", "07:35", "Sunita released her claim on the way. Sent at once to Anita Verma (3.8 km) and Shalini Gupta; ASHA worker Kiran on standby."); toast("Released. Anita and Shalini were told."); },
+    "kamla-cant"() { S.cases.kamla.state = "cant"; addLog("kamla", "07:20", "Sunita can't go. Sent to Anita Verma (3.8 km) and Shalini Gupta; ASHA worker Kiran on standby."); },
     "kamla-reached"() { S.cases.kamla.state = "reached"; S.reachedBoost += 1; addLog("kamla", "07:55", "Sunita is with Kamla Devi, confirmed by her phone at the address. One more reached in Rohini."); markStep(7); },
     maparea(d) { mapGo(d.v === "delhi" ? { area: "city", city: "delhi" } : { area: "india" }); }, maplayer(d) { S.mapLayer = d.v; }, time(d) { S.ti = +d.v; markStep(8); }, mapback() { mapGo({ area: "india" }); },
     crumb(d) { mapGo(d.v === "state" ? { area: "india", state: d.s } : { area: "india" }); }, mapgo(d) { const r = lastResults[+d.i]; if (r) mapGo(r.go); }, mapclear() {},
@@ -479,7 +496,7 @@
     const el = $("#thread"); if (!el) return;
     el.classList.toggle("mesh", S.mesh);
     $("#thread-title").textContent = S.mesh ? "Bitchat mesh · Sector 7" : "WhatsApp · Still Here";
-    $("#thread-sub").textContent = S.mesh ? "Towers down. Bluetooth hops phone to phone, 30–100 m each. No server, no number, encrypted." : "The same case, seen from Lata's phone. Replies here update the app.";
+    $("#thread-sub").textContent = S.mesh ? "Towers down. Bluetooth hops phone to phone, 30–100 m each. No server, no number, encrypted." : "The same case on Lata's phone, in Marathi; English below each message. Replies here update the app.";
     $("#meshtoggle").classList.toggle("on", S.mesh); $("#meshtoggle").setAttribute("aria-pressed", S.mesh ? "true" : "false");
     const s = S.cases.meera.state;
     const msgs = S.mesh ? [{ text: "Mesh · 14 phones in range · 3 hops to the school", kind: "sys" }].concat(RC.meshSample.map(m => ({ from: m.from, text: m.text, t: m.t, kind: "in" }))) : [{ text: "Still Here · verified sender · never asks for money, an OTP or a forward", kind: "sys" }].concat(S.thread);
@@ -487,11 +504,11 @@
     document.querySelectorAll(".msgbtn .badge").forEach(b => { const n = S.thread.filter(m => m.kind === "in").length; b.textContent = n || ""; b.style.display = n ? "" : "none"; });
     document.body.classList.toggle("msgs", !!S.msgs);
     el.innerHTML = empty ? `<div class="msg sys">${esc(msgs[0].text)}</div><div class="empty-thread">Messages for Meera's case appear here.<br><br>Open <a href="#case-meera">Meera's case</a> to see who was messaged.</div>`
-      : msgs.map(m => m.kind === "sys" ? `<div class="msg sys">${esc(m.text)}${m.t ? ` · ${m.t}` : ""}</div>` : `<div class="msg ${m.kind}"><span class="from">${esc(m.from)}</span>${esc(m.text)}<span class="time">${m.t || ""}${S.mesh ? " · hop" : ""}</span></div>`).join("");
+      : msgs.map(m => m.kind === "sys" ? `<div class="msg sys">${esc(m.text)}${m.t ? ` · ${m.t}` : ""}</div>` : `<div class="msg ${m.kind}"><span class="from">${esc(m.from)}</span>${esc(m.text)}${m.gloss ? `<span class="gloss">${esc(m.gloss)}</span>` : ""}<span class="time">${m.t || ""}${S.mesh ? " · hop" : ""}</span></div>`).join("");
     el.scrollTop = el.scrollHeight;
     let b = "";
     if (S.mesh) b = `<span class="fn">A preview. The case continues on WhatsApp when towers return.</span>`;
-    else if (s === "notified") b = `<button class="btn btn-compact btn-prominent" data-action="reply-lata-going">Reply as Lata: 1 GOING</button>${S.thread.some(m => m.from === "Rakesh Mehta") ? "" : `<button class="btn btn-compact" data-action="reply-rakesh-cant">Reply as Rakesh: 2 CAN'T</button>`}`;
+    else if (s === "notified") b = `<button class="btn btn-compact btn-prominent" data-action="reply-lata-going">Reply as Lata: 1 GOING</button>${S.rakeshCant ? "" : `<button class="btn btn-compact" data-action="reply-rakesh-cant">Reply as Rakesh: 2 CAN'T</button>`}`;
     else if (s === "claimed") b = `<button class="btn btn-compact btn-prominent" data-action="reply-lata-have">Reply as Lata: HAVE HER</button>`;
     else if (s === "reached") b = `<span class="fn">Waiting for Sunita to see Meera on a video call. Open Meera's case.</span>`;
     else b = `<span class="fn">Lata and Sunita can keep talking here.</span>`;

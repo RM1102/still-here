@@ -15,7 +15,8 @@
   const T = () => M.TIMES[S.ti], H = () => T().h, now = () => S.ti === 0;
   const scopeAgg = h => S.scope === "delhi" ? M.scopes.delhi(h) : S.state ? M.scopes.state(S.state, h) : M.scopes.india(h);
   const scopeName = () => S.scope === "delhi" ? "Delhi" : S.state || "India";
-  const wardRank = h => M.byState.Delhi.map(u => ({ u, v: M.at(u, h) })).filter(x => !x.v.nodata).sort((a, b) => b.v.u5 - a.v.u5);
+  // Wards ranked by the share of their alone children who are under five with nobody going, not the raw count (audit 2, N-14)
+  const wardRank = h => M.byState.Delhi.map(u => ({ u, v: M.at(u, h) })).filter(x => !x.v.nodata && x.v.A > 0).sort((a, b) => b.v.u5 / b.v.A - a.v.u5 / a.v.A);
   const slowest = h => Object.keys(M.byState).map(n => ({ n, v: M.scopes.state(n, h) })).filter(x => x.v.A > 1e6).sort((a, b) => a.v.share - b.v.share)[0];
   const row = (l, v) => `<div class="row"><span>${l}</span><span>${v}</span></div>`;
   const projNote = () => now() ? "" : `<div class="src">Projection for ${esc(T().label)}</div>`;
@@ -24,7 +25,7 @@
     const h = H();
     return GV.queue.filter(q => S.scope === "india" || q.scope === "delhi").map(q => {
       const o = Object.assign({}, q);
-      if (q.dyn === "children") { const v = M.scopes.delhi(h), top = wardRank(h).slice(0, 3), none = v.u5 * 0.16; o.title = `${C(v.u5)} small children nobody is coming for`; o.what = `Under five, in Delhi. About ${C(none)} have nobody left alive in their circle, known since 06:00; ${C(v.u5 - none)} have a circle that hasn't said it's going. Worst wards: ${top.map(x => `${x.u.name} (${Math.round(x.v.u5)})`).join(", ")}.`; }
+      if (q.dyn === "children") { const v = M.scopes.delhi(h), top = wardRank(h).slice(0, 3), none = v.u5 * 0.16; o.title = `${C(v.u5)} small children nobody is coming for`; o.where = `Across Delhi, worst in ${top[0].u.name} and ${top[1].u.name}`; o.what = `Under five, in Delhi. About ${C(none)} have nobody left alive in their circle, known the moment they were flagged; ${C(v.u5 - none)} have a circle that hasn't said it's going. Worst wards: ${top.map(x => `${x.u.name} (${Math.round(x.v.u5)})`).join(", ")}.`; }
       if (q.dyn === "slowest") { const sl = slowest(h); o.title = `${sl.n} is being reached slowest`; o.what = `${P(sl.v.share)} of ${C(sl.v.A)} people alone there have been reached, the lowest of any large state.`; o.state = sl.n; o.where = sl.n; o.lonlat = toLL(RC.GEO.india.states[sl.n].c); }
       o.done = S.done[q.id] || null; o.inprog = !!(q.keepOpen && o.done); return o;
     });
@@ -95,7 +96,7 @@
       const v = regionAgg(s), name = regionName(s), kind = s.kind === "ward" ? "Ward · Delhi" : s.kind === "district" ? `District · ${esc((M.byKey[s.key] || {}).state || "")}` : "State";
       head = `<div><span class="who">${kind}</span><h2>${esc(name)}</h2></div>`;
       if (!v || v.nodata) body = `<p>No phone network here, so there is no data. Shown grey on the map, never red. A runner was sent at 06:50.</p>`;
-      else body = `<div class="nums"><div class="num" data-help="alone"><div class="l">People alone</div><div class="v">${C(v.A)}</div></div><div class="num" data-help="reached"><div class="l">Reached and safe</div><div class="v">${P(v.share)}</div></div><div class="num" data-help="claimed"><div class="l">Someone on the way</div><div class="v">${C(v.claimed)}</div></div><div class="num" data-help="nocircle"><div class="l">Small children, nobody coming</div><div class="v">${C(v.u5)}</div></div></div>${CH.stack(v)}
+      else body = `<div class="nums"><div class="num" data-help="alone"><div class="l">Children with no adult left</div><div class="v">${C(v.A)}</div></div><div class="num" data-help="reached"><div class="l">Reached and safe</div><div class="v">${P(v.share)}</div></div><div class="num" data-help="claimed"><div class="l">Someone on the way</div><div class="v">${C(v.claimed)}</div></div><div class="num" data-help="nocircle"><div class="l">Small children, nobody coming</div><div class="v">${C(v.u5)}</div></div></div>${CH.stack(v)}
         <h3>Over the next three days</h3><div id="drchart"></div>${projNote()}`;
       const here = items().filter(q => (s.kind === "state" && q.state === name));
       if (here.length) body += `<h3>Problems here</h3>` + here.map(q => `<div class="qi" data-q="${q.id}"><div class="qi-top">${sev(q)}</div><div class="qi-title">${esc(q.title)}</div></div>`).join("");
@@ -127,7 +128,7 @@
       const v = valOf(k), name = view === "india" ? k : (M.byKey[k] || {}).name || k;
       if (!v) return `<b>${esc(name)}</b>`;
       if (v.nodata) return `<b>${esc(name)}</b><div>No phone network, so no data. Shown grey, never red.</div>`;
-      return `<b>${esc(name)}</b>${row("People alone", C(v.A))}${row("Reached and safe", P(v.share))}${row("Someone on the way", C(v.claimed))}${row("Nobody yet", C(v.unclaimed))}${row("Small children, nobody coming", C(v.u5))}${projNote()}<div class="hintl">${view === "india" ? (k === "Delhi" ? "Click to open Delhi's wards" : "Click to see its districts") : "Click for detail"}</div>`;
+      return `<b>${esc(name)}</b>${row("Children with no adult left", C(v.A))}${row("Reached and safe", P(v.share))}${row("Someone on the way", C(v.claimed))}${row("Nobody yet", C(v.unclaimed))}${row("Small children, nobody coming", C(v.u5))}${projNote()}<div class="hintl">${view === "india" ? (k === "Delhi" ? "Click to open Delhi's wards" : "Click to see its districts") : "Click for detail"}</div>`;
     };
     o.click = k => { if (view === "india") { if (k === "Delhi") { S.scope = "delhi"; S.state = null; S.sel = null; } else { S.state = k; S.sel = { type: "region", kind: "state", key: k }; } } else S.sel = { type: "region", kind: view === "delhi" ? "ward" : "district", key: k }; render(); };
     o.clickPin = id => { if (id === "delhi-cluster") { S.scope = "delhi"; S.state = null; S.sel = null; } else S.sel = { type: "q", id }; render(); };
@@ -160,7 +161,7 @@
       <div class="sec"><h2>People on professional registers<span class="inl-info" data-help="register">${I("info", 15)}</span></h2><p class="sub">Asked, not conscripted. Each ask is a message with the site, the shift and what it earns.</p>
         <table class="t"><thead><tr><th>Who</th><th>Register</th><th class="n">Still Here</th><th class="n">Asked</th><th class="n">Came</th><th></th></tr></thead><tbody>${GV.people.map((p, i) => `<tr><td><b>${esc(p.role)}</b></td><td>${esc(p.reg)}</td><td class="n">${p.alive.toLocaleString("en-IN")} of ${p.of.toLocaleString("en-IN")}</td><td class="n">${(p.asked + (S.asked[i] || 0)).toLocaleString("en-IN")}</td><td class="n">${p.came.toLocaleString("en-IN")}</td><td class="n"><button class="btn btn-compact" data-ask="${i}">Ask 50 More</button></td></tr>`).join("")}</tbody></table></div>
       <div class="sec restricted"><span class="tag">${I("shield-alert", 14)}Restricted</span><h2>Supplies on the way</h2><p class="sub">Routes and arrival times stay in this view. The public sees only that a supply has left, two hours after it left.</p>
-        <table class="t"><thead><tr><th>What</th><th>How</th><th>From → To</th><th>Left</th><th>Arrives</th><th>Route</th></tr></thead><tbody>${GV.supplies.map(f => `<tr><td><b>${esc(f.what)}</b></td><td>${esc(f.how)}</td><td>${esc(f.from)} → ${esc(f.to)}</td><td>${f.dep}</td><td>${esc(f.eta)}</td><td>${esc(f.route)}</td></tr>`).join("")}</tbody></table></div>
+        <table class="t"><thead><tr><th>What</th><th>How</th><th>From → To</th><th>Departs</th><th>Arrives</th><th>Route</th></tr></thead><tbody>${GV.supplies.map(f => `<tr><td><b>${esc(f.what)}</b></td><td>${esc(f.how)}</td><td>${esc(f.from)} → ${esc(f.to)}</td><td>${f.dep}</td><td>${esc(f.eta)}</td><td>${esc(f.route)}</td></tr>`).join("")}</tbody></table></div>
     </div></div>`;
   }
 

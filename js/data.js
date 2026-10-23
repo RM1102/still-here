@@ -20,7 +20,7 @@ window.RC = window.RC || {};
     { id: "shalini",name: "Shalini Gupta", rel: "Sister", age: 45, city: "Jaipur", status: "active", last: "1 h ago", checkedIn: false },
     { id: "dr-rao", name: "Dr. Rao",       rel: "Family doctor", age: 61, city: "Delhi", status: "active", last: "15 min ago", checkedIn: true },
     { id: "pappu",  name: "Pappu (driver)",rel: "Driver", age: 38, city: "Delhi", status: "unconfirmed", ev: "Phone idle at 14:32; last used 13:50" },
-    { id: "anil",   name: "Anil Sharma",   rel: "Nephew", age: 31, city: "Delhi", status: "quiet", place: "Safdarjung Hospital", since: "16:40 yesterday" },
+    { id: "anil",   name: "Anil Sharma",   rel: "Nephew", age: 31, city: "Delhi", status: "quiet", place: "a hospital in South Delhi", since: "16:40 yesterday" },
     { id: "meena",  name: "Meena (help)",  rel: "Domestic help", age: 41, city: "Delhi", status: "active", last: "8 min ago", checkedIn: true }
   ];
 
@@ -42,7 +42,7 @@ window.RC = window.RC || {};
     },
     kamla: {
       id: "kamla", name: "Kamla Devi", age: 78, ageBand: "over 75",
-      address: "C-7/112, Rohini Sector 7, Delhi", ward: "Rohini Sector 7", lonlat: [77.11, 28.72],
+      address: "B-4/57, Rohini Sector 3, Delhi", ward: "Rohini Sector 3", lonlat: [77.13, 28.70],
       why: "The other adult at the address (Vinod) stopped at 14:32:07. Kamla has no device. Pension and ABHA records place her here.",
       distanceFromMe: "3.1 km", youAreNearest: true
     }
@@ -50,7 +50,7 @@ window.RC = window.RC || {};
 
   // India by state: f = flagged alone (millions), r = share confirmed reached, c = share claimed-unconfirmed
   RC.country = {
-    name: "India", flagged: 43100000, claimed: 6800000, reached: 2140000, lastHour: 41200, silencesSinceT: 0,
+    name: "India", flagged: 43100000, claimed: 4000000, reached: 2140000, lastHour: 41200, silencesSinceT: 0,
     states: [
       { n: "UP", f: 7.9, r: 0.31, c: 0.12 }, { n: "BR", f: 4.6, r: 0.09, c: 0.08 }, { n: "MH", f: 3.6, r: 0.42, c: 0.15 },
       { n: "WB", f: 3.0, r: 0.21, c: 0.10 }, { n: "MP", f: 2.9, r: 0.17, c: 0.09 }, { n: "RJ", f: 2.7, r: 0.22, c: 0.12 },
@@ -113,7 +113,7 @@ window.RC = window.RC || {};
     { name: "Jama Masjid, Rohini", kind: "worship", open: true, staff: "open · water · 4 on duty", dist: "2.1 km", lonlat: [77.10, 28.73] },
     { name: "Govt Sr Sec School, Sec 7", kind: "public", open: true, staff: "open · police present · water point", dist: "0.7 km", lonlat: [77.11, 28.71], hub: "Internet-in-a-Box on local Wi-Fi" },
     { name: "Community hall, Sec 11", kind: "public", open: false, staff: "no staff signal", dist: "2.6 km", lonlat: [77.09, 28.72] },
-    { name: "Japanese Park", kind: "public", open: true, staff: "open space · tanker 08:00", dist: "1.8 km", lonlat: [77.10, 28.71] }
+    { name: "Japanese Park", kind: "public", open: true, staff: "open space", dist: "1.8 km", lonlat: [77.10, 28.71] }
   ];
 
   // Open with a person on duty: shops and services where a staff phone is present now (audit section 6, #4 and #5)
@@ -227,7 +227,7 @@ window.RC = window.RC || {};
     withme: { t: "Who's with you", b: "Children or elders now in your care. Adding them stops them being flagged alone, tells their circle, and moves their ration and records to you, so looking after them doesn't cost you.", s: "Ration card portability (ONORC) and the case record" },
     quiet: { t: "Here, not answering", b: "Their phone is active but they haven't replied. Where the phone is shows the type of place, such as a hospital, and only to their household.", s: "Carrier location, type of place only" },
     unconfirmed: { t: "Unconfirmed", b: "The phone was idle at 14:32, so the carrier can't tell whether its owner vanished. The last activity was before the Snap. Try calling. If they're here, one tap of I'm here clears it.", s: "Carrier signalling" },
-    vanish: { t: "New vanishings since the Snap", b: "Phones, watches and accounts that went silent after 14:32:07 yesterday while their network stayed up. At the Snap itself 3.8 billion went silent in the same second. Zero since then means it has not happened again. This is the only evidence anyone has that it was a one-time event.", s: "Carrier signalling and platform presence, checked every minute" },
+    vanish: { t: "New vanishings since the Snap", b: "Phones, watches and accounts that went silent after 14:32:07 yesterday while their network stayed up. At the Snap itself the phones of half of everyone went silent in the same second. Zero since then means it has not happened again, and it is the only evidence anyone has that it was a one-time event.", s: "Carrier signalling and platform presence, checked every minute" },
     alone: { t: "Children with no adult left", b: "Children under 15 whose every resident adult's phone stopped at 14:32:07. The household comes from where phones sleep at night, family plans, ration cards and anganwadi registers. A flat with a silent father and a mother who has no phone is marked unknown, and the address is asked first. Dependent adults like Kamla are cases too.", s: "Carriers, ration cards (PDS) and anganwadi registers" },
     reached: { t: "Reached and safe", b: "Someone replied \"have her\" or \"I'm with him\", and their phone is physically at the address. A tap alone never counts, so this number is hard to inflate.", s: "Replies by WhatsApp, SMS, missed call or app, plus device location" },
     claimed: { t: "Someone on the way", b: "A person from their circle has said they are going. If they don't confirm by their own arrival time plus an hour, the case reopens and goes out again.", s: "Replies to the case message" },
@@ -239,7 +239,7 @@ window.RC = window.RC || {};
     stopped: { t: "Gone at 14:32:07", b: "This person's phone was in use or moving at 14:32:07 and has not moved since, while the network stayed up. If that's wrong, tap Not right, or they tap I'm here on any phone and it clears everywhere.", s: "Carrier signalling" },
     nodevice: { t: "No phone of their own", b: "This person has no phone, so their status comes from the household: who else lives there and whether those phones are active.", s: "Ration card, school, anganwadi and pension records" },
     active: { t: "Active", b: "Their phone has been used recently. They are here.", s: "Carrier and platform presence" },
-    projection: { t: "Projection", b: "Times after now are projected from the rate at which people are being reached in each area right now. They show where this is heading if nothing changes. Only \"Now\" is current.", s: "The same model as every other number" },
+    projection: { t: "Projection", b: "Times after now are projected from the rate at which people are being reached in each area right now. The carriers finish flagging cases by 10:00, and each case runs on its own clock from its first message: about three in four are reached within six hours. Only \"Now\" is current.", s: "The same model as every other number" },
     simulated: { t: "Simulated data", b: "Every person, address, number and count in this prototype is made up, and every number comes from one model so they add up. Phone numbers are fictional. The maps are real: Natural Earth, india-maps-data for 719 districts, and DataMeet's ward maps for seven cities.", s: "Prototype" },
     govview: { t: "Government view · restricted", b: "A separate system on a separate network with its own login. The public app never links to it. It holds addresses, routes and staff lists that would help a raider.", s: "Design rule" },
     scale: { t: "How to read the map", b: "Each area is coloured by the share of its children with no adult left who have been reached and confirmed safe: pale is few, deep green is most. The steps are uneven (4, 8, 15, 35 and 65%) so the map reads in the first hours as well as on Day 2. Hatched grey means no phone network, never bad news. Hover for numbers, click for detail, + and − to zoom.", s: "The model" },
@@ -314,11 +314,11 @@ window.RC = window.RC || {};
       { role: "Pharmacists", reg: "Pharmacy Council register", alive: 840, of: 1690, asked: 200, came: 96 }
     ],
     supplies: [
-      { what: "Grain and water, 40 t", how: "Train", from: "Mumbai Central", to: "Delhi", dep: "06:10", eta: "Day 2 02:00", route: "Western Railway via Vadodara and Kota", fromLL: [72.82, 18.97], toLL: [77.22, 28.64] },
-      { what: "Grain from Food Corporation stock, 1,200 t", how: "Trucks", from: "Narela godown", to: "North West Delhi ration shops", dep: "07:00", eta: "10:30", route: "NH-44, GT Karnal Road", fromLL: [77.09, 28.84], toLL: [77.12, 28.70] },
-      { what: "Water tankers, 42", how: "Tankers", from: "Haiderpur plant", to: "Rohini and Mangolpuri water points", dep: "07:30", eta: "08:15", route: "Outer Ring Road", fromLL: [77.14, 28.72], toLL: [77.07, 28.69] },
-      { what: "60 doctors and 4 t of medicine", how: "Air Force", from: "Hyderabad", to: "Patna", dep: "05:50", eta: "09:40", route: "C-17 flight", fromLL: [78.49, 17.39], toLL: [85.14, 25.59] },
-      { what: "120 power engineers", how: "Train", from: "Chennai", to: "Bhubaneswar", dep: "06:30", eta: "Day 2 01:00", route: "Coromandel line", fromLL: [80.27, 13.08], toLL: [85.82, 20.30] }
+      { what: "Grain and water, 40 t", how: "Train", from: "Mumbai Central", to: "Delhi", dep: "04:10", eta: "Day 1 22:00", route: "Western Railway via Vadodara and Kota", fromLL: [72.82, 18.97], toLL: [77.22, 28.64] },
+      { what: "Grain from Food Corporation stock, 1,200 t", how: "Trucks", from: "Narela godown", to: "North West Delhi ration shops", dep: "08:00", eta: "10:30", route: "NH-44, GT Karnal Road", fromLL: [77.09, 28.84], toLL: [77.12, 28.70] },
+      { what: "Water tankers, 42", how: "Tankers", from: "Haiderpur plant", to: "Rohini and Mangolpuri water points", dep: "07:40", eta: "08:15", route: "Outer Ring Road", fromLL: [77.14, 28.72], toLL: [77.07, 28.69] },
+      { what: "60 doctors and 4 t of medicine", how: "Air Force", from: "Hyderabad", to: "Patna", dep: "03:50", eta: "07:40", route: "C-17 flight", fromLL: [78.49, 17.39], toLL: [85.14, 25.59] },
+      { what: "120 power engineers", how: "Train", from: "Chennai", to: "Bhubaneswar", dep: "04:30", eta: "Day 1 23:00", route: "Coromandel line", fromLL: [80.27, 13.08], toLL: [85.82, 20.30] }
     ],
     fair: [
       { d: "New Delhi (capital)", pop: 0.04, alloc: 0.12 }, { d: "Central", pop: 0.04, alloc: 0.06 }, { d: "North West", pop: 0.22, alloc: 0.15 },
