@@ -125,11 +125,17 @@ window.RC = window.RC || {};
     { name: "Indian Oil pump, Sec 11", what: "2 attendants · petrol and diesel", queue: "about 60 vehicles waiting", dist: "1.6 km", icon: "truck", tile: "orange" }
   ];
   // Doctors and nurses on duty (Rahul, 24 Oct evening): counted from staff phones at each place, like every other "on duty"
+  // Plain warnings for the public, from IMD and satellite maps (STRATEGY §2)
+  RC.warnings = [
+    { icon: "sun", t: "Heat tomorrow: 41 °C", s: "Drink water often. Keep children and elders out of the afternoon sun. (IMD)" },
+    { icon: "droplets", t: "Rain in the hills on Day 3", s: "With half the plants gone, bare slopes may slide. Avoid hill roads in Uttarakhand and Himachal." },
+    { icon: "triangle-alert", t: "Dust on bare fields", s: "Half the grass vanished too, so wind lifts dust. Cover your nose and keep stored water covered." }
+  ];
   RC.clinics = [
-    { name: "Mohalla Clinic, Sector 7", dist: "0.6 km", doctors: 1, nurses: 2, since: "7:00 am", wait: "about 40 minutes", treats: "fever, wounds, repeat prescriptions" },
-    { name: "First-aid point at the Sector 7 govt school", dist: "0.7 km", doctors: 1, nurses: 0, since: "6:30 am", wait: "under 10 minutes", treats: "first aid and checking medicines; Dr. Rao, your family doctor, runs it" },
-    { name: "Dr. BSA Hospital, emergency ward", dist: "2.4 km", doctors: 14, nurses: 31, since: "", wait: "about 2 hours", treats: "injuries, breathing trouble, childbirth; 38 doctors on a normal day" },
-    { name: "Jaipur Golden Hospital, Sector 3", dist: "3.0 km", doctors: 6, nurses: 12, since: "", wait: "about 1 hour", treats: "dialysis and heart patients first" }
+    { name: "Mohalla Clinic, Sector 7", dist: "0.6 km", doctors: 1, nurses: 2, since: "7:00 am", wait: "about 40 minutes", mins: 40, treats: "fever, wounds, repeat prescriptions" },
+    { name: "First-aid point at the Sector 7 govt school", dist: "0.7 km", doctors: 1, nurses: 0, since: "6:30 am", wait: "under 10 minutes", mins: 8, firstaid: true, treats: "first aid and checking medicines; Dr. Rao, your family doctor, runs it" },
+    { name: "Dr. BSA Hospital, emergency ward", dist: "2.4 km", doctors: 14, nurses: 31, since: "", wait: "about 2 hours", mins: 120, treats: "injuries, breathing trouble, childbirth; 38 doctors on a normal day" },
+    { name: "Jaipur Golden Hospital, Sector 3", dist: "3.0 km", doctors: 6, nurses: 12, since: "", wait: "about 1 hour", mins: 60, treats: "dialysis and heart patients first" }
   ];
   // Who's with you (audit section 6, #1, #2 and #7): a child already with Sunita, from next door
   RC.withMeSuggest = { name: "Aarav Malhotra", age: 7, from: "C-7/110, next door", why: "Both his parents vanished at 2:32 pm yesterday. He came to your flat last night.", ration: "5 kg a month", code: "7K3Q" };
@@ -347,6 +353,97 @@ window.RC = window.RC || {};
     { n: "Shakurbasti fuel depot", k: "F", ll: [77.144, 28.683], staff: "44% of staff", short: true }, { n: "Bijwasan fuel terminal", k: "F", ll: [77.040, 28.530], staff: "57% of staff", short: false }, { n: "Tughlakabad LPG plant", k: "F", ll: [77.270, 28.500], staff: "50% of staff", short: false },
     { n: "IGI Airport air traffic control", k: "A", ll: [77.100, 28.556], staff: "58% of controllers", short: false },
     { n: "National Zoological Park", k: "Z", ll: [77.244, 28.603], staff: "keepers at 40%", short: true }
+  ];
+  /* ---------- 24 Oct night: the wider system (STRATEGY.md). All counts simulated; the named sources and places are real. ---------- */
+  // Every feed the product joins, how fresh it is and how far it is trusted (STRATEGY §3)
+  RC.sources = [
+    { group: "Who vanished", name: "Mobile networks", feeds: "Phones that fell still at 2:32 pm and have not moved, called or messaged since", fresh: "1 min", trust: "High" },
+    { group: "Who vanished", name: "Google and Apple", feeds: "Phones never unlocked again", fresh: "5 min", trust: "High" },
+    { group: "Who vanished", name: "UPI and WhatsApp", feeds: "No payment or message since 2:32 pm", fresh: "5 min", trust: "Medium" },
+    { group: "Who vanished", name: "Smart electricity meters", feeds: "A home's use fell to its fridge", fresh: "15 min", trust: "Medium" },
+    { group: "Who lives where", name: "Ration cards (PDS) and Aadhaar addresses", feeds: "Households and who is in them", fresh: "Months", trust: "Medium" },
+    { group: "Who lives where", name: "Child vaccination registry (U-WIN) and anganwadi app (Poshan Tracker)", feeds: "Every young child and a parent's number", fresh: "Weeks", trust: "High" },
+    { group: "Who lives where", name: "School records (UDISE+)", feeds: "Children by school and home", fresh: "Months", trust: "Medium" },
+    { group: "Damage", name: "Satellite fire detection (NASA FIRMS) and ISRO Bhuvan", feeds: "Fires, smoke, blocked roads, vegetation lost", fresh: "3 h", trust: "High" },
+    { group: "Damage", name: "112 emergency calls", feeds: "Crashes, fires, trapped people", fresh: "1 min", trust: "Medium" },
+    { group: "Damage", name: "Grid-India and water plant controls", feeds: "Power and water output, plants at risk", fresh: "1 min", trust: "High" },
+    { group: "Weather and land", name: "IMD forecasts and radars; Central Water Commission river gauges", feeds: "Heat, rain, floods", fresh: "1 h", trust: "High" },
+    { group: "Who can help", name: "Professional registers and licences", feeds: "Doctors, nurses, lawyers, drivers (Sarathi), pilots (DGCA)", fresh: "Years", trust: "High for profession, low for address" },
+    { group: "Who can help", name: "Staff rosters (police, railways, health) matched to phones in use", feeds: "Who is at work, by district", fresh: "15 min", trust: "High" },
+    { group: "What is open", name: "Verified contributors (hospitals, pharmacies, ration shops, shops)", feeds: "Open or closed, stock, queue, needs", fresh: "Each report fades in 4 h", trust: "Tiered" },
+    { group: "What is open", name: "Ration shop sales machines (ePoS) and blood banks (e-RaktKosh)", feeds: "Which shops are selling; blood in stock", fresh: "Live", trust: "High" },
+    { group: "What is in stock", name: "Food Corporation depots, vaccine cold chain (eVIN), e-commerce warehouses", feeds: "Grain, vaccines, packaged food and medicines near people", fresh: "1 h", trust: "High" },
+    { group: "What is moving", name: "Train running data (NTES, FOIS), aircraft transponders, FASTag", feeds: "Trains, flights and trucks on the move", fresh: "1 min", trust: "High" },
+    { group: "Rumours", name: "Platform trust teams, helplines, PIB Fact Check", feeds: "Messages spreading and their corrections", fresh: "10 min", trust: "Medium" }
+  ];
+  // Who is left, by city: the same rosters matched to phones in use (STRATEGY §3.2). Shares of usual strength.
+  RC.cities = [
+    { city: "Delhi", police: 0.70, doctors: 0.31, nurses: 0.46, drivers: 0.48 },
+    { city: "Meerut", police: 0.38, doctors: 0.66, nurses: 0.58, drivers: 0.52 },
+    { city: "Gurugram", police: 0.55, doctors: 0.49, nurses: 0.51, drivers: 0.40 },
+    { city: "Noida", police: 0.52, doctors: 0.57, nurses: 0.49, drivers: 0.45 },
+    { city: "Ghaziabad", police: 0.61, doctors: 0.44, nurses: 0.41, drivers: 0.55 },
+    { city: "Faridabad", police: 0.47, doctors: 0.52, nurses: 0.62, drivers: 0.50 }
+  ];
+  RC.trades = [
+    { id: "t1", give: "Delhi sends 6 police companies to Meerut", get: "Meerut sends 140 doctors to Delhi's emergency wards", why: "Delhi has 70% of its police but 31% of its doctors; Meerut is the other way round" },
+    { id: "t2", give: "Faridabad sends 90 nurses to Ghaziabad", get: "Ghaziabad sends 20 tanker drivers to Faridabad", why: "Ghaziabad's nurses are at 41%; Faridabad's drivers are needed for water" }
+  ];
+  // What is moving (STRATEGY §3.2)
+  RC.transport = [
+    { mode: "Flights", staff: "Pilots at 52%, air traffic control at 58%", running: "Relief flights only, 38 today", sev: "orange" },
+    { mode: "Trains", staff: "Loco pilots at 49%", running: "Passenger trains stopped; 60 freight trains with food and fuel", sev: "orange" },
+    { mode: "Delhi Metro", staff: "Train operators at 55%", running: "Red Line every 20 min; other lines closed", sev: "orange" },
+    { mode: "Buses", staff: "Drivers at 46%", running: "DTC: 1,100 of 3,800 buses, mostly to hospitals and water points", sev: "orange" },
+    { mode: "Trucks", staff: "Commercial drivers at 48%", running: "Food and fuel convoys with police escort", sev: "orange" },
+    { mode: "Highways", staff: "", running: "NH-44 open; NH-48 blocked near Manesar by wrecks; NH-9 open with one lane", sev: "red" }
+  ];
+  // What still produces with few people (STRATEGY §9)
+  RC.production = [
+    { what: "Panipat refinery", out: "64% of normal", note: "Enough diesel for towers and trucks for 3 weeks", sev: "green" },
+    { what: "Mathura refinery", out: "38% of normal", note: "Short of operators: 11 asked from the register", sev: "orange" },
+    { what: "Power plants serving Delhi", out: "71% of demand met", note: "Demand also fell by half", sev: "green" },
+    { what: "Automated factories (medicines, packaged food, bottled water)", out: "22 of 41 running", note: "Insulin line at Baddi running on automation", sev: "orange" },
+    { what: "Data centres in India", out: "All running", note: "Half the users gone, so spare capacity for alerts and AI", sev: "green" },
+    { what: "E-commerce and quick-commerce warehouses, Delhi-NCR", out: "14 with stock", note: "Delivery riders at 41%; can deliver to people who can't travel", sev: "orange" },
+    { what: "Food Corporation grain, Delhi", out: "About 40 days of stock", note: "Drivers and loaders are the limit, not grain", sev: "green" }
+  ];
+  // Weather and land after half of all plants vanished (STRATEGY §2). Effects beyond Day 3 are hypotheses.
+  RC.environment = [
+    { what: "Heat", now: "41 °C tomorrow in Delhi (IMD)", then: "Less shade and less moisture from plants may add a degree or two in cities: a hypothesis to watch", sev: "orange" },
+    { what: "Rain", now: "Showers expected on Day 3 in the hills", then: "Bare slopes lose topsoil; landslide risk up in Uttarakhand and Himachal", sev: "red" },
+    { what: "Green cover", now: "About half of all grass, crops and trees gone (satellite vegetation index)", then: "Dust storms on bare fields; the next harvest will be smaller", sev: "orange" },
+    { what: "Rivers and coasts", now: "Mangroves halved along the Mithi river", then: "Mumbai floods at high tide; rivers carry more silt", sev: "red" },
+    { what: "Pests", now: "Half of rats, locusts and their predators gone", then: "Fast breeders rebound first; watch grain stores within weeks", sev: "" }
+  ];
+  // Rumours spreading and their corrections, and how far each channel reaches (STRATEGY §5, §6)
+  RC.rumours = [
+    { text: "Kalpakkam nuclear plant has exploded", where: "Chennai and Mumbai", n: "41,000 forwards", fix: "Not true: the reactors shut down safely at 03:10; radiation monitors read normal", sent: false },
+    { text: "Another vanishing at 3 pm today", where: "All India", n: "1.2 M forwards", fix: "Not true: no phone has fallen still since 2:32 pm yesterday", sent: true },
+    { text: "Tap water in Delhi is poisoned", where: "North West Delhi", n: "18,000 forwards", fix: "Not true: Delhi Jal Board tested 40 points at 06:00; safe to drink", sent: false }
+  ];
+  RC.channels = [
+    { name: "Emergency alert to every phone (cell broadcast)", reach: "91% of phones in Delhi" },
+    { name: "SMS and the missed-call voice line", reach: "Basic phones: 6.2 M in Delhi" },
+    { name: "WhatsApp bot", reach: "2.4 M people asked it something today" },
+    { name: "All India Radio and FM", reach: "14 stations on air, bulletin every hour" },
+    { name: "TV scrolls (Doordarshan and 22 private channels)", reach: "Where power is back" },
+    { name: "Loudspeakers at police stations and places of worship", reach: "1,900 points in Delhi" }
+  ];
+  // "Is this true?": checked against official sources only. Anything else gets "not confirmed".
+  RC.factcheck = [
+    { keys: ["kalpakkam", "nuclear", "reactor", "radiation"], verdict: "Not true", text: "The Kalpakkam reactors shut down safely at 03:10. Radiation monitors around the plant read normal at 07:00.", src: "Nuclear Power Corporation and the Atomic Energy Regulatory Board, 07:00" },
+    { keys: ["3 pm", "second", "again", "another vanish", "vanish again"], verdict: "Not true", text: "No phone anywhere has fallen still since 2:32 pm yesterday. Networks check every minute.", src: "National Disaster Management Authority, 06:00" },
+    { keys: ["water", "poison", "tap"], verdict: "Not true", text: "Delhi Jal Board tested 40 points at 06:00. Tap water in Rohini is safe to drink; pressure is low.", src: "Delhi Jal Board, 06:40" },
+    { keys: ["school", "sector 7", "water point", "tanker"], verdict: "Confirmed", text: "Drinking water at Govt Sr Sec School, Sector 7, with police present. A 2,000-litre tanker arrives at 8 am.", src: "Delhi Disaster Management Authority, 06:45; 14 people there confirm" },
+    { keys: ["free food", "red fort", "distribution"], verdict: "Not confirmed", text: "No official source and nobody on the spot has said this. Don't travel on it: ration shops listed in Help is coming are open.", src: "No official notice found" }
+  ];
+  // Verified contributors: places that update their own status (STRATEGY §4). Tier 1 is strictest.
+  RC.contributors = [
+    { id: "clinic", name: "Mohalla Clinic, Sector 7", kind: "Clinic", tier: 1, how: "Matched to the health facility registry; 3 staff phones here now", open: true, queue: 40, stock: [["ORS", "Plenty"], ["Paracetamol", "Plenty"], ["Insulin", "Out"]], capacity: "1 doctor, 2 nurses", needs: "A second doctor; insulin" },
+    { id: "pharmacy", name: "Apollo Pharmacy, Sector 8", kind: "Pharmacy", tier: 2, how: "Matched to its drug licence; the pharmacist's phone is here", open: true, queue: 15, stock: [["Insulin", "Low"], ["Metformin", "Plenty"], ["Amlodipine", "Plenty"]], capacity: "1 pharmacist", needs: "Cold-chain insulin delivery" },
+    { id: "ration", name: "Ration shop 112, Sector 7", kind: "Ration shop", tier: 1, how: "Matched to its sales machine (ePoS); the dealer's phone is here", open: true, queue: 140, stock: [["Rice", "Plenty"], ["Wheat", "Plenty"], ["Sugar", "Low"]], capacity: "1 dealer", needs: "A helper to manage the queue" },
+    { id: "gurudwara", name: "Gurudwara, Sector 7", kind: "Shelter and kitchen", tier: 3, how: "Vouched for by the ward officer; 6 volunteer phones here", open: true, queue: 10, stock: [["Meals", "Plenty"], ["Drinking water", "Plenty"], ["Blankets", "Low"]], capacity: "120 people tonight", needs: "Blankets; a doctor's visit" }
   ];
   // Emergency powers in use, in plain words
   RC.govPowers = [

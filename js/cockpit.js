@@ -17,8 +17,8 @@
   const needLegend = () => `<div class="legend compact"><span class="lt">Nobody going yet</span><span>${NEED[0].l}</span><span class="ramp">${NEED.map(b => `<i style="background:${b.c}"></i>`).join("")}</span><span>${NEED[NEED.length - 1].l}</span><span class="nd"><i></i>No network</span></div>`;
   const marksLegend = () => `<div class="legend compact marks">${S.layers.problems ? `<span><i class="pin-k" style="background:var(--apple-red)">!</i>Problem, open</span><span><i class="pin-k" style="background:var(--green)">✓</i>Handled</span>` : ""}${S.layers.sites && S.scope === "delhi" ? `<span><i class="pin-k" style="background:#6E6E73">H</i>Critical site (H hospital, W water, P prison, L lab, F fuel)</span>` : ""}${S.layers.help ? `<span><i class="arr-k"></i>Supply moving (route shown here only)</span>` : ""}${S.layers.hazards ? `<span><i class="ring-k"></i>Keep away</span>` : ""}</div>`;
   const SITEK = { H: "Hospital", W: "Water plant", P: "Prison", L: "Disease lab", F: "Fuel site", A: "Air traffic control", Z: "Zoo" };
-  function def() { return { page: "situation", colour: "need", rebalanced: false, scope: "delhi", state: null, ti: 0, qtab: "problems", sel: null, done: {}, layers: { people: true, problems: true, sites: true, help: true, hazards: true }, siteAsk: {}, asked: {}, mirror: true, wardTeam: {}, wsel: null }; }
-  let S = (() => { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.page) { const o = Object.assign(def(), s); if (o.layers.sites == null) o.layers.sites = true; return o; } } catch (e) {} return def(); })();
+  function def() { return { page: "situation", colour: "need", rebalanced: false, trades: {}, fixSent: {}, scope: "delhi", state: null, ti: 0, qtab: "problems", sel: null, done: {}, layers: { people: true, problems: true, sites: true, help: true, hazards: true }, siteAsk: {}, asked: {}, mirror: true, wardTeam: {}, wsel: null }; }
+  let S = (() => { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.page) { const o = Object.assign(def(), s); if (o.layers.sites == null) o.layers.sites = true; o.trades = o.trades || {}; o.fixSent = o.fixSent || {}; return o; } } catch (e) {} return def(); })();
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
   const T = () => M.TIMES[S.ti], H = () => T().h, now = () => S.ti === 0;
   const scopeAgg = h => S.scope === "delhi" ? M.scopes.delhi(h) : S.state ? M.scopes.state(S.state, h) : M.scopes.india(h);
@@ -43,7 +43,7 @@
 
   /* ---------- header ---------- */
   function header() {
-    $("#tabs").innerHTML = [["situation", "Situation"], ["resources", "Resources"], ["sites", "Homes & sites"], ["fair", "Fairness & law"], ["world", "World"]].map(([k, l]) => `<button class="${S.page === k ? "on" : ""}" data-page="${k}">${l}</button>`).join("");
+    $("#tabs").innerHTML = [["situation", "Situation"], ["resources", "Resources"], ["network", "Network"], ["sites", "Homes & sites"], ["info", "Information"], ["fair", "Fairness & law"], ["world", "World"]].map(([k, l]) => `<button class="${S.page === k ? "on" : ""}" data-page="${k}">${l}</button>`).join("");
     $("#who").textContent = `${GV.persona.org} · ${GV.persona.role}`;
     const r = $("#restricted"); if (r && !r.querySelector("svg")) r.insertAdjacentHTML("afterbegin", I("shield-alert", 13));
   }
@@ -183,6 +183,9 @@
     return `<div class="page"><div class="page-in"><h1>Resources and plan</h1><p class="lede">What each open problem needs, what you have free to send, and where everything already is. Pressing an action here or on the Situation page is the same action, and every count below follows it.</p>
       <div class="sec"><h2>Plan for open problems</h2><p class="sub">Worst first. "Free now" is what could reach the problem soonest.</p>
         <table class="t plan"><thead><tr><th>Problem</th><th>Needs</th><th>Free now</th><th>Plan</th><th></th></tr></thead><tbody>${planRows}</tbody></table></div>
+      <div class="sec"><h2>People by city</h2><p class="sub">The share of each city's usual police, doctors, nurses and drivers whose phones are still in use. Cities short of one kind and rich in another can trade.</p>
+        <table class="t"><thead><tr><th>City</th><th>Police</th><th>Doctors</th><th>Nurses</th><th>Drivers</th></tr></thead><tbody>${RC.cities.map(c => `<tr><td><b>${esc(c.city)}</b></td>${["police", "doctors", "nurses", "drivers"].map(k => `<td>${share(c[k])}</td>`).join("")}</tr>`).join("")}</tbody></table>
+        <h3 class="mini">Suggested trades</h3>${RC.trades.map(t => `<div class="zrow"><div class="zt"><b>${esc(t.give)}; ${esc(t.get).charAt(0).toLowerCase() + esc(t.get).slice(1)}</b></div><div class="zr">${esc(t.why)}</div><div style="margin-top:6px">${S.trades[t.id] ? `${done("Approved at 07:3" + (t.id === "t1" ? "2" : "4") + "; first arrivals by 11:00")} <button class="btn btn-compact btn-plain" data-trade="${t.id}">Undo</button>` : `<button class="btn btn-compact" data-trade="${t.id}">Approve the Trade</button>`}</div></div>`).join("")}</div>
       <div class="sec"><h2>Teams and vehicles you can send</h2><p class="sub">Counted from each team's phones and each vehicle's tracker at 07:10.</p>
         <table class="t"><thead><tr><th>What</th><th>Free now</th><th>Busy with</th></tr></thead><tbody>${pools}</tbody></table></div>
       <div class="sec"><h2>People by profession<span class="inl-info" data-help="register">${I("info", 15)}</span></h2><p class="sub">Every profession that matters in the first days, from the register each one comes from. A SIM's registration holds only a name, an address and an Aadhaar number, never a profession, so these come from the professional councils, licences and employer records, matched to phones still in use. Who is still here, who is already at work, and who could still be asked (not at work and not waiting on an answer). Each ask is a message with the place, the shift and what it pays; nobody is ordered.</p>
@@ -193,6 +196,38 @@
         <div class="src">Source: employer rosters matched to phone location, 07:10</div></div>
       <div class="sec restricted"><span class="tag">${I("shield-alert", 14)}Restricted</span><h2>Supplies on the way</h2><p class="sub">Routes and arrival times stay in this view. The public sees only that a supply has left, two hours after it left.</p>
         <table class="t"><thead><tr><th>What</th><th>How</th><th>From → To</th><th>Left</th><th>Arrives</th><th>Route</th></tr></thead><tbody>${GV.supplies.map(f => `<tr><td><b>${esc(f.what)}</b></td><td>${esc(f.how)}</td><td>${esc(f.from)} → ${esc(f.to)}</td><td>${f.dep}</td><td>${esc(f.eta)}</td><td>${esc(f.route)}</td></tr>`).join("")}</tbody></table></div>
+    </div></div>`;
+  }
+
+  // A share of usual strength as a small coloured bar: red under 40%, orange under 60%, green above
+  const share = f => `<div class="meter" style="min-width:110px"><div class="bar"><i style="width:${Math.round(f * 100)}%;background:${f < 0.4 ? "var(--apple-red)" : f < 0.6 ? "var(--apple-orange)" : "var(--apple-green)"}"></i></div><span>${Math.round(f * 100)}%</span></div>`;
+  const sevW = s => s === "red" ? `<span class="st red">Urgent</span>` : s === "orange" ? `<span class="st orange">Short</span>` : s === "green" ? `<span class="st green">Running</span>` : `<span class="st">Watch</span>`;
+
+  /* ---------- network: what still moves and produces, and the weather and land ---------- */
+  function network() {
+    return `<div class="page"><div class="page-in"><h1>Network</h1><p class="lede">What still moves, what still produces, and what the weather and the land are about to do. Half of all drivers, pilots and operators vanished, and so did half of all plants.</p>
+      <div class="sec"><h2>Transport</h2><p class="sub">Crews counted from rosters matched to phones in use; routes from train running data, aircraft transponders, toll reads and satellite views.</p>
+        <table class="t"><thead><tr><th>Mode</th><th>Crews</th><th>What is running</th><th></th></tr></thead><tbody>${RC.transport.map(x => `<tr><td><b>${esc(x.mode)}</b></td><td>${esc(x.staff || "—")}</td><td>${esc(x.running)}</td><td>${sevW(x.sev)}</td></tr>`).join("")}</tbody></table></div>
+      <div class="sec"><h2>What still produces</h2><p class="sub">Much of the modern world needs few hands. Counting it lets supply be matched to need for the first weeks, before markets take over again.</p>
+        <table class="t"><thead><tr><th>What</th><th>Output</th><th>Note</th><th></th></tr></thead><tbody>${RC.production.map(x => `<tr><td><b>${esc(x.what)}</b></td><td>${esc(x.out)}</td><td>${esc(x.note)}</td><td>${sevW(x.sev)}</td></tr>`).join("")}</tbody></table></div>
+      <div class="sec"><h2>Weather and land</h2><p class="sub">Forecasts from IMD and river gauges; green cover from satellite vegetation maps. What happens after Day 3 is a hypothesis to watch, not a forecast.</p>
+        <table class="t"><thead><tr><th>What</th><th>Now</th><th>What it may lead to</th><th></th></tr></thead><tbody>${RC.environment.map(x => `<tr><td><b>${esc(x.what)}</b></td><td>${esc(x.now)}</td><td>${esc(x.then)}</td><td>${sevW(x.sev)}</td></tr>`).join("")}</tbody></table>
+        <div class="src">Counts on this page are simulated for the prototype; the sources named are real.</div></div>
+    </div></div>`;
+  }
+
+  /* ---------- information: rumours, corrections, channels, and every data source ---------- */
+  function info() {
+    const groups = [...new Set(RC.sources.map(s => s.group))];
+    return `<div class="page"><div class="page-in"><h1>Information</h1><p class="lede">What people are being told, what is true, and how to reach everyone. Then every feed this view is built from, how fresh it is, and how far it is trusted.</p>
+      <div class="sec"><h2>Rumours spreading</h2><p class="sub">Messages forwarded most in the last hour, from platform trust teams and helpline calls, with the official correction.</p>
+        ${RC.rumours.map((r, i) => `<div class="zrow"><div class="zt"><b>"${esc(r.text)}"</b><span class="st ${r.sent || S.fixSent[i] ? "green" : "red"}">${r.sent || S.fixSent[i] ? "Correction sent" : "Spreading"}</span></div><div class="sub" style="margin:2px 0 0">${esc(r.where)} · ${esc(r.n)}</div><div class="zr">${esc(r.fix)}</div>
+          ${r.sent || S.fixSent[i] ? "" : `<div style="margin-top:6px"><button class="btn btn-compact" data-fix="${i}">Send the Correction on Every Channel</button></div>`}</div>`).join("")}</div>
+      <div class="sec"><h2>How far each channel reaches</h2><p class="sub">The same core message goes on all of them, so the poorest phone and the person with no phone hear what the best phone sees.</p>
+        <table class="t"><thead><tr><th>Channel</th><th>Reach now</th></tr></thead><tbody>${RC.channels.map(c => `<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.reach)}</td></tr>`).join("")}</tbody></table></div>
+      <div class="sec"><h2>Where every number comes from</h2><p class="sub">Each feed with how old its data is and how far it is trusted. Old registers are fine for a profession or a birth, not for an address, so live signals such as a phone at the site confirm them.</p>
+        <table class="t"><thead><tr><th>Source</th><th>What it feeds</th><th>How fresh</th><th>Trust</th></tr></thead><tbody>${groups.map(g => `<tr><td colspan="4" class="grp">${esc(g)}</td></tr>` + RC.sources.filter(s => s.group === g).map(s => `<tr><td><b>${esc(s.name)}</b></td><td>${esc(s.feeds)}</td><td>${esc(s.fresh)}</td><td>${esc(s.trust)}</td></tr>`).join("")).join("")}</tbody></table>
+        <div class="src">The named sources are real systems; in the real product each would be joined under the emergency order, with only the result leaving its owner.</div></div>
     </div></div>`;
   }
 
@@ -299,16 +334,18 @@
   function render() {
     MAP.hide(); header();
     const pg = $("#page");
-    pg.innerHTML = S.page === "situation" ? situation() : S.page === "resources" ? resources() : S.page === "sites" ? sites() : S.page === "fair" ? fair() : world();
+    pg.innerHTML = S.page === "situation" ? situation() : S.page === "resources" ? resources() : S.page === "network" ? network() : S.page === "info" ? info() : S.page === "sites" ? sites() : S.page === "fair" ? fair() : world();
     let ran = false; const draw = () => { if (ran) return; ran = true; if (S.page === "situation") { const el = $("#map"); if (el) MAP.render(el, mapOpts()); trend(); } if (S.page === "world") worldMap(); if (S.page === "sites") vacantMap(); };
     requestAnimationFrame(draw); setTimeout(draw, 60);
     save();
   }
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-patrol],[data-essplan],[data-export],[data-page],[data-scope],[data-ti],[data-qtab],[data-layer],[data-colour],[data-rebalance],[data-do],[data-undo],[data-q],[data-close],[data-back],[data-team],[data-siteask],[data-ask],[data-mirror],[data-wsel]");
+    const t = e.target.closest("[data-trade],[data-fix],[data-patrol],[data-essplan],[data-export],[data-page],[data-scope],[data-ti],[data-qtab],[data-layer],[data-colour],[data-rebalance],[data-do],[data-undo],[data-q],[data-close],[data-back],[data-team],[data-siteask],[data-ask],[data-mirror],[data-wsel]");
     if (!t) return; const d = t.dataset;
     if (d.export) { exportLog(); return; }
     if (d.patrol) { S.patrols = !S.patrols; render(); return; }
+    if (d.trade) { S.trades = S.trades || {}; S.trades[d.trade] = !S.trades[d.trade]; render(); return; }
+    if (d.fix != null) { S.fixSent = S.fixSent || {}; S.fixSent[d.fix] = true; render(); return; }
     if (d.essplan) { S.essPlan = true; render(); return; }
     if (d.page) { S.page = d.page; S.sel = null; }
     else if (d.scope) { S.scope = d.scope; S.state = null; S.sel = null; }

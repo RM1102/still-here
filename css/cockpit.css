@@ -263,3 +263,6 @@ table.t .donetext { display: flex; gap: 6px; align-items: flex-start; } table.t 
 h3.mini { font-size: 14px; font-weight: 600; margin: 14px 0 2px; }
 @media (max-width: 700px) { .vstats { grid-template-columns: 1fr; } .vmapwrap { height: 320px; } }
 .vmapwrap svg { width: 100%; height: 100%; display: block; }
+table.t td.grp { font-size: 12.5px; font-weight: 600; color: var(--label2); background: var(--group); padding-top: 7px; padding-bottom: 7px; }
+@media (max-width: 1420px) { .hdr .who { display: none; } }
+@media (max-width: 1240px) { .tabs button { padding: 0 10px; font-size: 13px; } }

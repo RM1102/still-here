@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file:; style-src 'self' 'unsafe-inline' file:; img-src 'self' data: file:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<title>Still Here · For places and staff</title>
+<meta name="description" content="The contributor side of Still Here: verified clinics, pharmacies, ration shops and shelters update what they have. A prototype; simulated data.">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#08080A" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="stylesheet" href="css/apple/apple-system-colors.css">
+<link rel="stylesheet" href="css/apple/apple-materials.css">
+<link rel="stylesheet" href="css/apple/apple-buttons.css">
+<link rel="stylesheet" href="css/apple/apple-feedback.css">
+<link rel="stylesheet" href="css/app.css">
+<style>
+  body.contrib { overflow-y: auto; height: auto; } .contrib .content { padding-top: 26px; }
+  .cbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 20px; border-bottom: 1px solid var(--hair); background: var(--glass-bg); position: sticky; top: 0; z-index: 5; -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); }
+  .cbar b { font-size: 15px; } .cbar span { color: var(--label2); font-size: 13px; } .cbar a { font-size: 13px; color: var(--accent); }
+  .form .r { flex-wrap: wrap; } .form .r .tt { flex: 1 1 160px; } .form textarea { width: 100%; min-height: 56px; border-radius: 10px; border: 1px solid var(--hair); background: var(--fill); color: var(--label); font: inherit; padding: 8px 10px; }
+  .tier { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--fill); }
+</style>
+</head>
+<body class="contrib">
+<div class="cbar"><div><b>Still Here</b> <span>· for places and staff</span></div><div><a href="index.html">Public app</a> · <a href="cockpit.html">Government view</a></div></div>
+<main class="content" id="view"></main>
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/contributor.js"></script>
+</body>
+</html>

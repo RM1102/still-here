@@ -95,7 +95,50 @@
         <div class="r t">${tile("shield", "gray")}<div class="tt"><b>Only they get your address</b><span>Nobody else can see that you're alone, or where you are.</span></div></div>
         <div class="r t">${tile("heart-pulse", "red")}<div class="tt"><b>If nobody can come within two hours</b><span>Kiran, the community health worker for your area, comes with a police officer.</span></div></div></div>
       <div class="btn-row"><button class="btn btn-prominent btn-block" data-action="ownsend">Send for Someone I Know</button></div>
-      <p class="foot">You don't need to type anything: we already know which phones in your home went silent at 2:32 pm yesterday. In this demo, this is what a child on their own would see.</p>`}`;
+      <p class="foot">You don't need to type anything: we already know which phones in your home went silent at 2:32 pm yesterday. In this demo, this is what a child on their own would see. For a child too young to read, see <a href="#child">the child alert</a>.</p>`}`;
+
+  /* Is this true? (24 Oct night): checked against official sources and people on the spot; never a guess (STRATEGY §6) */
+  const CLAIMS = ["Kalpakkam nuclear plant has exploded", "Another vanishing at 3 pm today", "Tap water in Delhi is poisoned", "Free food at Red Fort at noon"];
+  function factcheck(q) { const s = q.toLowerCase(); return RC.factcheck.find(f => f.keys.some(k => s.indexOf(k) >= 0)) || { verdict: "Not confirmed", text: "No official source and nobody on the spot has said this. Don't act on it, and please don't forward it.", src: "No official notice found" }; }
+  const VERD = { "Not true": ["x-circle", "red"], "Confirmed": ["check", "green"], "Not confirmed": ["circle-help", "gray"] };
+  V["#check"] = () => { const q = S.claim || "", r = q ? factcheck(q) : null;
+    return `${head("Is this true?", "Type or paste a message you were sent. Still Here checks it against official sources and people on the spot.")}
+      <div class="mapsearch" style="margin-top:22px"><label class="field">${I("search", 17)}<input id="claimq" type="search" autocomplete="off" placeholder="Type or paste a message" value="${esc(q)}" aria-label="Message to check"></label></div>
+      <div class="chips">${CLAIMS.map(x => `<button class="btn btn-compact" data-action="claim" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+      <div class="btn-row"><button class="btn btn-prominent btn-block" data-action="checkclaim">Check It</button></div>
+      ${r ? `<div class="group" style="margin-top:14px"><div class="r t">${tile(VERD[r.verdict][0], VERD[r.verdict][1])}<div class="tt"><b>${esc(r.verdict)}</b><span>${esc(r.text)}</span></div>${st(VERD[r.verdict][1] === "gray" ? "" : VERD[r.verdict][1], r.verdict)}</div><div class="pad fn">Source: ${esc(r.src)}</div></div>` : ""}
+      ${disc("How it decides", "It answers only from official notices, the people who run the place named, and confirmations from phones at that spot. If none of them has said it, the answer is Not confirmed, never a guess. The same check works in the WhatsApp bot.")}`; };
+
+  /* The WhatsApp bot (24 Oct night): the same help as a chat, for people with WhatsApp but not this app (STRATEGY §5) */
+  const BOTMENU = [["1", "1 Who's still here"], ["2", "2 Help near me"], ["3", "3 Health near me"], ["4", "4 Is this true?"], ["5", "5 Someone is alone"]];
+  const botStart = () => [{ t: "Hi. I'm the Still Here bot, from the government's emergency service. I never ask for money, an OTP or a forward.\nReply with a number:\n1  Who's still here\n2  Help near me\n3  Health near me\n4  Is this true?\n5  Someone is alone" }];
+  function botReply(k) {
+    const m = S.cases.meera.state, meera = m === "notified" ? "Meera (3) is alone in Mumbai. We've messaged the people who know her; nobody is going yet." : m === "claimed" ? "Meera (3): Lata, her nanny, is on her way." : "Meera (3) is safe with Lata.";
+    return { "1": "Your people: 6 here, 4 gone, 1 not sure, 2 without a phone.\n" + meera + "\nKamla (78) needs someone: you're the nearest person she knows.",
+      "2": "Near Rohini Sector 7:\nWater: Govt school, Sector 7 (0.7 km), police there.\nRations: shop 112 has about 140 waiting; shop 118 (0.6 km) has 30.\nCharging: Gurudwara, Sector 7 (0.9 km).",
+      "3": "Shortest wait first:\nMohalla Clinic, Sector 7 (0.6 km): about 40 min.\nJaipur Golden Hospital (3 km): about 1 h.\nDr. BSA emergency (2.4 km): about 2 h.\nInsulin: Apollo Pharmacy, Sector 8 (low stock).\nIf it's too much: Tele-MANAS 14416.",
+      "4": "Forward me the message and I'll check it against official sources.\n\nYou forwarded: \"Kalpakkam nuclear plant has exploded\"\nNot true. The reactors shut down safely at 03:10 and radiation monitors read normal (Nuclear Power Corporation, 07:00).",
+      "5": "Tell me where and what you saw. It goes only to the area's health worker, never to the public.\n\nYou wrote: \"Boy about 5, crying on the steps of C-7 block\"\nKiran, the health worker, is on her way with a constable." }[k]; }
+  V["#bot"] = () => { const msgs = S.bot || botStart();
+    return `${head("Still Here on WhatsApp", "The same help as a chat, for anyone who has WhatsApp but not this app. Tap a reply to try it.")}
+      <div class="thread botthread" style="margin-top:18px">${msgs.map(m => `<div class="msg ${m.me ? "out" : "in"}">${m.me ? "" : `<span class="from">Still Here bot</span>`}<span class="botline">${esc(m.t)}</span></div>`).join("")}</div>
+      <div class="reply-row">${BOTMENU.map(([k, l]) => `<button class="btn btn-compact" data-action="bot" data-v="${k}">${esc(l)}</button>`).join("")}</div>
+      ${disc("Where its answers come from", "The same sources as the app: your people's status, places that update themselves, staff phones at hospitals and shops, and official notices. In the real product it runs on WhatsApp's business platform, and also by SMS for basic phones.")}`; };
+
+  /* The child alert (24 Oct night): for a young child holding a parent's phone (STRATEGY §8) */
+  const SAY = { en: "Are you okay? Is a grown-up with you? Press the green face if a grown-up is with you. Press the red face if you are alone.", hi: "क्या तुम ठीक हो? क्या कोई बड़ा तुम्हारे साथ है? अगर कोई बड़ा साथ है तो हरा चेहरा दबाओ। अगर तुम अकेले हो तो लाल चेहरा दबाओ।" };
+  V["#child"] = () => { const a = S.childAns;
+    return `${head("The child alert", "What a young child sees when they pick up the phone of a parent who vanished. The phone speaks, in the language it was set to.", ["#more", "More"])}
+      <div class="kidalert">
+        <div class="ka-top">${I("siren", 18)}<span>Emergency alert · Government of India</span></div>
+        ${!a ? `<p class="ka-q">Are you okay?<br>Is a grown-up with you?</p><p class="ka-hi" lang="hi">क्या तुम ठीक हो? क्या कोई बड़ा तुम्हारे साथ है?</p>
+          <div class="ka-btns"><button class="ka-b ok" data-action="kid" data-v="ok"><span>🙂</span>A grown-up is with me</button><button class="ka-b no" data-action="kid" data-v="alone"><span>😟</span>I'm alone</button></div>
+          <button class="btn btn-compact" data-action="kidsay">${I("message-circle", 15)}Say It Again</button>`
+        : a === "alone" ? `<p class="ka-q">Help is coming.</p><p class="ka-s">Stay inside and keep the door shut. A grown-up who knows you will come. They will say this word:</p><p class="ka-code">🥭 MANGO</p><p class="ka-s">Open the door only for the person who says it.</p>`
+        : `<p class="ka-q">Good. 🙂</p><p class="ka-s">Ask the grown-up to tap I'm Safe on their own phone.</p>`}
+      </div>
+      ${a ? `<div class="btn-row"><button class="btn btn-block" data-action="kid" data-v="">Show the Alert Again</button></div>` : ""}
+      ${disc("How it works", "It is sent only by the verified government sender, to a phone whose owner fell still at 2:32 pm and which someone has started using again: often a child. The phone reads it aloud. A red tap, or no tap within two minutes while no adult's phone is at home, starts a case for that child, sent to the people the parents called most. The person who goes is told the code word, so the child knows who to open the door for. No photo is taken.")}`; };
 
   V["#home"] = () => {
     const w = myWard(), ind = MD.scopes.india(MD.NOW);
@@ -264,6 +307,10 @@
       <a class="r t" href="#find">${tile("search", "blue")}<div class="tt"><b>Find someone</b><span>See whether someone you know is safe</span></div>${chev()}</a>
       <a class="r t" href="#report">${tile("siren", "red")}<div class="tt"><b>Report someone alone</b><span>A child or elder who isn't your family</span></div>${chev()}</a>
       <a class="r t" href="#with">${tile("hand-helping", "orange")}<div class="tt"><b>Who's with you</b><span>A child or elder already in your care</span></div>${chev()}</a>
+      <a class="r t" href="#check">${tile("circle-help", "blue")}<div class="tt"><b>Is this true?</b><span>Check a message against official sources</span></div>${chev()}</a>
+      <a class="r t" href="#bot">${tile("message-circle", "green")}<div class="tt"><b>Still Here on WhatsApp</b><span>The same help as a chat</span></div>${chev()}</a>
+      <a class="r t" href="#child">${tile("baby", "orange")}<div class="tt"><b>The child alert</b><span>What a young child sees on a parent's phone</span></div>${chev()}</a>
+      <a class="r t" href="contributor.html">${tile("building-2", "indigo")}<div class="tt"><b>For clinics, shops and shelters</b><span>Verified places update what they have</span></div>${chev()}</a>
       <a class="r t" href="#onmyown">${tile("life-buoy", "red")}<div class="tt"><b>If you're on your own</b><span>What a child or elder alone sees, and how they ask for help</span></div>${chev()}</a>
       <a class="r t" href="#ward">${tile("building-2", "blue")}<div class="tt"><b>Your ward</b><span>Water, power, official notices and local groups</span></div>${chev()}</a>
       <a class="r t" href="#radar">${tile("radar", "indigo")}<div class="tt"><b>On duty</b><span>Only for health workers, police and teachers</span></div>${chev()}</a>
@@ -384,24 +431,33 @@
   }
 
   const FLOW_ICON = { rail: "train-front", road: "truck", air: "plane", sea: "ship" };
+  // Updates that places post themselves in the contributor portal (contributor.html) are kept in this browser and shown here
+  const contribUpd = () => { try { return (JSON.parse(localStorage.getItem("stillhere-contrib-v1")) || {}).upd || {}; } catch (e) { return {}; } };
+  const QW = { short: "short queue", medium: "medium queue", long: "long queue" };
   V["#help"] = () => {
-    const ind = MD.scopes.india(MD.NOW);
+    const ind = MD.scopes.india(MD.NOW), up = contribUpd();
+    const places = RC.contributors.map(c => { const u = up[c.id] || {}; return Object.assign({}, c, { open: u.open != null ? u.open : c.open, q: u.q || (c.queue < 15 ? "short" : c.queue <= 60 ? "medium" : "long"), stock: u.stock ? c.stock.map(([k, v]) => [k, u.stock[k] || v]) : c.stock, t: u.t || "6:58 am" }); });
     return `${head("Help is coming", "Supplies sent from other cities, and what's open near you now.")}
+      ${sect("Warnings for today")}<div class="group tiles">${RC.warnings.map(w => `<div class="r t">${tile(w.icon, "orange")}<div class="tt"><b>${esc(w.t)}</b><span>${esc(w.s)}</span></div></div>`).join("")}</div>
       <div class="stats" style="margin-top:24px">${stat("Children found alone who are now safe, India", C(ind.reached), P(ind.share) + " of " + C(ind.A), "reached")}${stat(RC.TERMS.vanish, "0", "checked every minute", "vanish")}</div>
       ${sect("Sent from other cities")}
       <div class="group tiles flowlist">${RC.flows.map((f, i) => `<div class="r t"><span class="n">${i + 1}</span><div class="tt"><b>${esc(f.what)}</b><span>${I(FLOW_ICON[f.kind] || "package", 13)} ${esc(f.from)} to ${esc(f.to)}</span></div><span class="val">Left ${clock(f.dep)}</span></div>`).join("")}</div>
       <p class="foot">Each arrow runs from the city a supply left to the city it's going to, numbered as in the list. We show a supply only two hours after it leaves, and never its route or arrival time, so nobody can wait for it on the road. Nothing moving inside a city is shown.</p>
       <div class="mapgroup" style="margin-top:14px"><div class="mapbox" id="flowmap" style="height:460px;min-height:0"></div><div class="legend"><span><i style="background:var(--flow);border-radius:50%"></i>Supply on its way, numbered as in the list</span><span><i style="background:var(--apple-indigo);border-radius:50%"></i>Community taking people in</span></div></div>
       ${sect("Services back in Delhi")}${intro("Compared with a normal day.")}<div class="stats">${RC.restoration.map(r => stat(r.k, `${r.v} <small>${esc(r.unit)}</small>`)).join("")}</div>
-      ${sect("Doctors and nurses on duty near you")}${intro("Counted from staff phones at each place, so you know who is there before you walk.")}
-      <div class="group tiles">${RC.clinics.map(c => `<div class="r t">${tile("heart-pulse", "red")}<div class="tt"><b>${esc(c.name)}</b><span>${c.doctors} doctor${c.doctors === 1 ? "" : "s"}${c.nurses ? ` and ${c.nurses} nurse${c.nurses === 1 ? "" : "s"}` : ""} there ${c.since ? `since ${esc(c.since)}` : "now"} · ${esc(c.treats)} · wait ${esc(c.wait)}</span></div><span class="val">${esc(c.dist)}</span></div>`).join("")}</div>
+      ${sect("Doctors and nurses on duty near you")}${intro("Counted from staff phones at each place, so you know who is there before you walk. The shortest wait is marked, so nobody crowds one place.")}
+      <div class="group tiles">${RC.clinics.map(c => { const best = c.mins === Math.min(...RC.clinics.filter(x => !x.firstaid).map(x => x.mins)); return `<div class="r t">${tile("heart-pulse", "red")}<div class="tt"><b>${esc(c.name)}</b><span>${c.doctors} doctor${c.doctors === 1 ? "" : "s"}${c.nurses ? ` and ${c.nurses} nurse${c.nurses === 1 ? "" : "s"}` : ""} there ${c.since ? `since ${esc(c.since)}` : "now"} · ${esc(c.treats)} · wait ${esc(c.wait)}</span></div>${best ? st("green", "Shortest wait") : c.mins >= 90 ? st("orange", "Long wait") : ""}<span class="val">${esc(c.dist)}</span></div>`; }).join("")}</div>
       <p class="foot">If someone can't breathe, is bleeding heavily or won't wake up, call 112. An ambulance comes if one is free; if not, the call goes to the nearest doctor on duty.</p>
+      ${sect("Updated by the places themselves")}${intro("Verified places post what they have and how long the queue is. Each update fades after 4 hours unless they renew it.")}
+      <div class="group tiles">${places.map(p => `<div class="r t">${tile(p.kind === "Pharmacy" ? "heart-pulse" : p.kind === "Ration shop" ? "package" : p.kind === "Clinic" ? "heart-pulse" : "users", p.open ? "green" : "gray")}<div class="tt"><b>${esc(p.name)}</b><span>${p.open ? QW[p.q] : "closed now"} · ${p.stock.map(([k, v]) => `${esc(k)}: ${esc(v.toLowerCase())}`).join(", ")} · updated ${esc(p.t)} · tier ${p.tier}</span></div>${p.open ? st(p.q === "long" ? "orange" : "green", p.q === "long" ? "Busy" : "Open") : st("", "Closed")}</div>`).join("")}</div>
+      <p class="foot"><a href="contributor.html">Run a clinic, shop or shelter? Update it here.</a></p>
       ${sect("Open now, with staff there")}
       <div class="group tiles">${RC.onDuty.map(o => `<div class="r t">${tile(o.icon, o.tile)}<div class="tt"><b>${esc(o.name)}</b><span>${esc(o.what)}${o.queue ? ` · ${esc(o.queue)}` : ""}</span></div><span class="val">${esc(o.dist)}</span></div>`).join("")}</div>
       <p class="foot">We know someone is working because their work phone is at the counter now: the ration shop dealer, a pharmacist, an ATM guard. Queue sizes come from the number of phones waiting there.</p>
       ${sect("Safe places near you")}
       <div class="group tiles">${RC.places.map(p => `<div class="r t">${tile(p.kind === "worship" ? "landmark" : "building-2", p.open ? "green" : "gray")}<div class="tt"><b>${esc(p.name)}</b><span>${esc(p.staff)} · ${esc(p.dist)}${p.charge ? ` · ${I("zap", 13)} ${esc(p.charge)}` : ""}${p.hub ? ` · ${I("wifi", 13)} ${esc(p.hub)}` : ""}</span></div>${p.open ? st("green", "Open") : st("", "Unknown")}</div>`).join("")}</div>
       <p class="foot">Open means an adult is on duty there and a phone was there in the last hour. Some have power for charging phones. An offline hub is a computer with its own Wi-Fi that serves maps, medical pages and messages when phone towers are down.</p>
+      ${sect("If it's too much")}<div class="group"><div class="r t">${tile("heart-pulse", "indigo")}<div class="tt"><b>Tele-MANAS: 14416</b><span>The government's free mental health line, 24 hours, in your language. Talking to someone helps.</span></div></div></div>
       ${sect("Communities taking people in")}${intro("Groups with food and a place to stay, for people who can do work they need. Asking sends your name and skills to the organiser, who decides and replies.")}
       <div class="group tiles">${RC.communities.filter(c => c.accepting).map((c, i) => `<div class="r t">${tile("users", "indigo")}<div class="tt"><b>${esc(c.name)}</b><span>${esc(c.note || c.members)}</span></div>${S.joined[i] ? st("green", "Asked") : `<button class="btn btn-compact" data-action="join" data-i="${i}">Ask to Join</button>`}</div>`).join("")}</div>`;
   };
@@ -500,6 +556,11 @@
     welcomed() { S.welcomed = true; go("#home"); },
     tellall() { S.told = true; toast("We told 214 people you're safe"); },
     ownsend() { S.ownSent = true; },
+    claim(d) { S.claim = d.v; markStep(10); },
+    checkclaim() { const q = document.getElementById("claimq"); S.claim = q ? q.value : S.claim; markStep(10); },
+    bot(d) { const m = S.bot || botStart(); m.push({ t: BOTMENU.find(x => x[0] === d.v)[1].slice(2), me: true }); m.push({ t: botReply(d.v) }); S.bot = m; markStep(10); },
+    kid(d) { S.childAns = d.v || null; },
+    kidsay() { try { const u = new SpeechSynthesisUtterance(SAY.en); u.lang = "en-IN"; speechSynthesis.cancel(); speechSynthesis.speak(u); const h = new SpeechSynthesisUtterance(SAY.hi); h.lang = "hi-IN"; speechSynthesis.speak(h); } catch (e) {} },
     report() { S.reported = true; markStep(9); },
     checkin(d) { S.checkins[d.id] = true; markStep(2); toast("Asked. They'll get a message: are you OK?"); },
     "call-lata"() { S.called.lata = true; addLog("meera", "07:11", "You called Lata for 2 minutes. She had read the message and was looking for her keys."); toast("Calling Lata Pawar…"); },
@@ -553,7 +614,7 @@
   };
 
   /* ---------- chrome ---------- */
-  const NAV = [["sec", "Your people"], ["#home", "Who's here", "house"], ["#cases", "Cases", "users"], ["#find", "Find someone", "search"], ["#report", "Report someone alone", "siren"], ["#with", "Who's with you", "hand-helping"], ["sec", "Around you"], ["#map", "Map", "map-pinned"], ["#help", "Help is coming", "truck"], ["#ward", "Your ward", "building-2"], ["sec", "Tools"], ["#onmyown", "If you're on your own", "life-buoy"], ["#radar", "On duty", "radar"], ["#kit", "Offline kit", "download"], ["sec", "Prototype"], ["#about", "About", "info"], ["cockpit.html", "Government view", "landmark"]];
+  const NAV = [["sec", "Your people"], ["#home", "Who's here", "house"], ["#cases", "Cases", "users"], ["#find", "Find someone", "search"], ["#report", "Report someone alone", "siren"], ["#with", "Who's with you", "hand-helping"], ["sec", "Around you"], ["#map", "Map", "map-pinned"], ["#help", "Help is coming", "truck"], ["#ward", "Your ward", "building-2"], ["sec", "Tools"], ["#check", "Is this true?", "circle-help"], ["#bot", "WhatsApp bot", "message-circle"], ["#onmyown", "If you're on your own", "life-buoy"], ["#child", "Child alert", "baby"], ["#radar", "On duty", "radar"], ["#kit", "Offline kit", "download"], ["sec", "Prototype"], ["#about", "About", "info"], ["contributor.html", "Contributor portal", "building-2"], ["cockpit.html", "Government view", "landmark"]];
   function chrome() {
     $("#nav").innerHTML = NAV.map(n => n[0] === "sec" ? `<div class="sec">${n[1]}</div>` : `<a href="${n[0]}"${n[0].indexOf("#") ? ` target="_blank" rel="noopener"` : ""}>${I(n[2], 17)}<span>${n[1]}</span></a>`).join("");
     const tabs = [["#home", "People", "house"], ["#cases", "Cases", "users"], ["#map", "Map", "map-pinned"], ["#help", "Help", "truck"]];
