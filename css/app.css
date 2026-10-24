@@ -242,7 +242,9 @@ body.phone .device .mapbox { height: 380px; min-height: 0; }
   .inspector .closer { display: inline-flex; }
   .msgbtn { display: inline-flex !important; } .btn-row.only-narrow { display: block !important; }
   .topbar .status .long { display: none; }
+  .topbar .status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 }
+@media (max-width: 959px) { .topbar .status .full { display: none; } .topbar .status .short { display: inline; } }
 @media (max-width: 759px) {
   .shell { grid-template-columns: minmax(0, 1fr); }
   .sidebar { display: none; }
@@ -299,3 +301,21 @@ body.pre .mobilenav, body.pre .tabbar { display: none !important; }
 .btn-pair .btn { flex: 1 1 220px; }
 .msg .gloss { display: block; font-size: 11.5px; color: var(--wa-ink2); font-style: italic; margin-top: 4px; line-height: 1.35; }
 @container (max-width: 560px) { .r .st { white-space: normal; max-width: 38%; text-align: right; line-height: 1.25; } .r .tt b { overflow-wrap: anywhere; } }
+/* Narrow screens: a row's status and button move under its text, so the text keeps the width (24 Oct, phone audit) */
+@container (max-width: 560px) {
+  .r:has(> .st) { flex-wrap: wrap; row-gap: 6px; }
+  .r:has(> .st) > .tt { flex: 1 1 calc(100% - 100px); }
+  .r:has(> .st) > .chev { order: 5; }
+  .r:has(> .st) > .st { order: 10; max-width: none; text-align: left; white-space: normal; }
+  .r:has(> .avatar) > .st { margin-left: 48px; }
+  .r:has(> .tile) > .st { margin-left: 40px; }
+  .r:has(> .st) > .btn { order: 11; margin-left: auto; }
+  .r:has(> .st) > .val { order: 6; }
+}
+@container (max-width: 560px) {
+  .r:has(> .val.sz) { flex-wrap: wrap; row-gap: 2px; }
+  .r:has(> .val.sz) > .tt { flex: 1 1 calc(100% - 80px); }
+  .r:has(> .val.sz) > .chev { order: 5; }
+  .r > .val.sz { order: 10; margin-left: 40px; font-size: 13px; }
+}
+.secthead .fn { white-space: nowrap; }

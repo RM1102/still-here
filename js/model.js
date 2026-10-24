@@ -7,11 +7,11 @@
 window.RC = window.RC || {};
 (function (RC) {
   const TIMES = [
-    { id: "now", label: "Now · 07:10", short: "Now", h: 7 / 6 },
-    { id: "noon", label: "12:00", short: "12:00", h: 6 },
-    { id: "eve", label: "20:00", short: "20:00", h: 14 },
-    { id: "d2", label: "Day 2 · 08:00", short: "Day 2", h: 26 },
-    { id: "d3", label: "Day 3 · 08:00", short: "Day 3", h: 50 }
+    { id: "now", label: "Now, 7:10 am", short: "Now", h: 7 / 6 },
+    { id: "noon", label: "Today at noon", short: "Noon", h: 6 },
+    { id: "eve", label: "Today at 8 pm", short: "8 pm", h: 14 },
+    { id: "d2", label: "Tomorrow (Day 2), 8 am", short: "Day 2", h: 26 },
+    { id: "d3", label: "Day 3, 8 am", short: "Day 3", h: 50 }
   ];
   // Two groups (Appendix A1, step 4): 1 − F have someone in their circle who goes on Day 1; F have nobody who goes
   // and are reached by the ward's paid anganwadi or ASHA worker, SLOW times more slowly. A third of alone children are under five.
@@ -96,8 +96,10 @@ window.RC = window.RC || {};
   function series(fn, step) { const out = []; for (let h = 0; h <= 50; h += step || 1) out.push(Object.assign({ h }, fn(h))); return out; }
   // Uneven steps so the map reads at 07:10 (most areas 3–15%) and on Day 2 (most over 50%).
   const BINS = [{ max: 0.04, c: "var(--q0)", l: "Under 4%" }, { max: 0.08, c: "var(--q1)", l: "4–8%" }, { max: 0.15, c: "var(--q2)", l: "8–15%" }, { max: 0.35, c: "var(--q3)", l: "15–35%" }, { max: 0.65, c: "var(--q4)", l: "35–65%" }, { max: 1.01, c: "var(--q5)", l: "Over 65%" }];
-  function color(v) { if (!v || v.nodata) return "var(--nodata)"; return BINS.find(b => v.share < b.max).c; }
-  function hourLabel(h) { if (h < 18) { const t = 6 + h; const hh = Math.floor(t), mm = Math.round((t - hh) * 60); return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`; } const d = 1 + Math.floor((h + 6) / 24), t = (h + 6) % 24; return `Day ${d} ${String(Math.floor(t)).padStart(2, "0")}:00`; }
+  function color(v) { if (!v || v.nodata) return "var(--nodata)"; return (BINS.find(b => v.share < b.max) || BINS[BINS.length - 1]).c; }
+  // Plain clock times: "7:10 am", "Day 2, 8 am" (hours are counted from 6 am on Day 1)
+  function hourLabel(h) { const m = Math.round((6 + h) * 60), d = 1 + Math.floor(m / 1440), x = m % 1440, hh = Math.floor(x / 60), mm = x % 60;
+    const c = `${hh % 12 || 12}${mm ? ":" + String(mm).padStart(2, "0") : ""} ${hh < 12 ? "am" : "pm"}`; return d > 1 ? `Day ${d}, ${c}` : c; }
   function compact(n) { n = Math.round(n); if (Math.abs(n) >= 1e7) return (n / 1e6).toFixed(1) + " M"; if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(2) + " M"; if (Math.abs(n) >= 1e5) return Math.round(n / 1e3) + " K"; return n.toLocaleString("en-IN"); }
   const pct = x => Math.round(x * 100) + "%";
 

@@ -136,8 +136,8 @@ window.RC = window.RC || {};
 
   function legend(o) {
     const B = RC.Model.BINS;
-    if (o && o.compact) return `<div class="legend compact" data-help="scale"><span class="lt">Reached</span><span>${esc(B[0].l)}</span><span class="ramp">${B.map(b => `<i style="background:${b.c}"></i>`).join("")}</span><span>${esc(B[B.length - 1].l)}</span><span class="nd"><i></i>No network</span></div>`;
-    return `<div class="legend" data-help="scale"><span class="lt">Reached and safe</span>${B.map(b => `<span><i style="background:${b.c}"></i>${b.l}</span>`).join("")}<span class="nd"><i></i>No network</span><span class="info" style="display:inline-flex">${RC.icon("info", 15)}</span></div>`;
+    if (o && o.compact) return `<div class="legend compact" data-help="scale"><span class="lt">Now safe</span><span>${esc(B[0].l)}</span><span class="ramp">${B.map(b => `<i style="background:${b.c}"></i>`).join("")}</span><span>${esc(B[B.length - 1].l)}</span><span class="nd"><i></i>No network</span></div>`;
+    return `<div class="legend" data-help="scale"><span class="lt">Children now safe</span>${B.map(b => `<span><i style="background:${b.c}"></i>${b.l}</span>`).join("")}<span class="nd"><i></i>No network</span><span class="info" style="display:inline-flex">${RC.icon("info", 15)}</span></div>`;
   }
 
   /* ---------- Line chart: solid until now, dashed after (projection); direct labels with values ---------- */
@@ -149,7 +149,7 @@ window.RC = window.RC || {};
     if (o.ytitle) svg += `<text x="${L - 30}" y="10" class="axis">${esc(o.ytitle)}</text>`;
     [0, 0.25, 0.5, 0.75, 1].forEach(g => { const y = ys(g * (o.ymax || 1)); svg += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" class="grid"/><text x="${L - 6}" y="${y + 3.5}" text-anchor="end" class="axis">${o.yfmt ? o.yfmt(g * (o.ymax || 1)) : g}</text>`; });
     (o.xticks || []).forEach(t => svg += `<text x="${xs(t.x)}" y="${H - 7}" text-anchor="middle" class="axis">${esc(t.l)}</text>`);
-    if (split != null && split < o.xmax) svg += `<rect x="${xs(split)}" y="${T}" width="${W - R - xs(split)}" height="${H - T - B}" class="projband"/><text x="${W - R - 6}" y="${T + 12}" text-anchor="end" class="axis">${W - R - xs(split) > 230 ? "Projection if today's pace holds" : "Projection"}</text>`;
+    if (split != null && split < o.xmax) svg += `<rect x="${xs(split)}" y="${T}" width="${W - R - xs(split)}" height="${H - T - B}" class="projband"/><text x="${W - R - 6}" y="${T + 12}" text-anchor="end" class="axis">${W - R - xs(split) > 230 ? "Estimate if today's pace holds" : "Estimate"}</text>`;
     o.series.forEach((se, si) => {
       const pts = se.pts, past = pts.filter(p => split == null || p.x <= split + 1e-9), fut = split == null ? [] : pts.filter(p => p.x >= split - 1e-9);
       const pathOf = arr => arr.map((p, i) => `${i ? "L" : "M"}${xs(p.x).toFixed(1)} ${ys(p.y).toFixed(1)}`).join(" ");
@@ -171,7 +171,7 @@ window.RC = window.RC || {};
       const X = xs(o.series[0].pts[idx].x); hair.setAttribute("x1", X); hair.setAttribute("x2", X); hair.style.display = "";
       dots.forEach((d, i) => { const p = o.series[i].pts[idx]; d.setAttribute("cx", X); d.setAttribute("cy", ys(p.y)); d.style.display = ""; });
       const px0 = o.series[0].pts[idx].x;
-      show("chart:" + idx, `<b>${esc(o.xlabel ? o.xlabel(px0) : px0)}${split != null && px0 > split ? " · projection" : ""}</b>` + o.series.map(se => `<div><i class="sw" style="background:${se.color}"></i>${esc(se.name)}: <b class="inl">${o.yfmt ? o.yfmt(se.pts[idx].y) : se.pts[idx].y}</b></div>`).join(""), e.clientX, e.clientY);
+      show("chart:" + idx, `<b>${esc(o.xlabel ? o.xlabel(px0) : px0)}${split != null && px0 > split ? " · estimate" : ""}</b>` + o.series.map(se => `<div><i class="sw" style="background:${se.color}"></i>${esc(se.name)}: <b class="inl">${o.yfmt ? o.yfmt(se.pts[idx].y) : se.pts[idx].y}</b></div>`).join(""), e.clientX, e.clientY);
     });
     sv.querySelector(".hit").addEventListener("mouseleave", () => { hair.style.display = "none"; dots.forEach(d => d.style.display = "none"); hide(); });
   }
@@ -184,15 +184,15 @@ window.RC = window.RC || {};
   // stacked bar: reached / on the way / nobody yet (status colours, each with its word)
   function stack(v) {
     const t = v.known || 1, r = v.reached / t * 100, c = v.claimed / t * 100, u = Math.max(0, 100 - r - c);
-    return `<div class="stack" role="img" aria-label="${Math.round(r)}% reached, ${Math.round(c)}% on the way, ${Math.round(u)}% nobody yet"><i style="width:${r}%;background:var(--st-reached)"></i><i style="width:${c}%;background:var(--st-going)"></i><i style="width:${u}%;background:var(--st-nobody)"></i></div>
-      <div class="stack-l"><span><i style="background:var(--st-reached)"></i>Reached ${Math.round(r)}%</span><span><i style="background:var(--st-going)"></i>On the way ${Math.round(c)}%</span><span><i style="background:var(--st-nobody)"></i>Nobody yet ${Math.round(u)}%</span></div>`;
+    return `<div class="stack" role="img" aria-label="${Math.round(r)}% safe, ${Math.round(c)}% someone on the way, ${Math.round(u)}% nobody going yet"><i style="width:${r}%;background:var(--st-reached)"></i><i style="width:${c}%;background:var(--st-going)"></i><i style="width:${u}%;background:var(--st-nobody)"></i></div>
+      <div class="stack-l"><span><i style="background:var(--st-reached)"></i>Safe ${Math.round(r)}%</span><span><i style="background:var(--st-going)"></i>Someone on the way ${Math.round(c)}%</span><span><i style="background:var(--st-nobody)"></i>Nobody going ${Math.round(u)}%</span></div>`;
   }
   // One sentence that answers "is it getting better?" for a scope function
   function trendSentence(fn, h, name) {
     const now = fn(h), d2 = fn(26), d3 = fn(50), P = x => Math.round(x * 100) + "%";
-    if (now.nodata) return `No phone network in ${name}, so there is nothing to measure yet.`;
+    if (now.nodata) return `There's no phone network in ${name}, so there's nothing to measure yet.`;
     const lastHour = now.lastHour, word = lastHour > 0 ? "Getting better." : "Not moving.";
-    return `${word} ${P(now.share)} of children with no adult left in ${name} have been reached. At this pace: ${P(d2.share)} by Day 2 morning, ${P(d3.share)} by Day 3.`;
+    return `${word} ${P(now.share)} of the children left alone in ${name} are now safe with someone. At today's pace, that's ${P(d2.share)} by 8 am tomorrow and ${P(d3.share)} by the morning after.`;
   }
 
   RC.Map = { pi, pd, pw, render, legend, fmt, esc, hide, statusColor: null };
