@@ -84,11 +84,16 @@ window.RC = window.RC || {};
 
   // Help is coming: departures only, two-hour lag, never a route or an arrival time
   RC.flows = [
-    { what: "Supply train · 40 t grain and water", from: "Mumbai", fromLL: [72.82, 18.97], to: "Delhi", toLL: [77.22, 28.64], dep: "04:10", shownAt: "06:10", kind: "rail" },
-    { what: "Medical team · 60 doctors, 4 t supplies", from: "Hyderabad", fromLL: [78.49, 17.39], to: "Patna", toLL: [85.14, 25.59], dep: "03:50", shownAt: "05:50", kind: "air" },
+    { what: "Supply train · 40 tonnes of grain and water", from: "Mumbai", fromLL: [72.82, 18.97], to: "Delhi", toLL: [77.22, 28.64], dep: "04:10", shownAt: "06:10", kind: "rail" },
+    { what: "Medical team · 60 doctors and 4 tonnes of medicines", from: "Hyderabad", fromLL: [78.49, 17.39], to: "Patna", toLL: [85.14, 25.59], dep: "03:50", shownAt: "05:50", kind: "air" },
     { what: "Field hospital · 200 beds", from: "Pune", fromLL: [73.86, 18.52], to: "Mumbai", toLL: [72.88, 19.08], dep: "04:40", shownAt: "06:40", kind: "road" },
     { what: "Grid crews · 120 engineers", from: "Chennai", fromLL: [80.27, 13.08], to: "Bhubaneswar", toLL: [85.82, 20.30], dep: "04:30", shownAt: "06:30", kind: "rail" },
-    { what: "Diesel for towers · 2,000 kL", from: "Kochi", fromLL: [76.27, 9.93], to: "Mangaluru", toLL: [74.86, 12.91], dep: "05:00", shownAt: "07:00", kind: "sea" }
+    { what: "Diesel for phone towers · 2,000 kilolitres", from: "Kochi", fromLL: [76.27, 9.93], to: "Mangaluru", toLL: [74.86, 12.91], dep: "05:00", shownAt: "07:00", kind: "sea" },
+    { what: "Grain and water · 25 tonnes, for villages", from: "Bhopal", fromLL: [77.41, 23.26], to: "Rewa district", toLL: [81.30, 24.53], dep: "04:20", shownAt: "06:20", kind: "road" },
+    { what: "Doctors and nurses · 35, to a district hospital", from: "Lucknow", fromLL: [80.95, 26.85], to: "Bahraich", toLL: [81.60, 27.57], dep: "04:45", shownAt: "06:45", kind: "road" },
+    { what: "Water purifiers · 300 units, for villages", from: "Jaipur", fromLL: [75.79, 26.91], to: "Barmer district", toLL: [71.39, 25.75], dep: "03:40", shownAt: "05:40", kind: "road" },
+    { what: "Baby food and medicines · 8 tonnes", from: "Kolkata", fromLL: [88.36, 22.57], to: "Ranchi", toLL: [85.32, 23.34], dep: "04:00", shownAt: "06:00", kind: "air" },
+    { what: "Diesel for phone towers · 600 kilolitres", from: "Guwahati", fromLL: [91.74, 26.14], to: "Dhubri district", toLL: [89.98, 26.02], dep: "04:50", shownAt: "06:50", kind: "rail" }
   ];
 
   RC.restoration = [
@@ -156,6 +161,12 @@ window.RC = window.RC || {};
   RC.avoid = [
     { z: "Bawana chemical area", why: "Nobody is working at a chlorine store here. Stay 1 km away.", lonlat: [77.03, 28.80], km: 1 },
     { z: "Yamuna east bank", why: "Many trees here vanished too, and the riverbank hasn't been checked since. Keep off it.", lonlat: [77.28, 28.60], km: 1.5 },
+    { z: "Tihar Jail", why: "The prison is below safe guard strength. Police have closed the roads around it.", lonlat: [77.106, 28.628], km: 1 },
+    { z: "Ghazipur landfill", why: "A fire has burned since last night (satellite fire map, 5:40 am). Heavy smoke downwind.", lonlat: [77.328, 28.624], km: 1.5 },
+    { z: "Mundka industrial area", why: "Two factory fires, and nobody at the controls of a solvent store.", lonlat: [77.03, 28.68], km: 1 },
+    { z: "Wazirabad water plant", why: "A chlorine store with a skeleton crew. Don't go near.", lonlat: [77.229, 28.712], km: 0.5 },
+    { z: "Delhi Zoo", why: "Half the keepers vanished; some enclosures haven't been checked.", lonlat: [77.246, 28.603], km: 0.5 },
+    { z: "Karol Bagh, Pusa Road", why: "A lorry with no driver hit a building; it is partly down.", lonlat: [77.19, 28.645], km: 0.3 },
   ];
 
   RC.authorities = [
@@ -443,13 +454,31 @@ window.RC = window.RC || {};
     { id: "clinic", name: "Mohalla Clinic, Sector 7", kind: "Clinic", tier: 1, how: "Matched to the health facility registry; 3 staff phones here now", open: true, queue: 40, stock: [["ORS", "Plenty"], ["Paracetamol", "Plenty"], ["Insulin", "Out"]], capacity: "1 doctor, 2 nurses", needs: "A second doctor; insulin" },
     { id: "pharmacy", name: "Apollo Pharmacy, Sector 8", kind: "Pharmacy", tier: 2, how: "Matched to its drug licence; the pharmacist's phone is here", open: true, queue: 15, stock: [["Insulin", "Low"], ["Metformin", "Plenty"], ["Amlodipine", "Plenty"]], capacity: "1 pharmacist", needs: "Cold-chain insulin delivery" },
     { id: "ration", name: "Ration shop 112, Sector 7", kind: "Ration shop", tier: 1, how: "Matched to its sales machine (ePoS); the dealer's phone is here", open: true, queue: 140, stock: [["Rice", "Plenty"], ["Wheat", "Plenty"], ["Sugar", "Low"]], capacity: "1 dealer", needs: "A helper to manage the queue" },
-    { id: "gurudwara", name: "Gurudwara, Sector 7", kind: "Shelter and kitchen", tier: 3, how: "Vouched for by the ward officer; 6 volunteer phones here", open: true, queue: 10, stock: [["Meals", "Plenty"], ["Drinking water", "Plenty"], ["Blankets", "Low"]], capacity: "120 people tonight", needs: "Blankets; a doctor's visit" }
+    { id: "gurudwara", name: "Gurudwara, Sector 7", kind: "Shelter and kitchen", tier: 3, how: "Vouched for by the ward officer; 6 volunteer phones here", open: true, queue: 10, stock: [["Meals", "Plenty"], ["Drinking water", "Plenty"], ["Blankets", "Low"]], capacity: "120 people tonight", needs: "Blankets; a doctor's visit" },
+    // More places in and around Rohini (Rahul, 24 Oct night: "why only four?")
+    { id: "bsa", name: "Dr. BSA Hospital, Sector 6", kind: "Hospital", tier: 1, how: "Matched to the health facility registry; 46% of staff phones here", open: true, queue: 90, stock: [["Beds free", "Low"], ["Oxygen", "Plenty"], ["Blood (O+)", "Low"]], capacity: "Emergency ward open", needs: "Nurses for the night shift" },
+    { id: "blood", name: "Blood bank, Rohini", kind: "Hospital", tier: 1, how: "Listed on e-RaktKosh; 3 staff phones here", open: true, queue: 5, stock: [["O+", "Low"], ["B+", "Plenty"], ["O\u2212", "Out"]], capacity: "2 technicians", needs: "Donors with O negative blood" },
+    { id: "phc", name: "Primary Health Centre, Pooth Kalan", kind: "Clinic", tier: 1, how: "Matched to the health facility registry; 2 staff phones here", open: true, queue: 25, stock: [["ORS", "Plenty"], ["Antibiotics", "Low"], ["Vaccines", "Plenty"]], capacity: "1 doctor, 1 nurse", needs: "Antibiotics" },
+    { id: "janaushadhi", name: "Jan Aushadhi Kendra, Sector 11", kind: "Pharmacy", tier: 2, how: "Matched to its drug licence; the pharmacist's phone is here", open: true, queue: 30, stock: [["Insulin", "Out"], ["BP tablets", "Plenty"], ["Inhalers", "Low"]], capacity: "1 pharmacist", needs: "Insulin" },
+    { id: "ration87", name: "Ration shop 87, Sector 3", kind: "Ration shop", tier: 1, how: "Matched to its sales machine (ePoS); no dealer phone here", open: false, queue: 0, stock: [["Rice", "Out"], ["Wheat", "Low"], ["Sugar", "Out"]], capacity: "No dealer", needs: "A dealer: ours went missing at 2:32 pm" },
+    { id: "anganwadi", name: "Anganwadi centre, Sector 7", kind: "Childcare", tier: 1, how: "Matched to Poshan Tracker; the worker's phone is here", open: true, queue: 10, stock: [["Take-home ration", "Plenty"], ["Baby food", "Low"]], capacity: "Kiran, the worker, is on duty", needs: "A second helper" },
+    { id: "school", name: "Government school shelter, Sector 7", kind: "Shelter and kitchen", tier: 1, how: "On the district's shelter list; police are there", open: true, queue: 15, stock: [["Places for children", "Low"], ["Meals", "Plenty"], ["Blankets", "Plenty"]], capacity: "9 places left", needs: "Two more adults overnight" },
+    { id: "mandir", name: "Shiv Mandir kitchen, Sector 5", kind: "Shelter and kitchen", tier: 3, how: "Vouched for by the ward officer; 4 volunteer phones here", open: true, queue: 35, stock: [["Meals", "Plenty"], ["Drinking water", "Low"], ["Blankets", "Out"]], capacity: "60 people tonight", needs: "Drinking water; blankets" },
+    { id: "tanker", name: "Water tanker point, Sector 7 park", kind: "Water point", tier: 1, how: "On the Delhi Jal Board's tanker list; the driver's phone is here", open: true, queue: 50, stock: [["Drinking water", "Plenty"]], capacity: "Refilled every 3 hours", needs: "A second tanker" },
+    { id: "milk", name: "Mother Dairy booth, Sector 8", kind: "Food shop", tier: 2, how: "Matched to its dealer code; the operator's phone is here", open: true, queue: 45, stock: [["Milk", "Low"], ["Baby milk powder", "Out"], ["Curd", "Plenty"]], capacity: "1 operator", needs: "Baby milk powder" },
+    { id: "bakery", name: "Bakery, Sector 7 market", kind: "Food shop", tier: 3, how: "Vouched for by the market association", open: true, queue: 20, stock: [["Bread", "Plenty"], ["Biscuits", "Plenty"]], capacity: "Baking since 5 am", needs: "Flour by tomorrow" },
+    { id: "pump", name: "Indian Oil petrol pump, Sector 9", kind: "Fuel", tier: 2, how: "Matched to its dealer licence; 2 staff phones here", open: true, queue: 120, stock: [["Petrol", "Low"], ["Diesel", "Plenty"], ["Cooking gas", "Out"]], capacity: "2 attendants", needs: "Staff for a second shift" }
   ];
   // Emergency powers in use, in plain words
   // "How we're doing": the case-log figures the model does not produce (simulated). The two pages, section 7 and 8, set the goals.
   RC.govDoing = {
     // cant: of the cases with nobody going within 2 hours, the share where someone still replied "2: can't go" within 30 minutes
     cant: 0.3, found: 0.94,
+    // What we watch under each step (the L2 metrics): name, today's value, within its limit?
+    l2: [[["Matched to a register", "95%", true], ["\u201cNot sure\u201d phones", "12%", true]],
+         [["Messages delivered", "98%", true], ["Minutes to first reply", "18", true]],
+         [["Minutes to GOING", "41", true], ["Replies saying \u201ccan't go\u201d", "14%", true]],
+         [["GOINGs silent over 2 h", "6%", false], ["Handovers with two checks", "100%", true]]],
     guard: [
       ["A child goes to the wrong person", "Wrong handovers, found by the Day 3 welfare call", "None so far", "None", "Pause handovers outside family in that ward", "green"],
       ["A living person is marked gone", "\u201cGone\u201d later corrected", "0.4%", "Under 1%", "Hold that network's cases for a check by a person", "green"],

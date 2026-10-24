@@ -48,7 +48,7 @@
   };
   const caseSt = (id) => { const x = ST[id][S.cases[id].state]; if (id === "meera" && S.cases.meera.state === "placed" && S.cases.meera.placed === "care") return st("green", "Safe at a school nearby"); return x ? st(x[0], x[1]) : ""; };
   function statusOf(p) {
-    if (p.status === "stopped") return st("red", "Gone", "stopped");
+    if (p.status === "stopped") return st("red", "Missing", "stopped");
     if (p.status === "unconfirmed") return st("orange", "Not sure", "unconfirmed");
     if (p.status === "quiet") return st("orange", "Here, not replying", "quiet");
     if (p.status === "nodevice") return st("", "No phone", "nodevice");
@@ -61,11 +61,19 @@
 
   V["#alert"] = () => `
     ${head("Still Here", "Find out who in your life is safe, who is alone, and who can get to them.")}
-    <div class="group" style="margin-top:26px">
+    <div class="persona"><span class="avatar">SS</span><div><b>In this demo, you are Sunita Sharma, 50</b><span>You live in Rohini, Delhi. It's 7:10 am, the morning after the vanishing. Your granddaughter Meera, 3, lives in Mumbai, and your mother Kamla, 78, lives 3 km away. Everything here is what your phone would show.</span></div></div>
+    <div class="group" style="margin-top:18px">
       <div class="alert-row">${tile("siren", "red", true)}<div class="tt"><b>Emergency alert from the Government of India</b><span>National Disaster Management Authority (NDMA) · 6:00 am today</span><span style="font-size:15px;color:var(--label);margin-top:8px">At 2:32 pm yesterday, half of all people vanished in the same second, all over the world. Nobody has vanished since. If you are safe, stay where you are unless someone needs you. Open Still Here to see who in your life is safe.</span></div></div>
       <div class="r t">${tile("smartphone", "gray")}<div class="tt"><b>You: Sunita Sharma, +91 98••• •4410</b><span>Your phone has been used since 2:32 pm, so you're shown as here.</span></div>${st("green", "Here")}</div>
     </div>
-    <p class="foot">Still Here runs under an emergency order with India's mobile networks (Jio, Airtel, Vi and BSNL). They already know which phones went silent at 2:32 pm, and who calls whom. Still Here uses that only to find people who are alone and the people who know them.</p>
+    ${sect("Where Still Here's information comes from")}
+    <div class="group tiles">
+      <div class="r t">${tile("radio-tower", "blue")}<div class="tt"><b>India's mobile networks</b><span>Jio, Airtel, Vi and BSNL know which phones went silent at 2:32 pm, roughly where each phone is, and who calls whom.</span></div></div>
+      <div class="r t">${tile("landmark", "indigo")}<div class="tt"><b>Government records</b><span>Birth registers, ration cards, vaccination records (U-WIN), schools, anganwadis and hospitals: who lives where, and who depends on whom.</span></div></div>
+      <div class="r t">${tile("globe", "green")}<div class="tt"><b>Google, Apple and Meta</b><span>Which accounts went silent at 2:32 pm, shared under the same emergency order, so the picture stays current.</span></div></div>
+      <div class="r t">${tile("users", "orange")}<div class="tt"><b>People on duty and places that are open</b><span>Police, health workers, clinics and shops post what they have and what they need.</span></div></div>
+    </div>
+    <p class="foot">Still Here works under an emergency order with these partners and the National Disaster Management Authority. It uses the data only to find people who are alone and the people who know them, and refreshes it every few minutes.</p>
     <div class="btn-row"><button class="btn btn-prominent btn-block" data-action="enter">I'm Safe. Show Me My People</button></div>
     <div class="btn-row" style="margin-top:8px"><a class="btn btn-block" href="#onmyown">I'm On My Own and Need Someone</a></div>
     <p class="foot">Tapping this tells your family you're safe. Only people who have your number and chose you can see you. Still Here never asks for money, an OTP, or for a message to be forwarded. In this prototype, every person, place and personal number is made up.</p>`;
@@ -120,25 +128,28 @@
       "4": "Forward me the message and I'll check it against official sources.\n\nYou forwarded: \"Kalpakkam nuclear plant has exploded\"\nNot true. The reactors shut down safely at 03:10 and radiation monitors read normal (Nuclear Power Corporation, 07:00).",
       "5": "Tell me where and what you saw. It goes only to the area's health worker, never to the public.\n\nYou wrote: \"Boy about 5, crying on the steps of C-7 block\"\nKiran, the health worker, is on her way with a constable." }[k]; }
   V["#bot"] = () => { const msgs = S.bot || botStart();
-    return `${head("Still Here on WhatsApp", "The same help as a chat, for anyone who has WhatsApp but not this app. Tap a reply to try it.")}
+    return `${head("Still Here as a chat", "The same help as a chat on WhatsApp, Instagram, Telegram or Messenger, and by SMS on a basic phone. Tap a reply to try it.")}
       <div class="thread botthread" style="margin-top:18px">${msgs.map(m => `<div class="msg ${m.me ? "out" : "in"}">${m.me ? "" : `<span class="from">Still Here bot</span>`}<span class="botline">${esc(m.t)}</span></div>`).join("")}</div>
       <div class="reply-row">${BOTMENU.map(([k, l]) => `<button class="btn btn-compact" data-action="bot" data-v="${k}">${esc(l)}</button>`).join("")}</div>
-      ${disc("Where its answers come from", "The same sources as the app: your people's status, places that update themselves, staff phones at hospitals and shops, and official notices. In the real product it runs on WhatsApp's business platform, and also by SMS for basic phones.")}`; };
+      ${disc("Where its answers come from", "The same sources as the app: your people's status, places that update themselves, staff phones at hospitals and shops, and official notices. In the real product it runs on WhatsApp's business platform, on Instagram, Telegram and Facebook Messenger, and by SMS for basic phones.")}`; };
 
   /* The child alert (24 Oct night): for a young child holding a parent's phone (STRATEGY §8) */
   const SAY = { en: "Are you okay? Is a grown-up with you? Press the green face if a grown-up is with you. Press the red face if you are alone.", hi: "क्या तुम ठीक हो? क्या कोई बड़ा तुम्हारे साथ है? अगर कोई बड़ा साथ है तो हरा चेहरा दबाओ। अगर तुम अकेले हो तो लाल चेहरा दबाओ।" };
-  V["#child"] = () => { const a = S.childAns;
-    return `${head("The child alert", "What a young child sees when they pick up the phone of a parent who vanished. The phone speaks, in the language it was set to.", ["#more", "More"])}
+  V["#child"] = () => { const a = S.childAns, who = S.childWho;
+    return `${head("The child alert", "Part of the morning alert that reaches every phone. Whoever is holding the phone says who they are, so a child gets a child's version, read aloud.", ["#more", "More"])}
       <div class="kidalert">
         <div class="ka-top">${I("siren", 18)}<span>Emergency alert · Government of India</span></div>
-        ${!a ? `<p class="ka-q">Are you okay?<br>Is a grown-up with you?</p><p class="ka-hi" lang="hi">क्या तुम ठीक हो? क्या कोई बड़ा तुम्हारे साथ है?</p>
+        ${!who ? `<p class="ka-q">Who is holding this phone?</p><p class="ka-hi" lang="hi">यह फ़ोन किसके हाथ में है?</p>
+          <div class="ka-btns"><button class="ka-b ok" data-action="kidwho" data-v="adult"><span>🧑</span>I'm a grown-up</button><button class="ka-b kid" data-action="kidwho" data-v="child"><span>🧒</span>I'm a child</button></div>`
+        : who === "adult" ? `<p class="ka-q">Thank you.</p><p class="ka-s">If you're safe, open Still Here and tap I'm Safe. If someone else's child is with you, add them under Who's with you, so nobody is sent to an empty home.</p>`
+        : !a ? `<p class="ka-q">Are you okay?<br>Is a grown-up with you?</p><p class="ka-hi" lang="hi">क्या तुम ठीक हो? क्या कोई बड़ा तुम्हारे साथ है?</p>
           <div class="ka-btns"><button class="ka-b ok" data-action="kid" data-v="ok"><span>🙂</span>A grown-up is with me</button><button class="ka-b no" data-action="kid" data-v="alone"><span>😟</span>I'm alone</button></div>
           <button class="btn btn-compact" data-action="kidsay">${I("message-circle", 15)}Say It Again</button>`
         : a === "alone" ? `<p class="ka-q">Help is coming.</p><p class="ka-s">Stay inside and keep the door shut. A grown-up who knows you will come. They will say this word:</p><p class="ka-code">🥭 MANGO</p><p class="ka-s">Open the door only for the person who says it.</p>`
         : `<p class="ka-q">Good. 🙂</p><p class="ka-s">Ask the grown-up to tap I'm Safe on their own phone.</p>`}
       </div>
-      ${a ? `<div class="btn-row"><button class="btn btn-block" data-action="kid" data-v="">Show the Alert Again</button></div>` : ""}
-      ${disc("How it works", "It is sent only by the verified government sender, to a phone whose owner fell still at 2:32 pm and which someone has started using again: often a child. The phone reads it aloud. A red tap, or no tap within two minutes while no adult's phone is at home, starts a case for that child, sent to the people the parents called most. The person who goes is told the code word, so the child knows who to open the door for. No photo is taken.")}`; };
+      ${who ? `<div class="btn-row"><button class="btn btn-block" data-action="kidwho" data-v="">Show the Alert Again</button></div>` : ""}
+      ${disc("How it works", "It is part of the 6 am alert from the verified government sender, so it reaches every phone, and the phone can\'t guess who is holding it. So it asks. On a phone whose owner went missing at 2:32 pm and which someone has started using again, it reads itself aloud, because a child is the most likely person holding it. A red tap, or no tap within two minutes while no adult's phone is at home, starts a case for that child, sent to the people the parents called most. The person who goes is told the code word, so the child knows who to open the door for. No photo is taken.")}`; };
 
   V["#home"] = () => {
     const w = myWard(), ind = MD.scopes.india(MD.NOW);
@@ -155,20 +166,21 @@
       ${intro("Everyone you call or message, and your family's phones. Green means their phone is still being used, so they're here.")}
       ${sect("Needs you now")}${intro("Both have no adult left with them. You see their cases because you're family.")}
       <div class="group">${need("meera")}${need("kamla")}</div>
-      ${sect("Here")}
+      ${sect("Here")}${intro("\u201cAsk if they're OK\u201d sends them: \u201cSunita wants to know you're okay. Reply 1 if you are.\u201d Their reply shows here.")}
+      <div class="askby"><span class="fn">Ask by</span><div class="seg">${[["wa", "WhatsApp"], ["sms", "SMS"], ["both", "Both"], ["call", "A call"]].map(([k, l]) => `<button class="${(S.askBy || "both") === k ? "on" : ""}" data-action="askby" data-v="${k}">${l}</button>`).join("")}</div></div>
       <div class="group">${here.map(hereRow).join("")}</div>
       ${sect("No phone of their own")}${intro("We check on them through the people they live with.")}
       <div class="group">${nophone.map(p => `<a class="r" href="#case-${p.id}"><span class="avatar">${initials(p.name)}</span><div class="tt"><b>${esc(p.name)}</b><span>${esc(p.rel)} · ${p.age} · ${esc(p.city)}</span></div>${p.id === "meera" || p.id === "kamla" ? caseSt(p.id) : statusOf(p)}${chev()}</a>`).join("")}</div>
-      ${sect("Gone")}${intro("Their phone was being used at 2:32 pm yesterday, fell still in that same second, and hasn't been touched since. If you think one of these is wrong, say so.")}
+      ${sect("Missing since 2:32 pm")}${intro("We're so sorry. Their phone was in use at 2:32 pm yesterday, fell still in that same second, and hasn't been touched since. If you think one of these is wrong, say so.")}
       <div class="group">${gone.map(goneRow).join("")}</div>
-      ${disc("How Still Here knows who's gone", "At 2:32 pm yesterday, half of all phones that were in someone's hand, on a call, being typed on or moving in a car fell still in the same second, and none of them has been touched since. That is the only trace the vanishing left. Mobile networks see that a phone stopped moving and has made no call or message; Google and Apple see that it was never unlocked again. If a phone was lying idle at that moment, we can't be sure, so it says Not sure. Anyone wrongly shown as gone can tap I'm here on any phone, and it's corrected for everyone.")}
+      ${disc("How Still Here knows who's missing", "At 2:32 pm yesterday, half of all phones that were in someone's hand, on a call, being typed on or moving in a car fell still in the same second, and none of them has been touched since. That is the only trace the vanishing left. Mobile networks see that a phone stopped moving and has made no call or message; Google and Apple see that it was never unlocked again. If a phone was lying idle at that moment, we can't be sure, so it says Not sure. Anyone wrongly shown as missing can tap I'm here on any phone, and it's corrected for everyone.")}
       <div class="btn-row btn-pair"><a class="btn" href="#find">${I("search", 16)}Find Someone</a><a class="btn" href="#report">${I("siren", 16)}Report Someone Alone</a></div>
       ${sect("Across India")}
       <div class="group" data-help="vanish"><div class="r t">${tile("shield-check", "green")}<div class="tt"><b>Nobody else has vanished since 2:32 pm yesterday</b><span>Every phone that was working this morning is still working. That's how we know it happened only once.</span></div><span class="spark" id="flat2"></span></div></div>
       <div class="stats" style="margin-top:14px">
         ${stat("Children found alone who are now safe, India", C(ind.reached), `${P(ind.share)} of about ${C(ind.A)} expected`, "reached")}
         ${stat("Safe so far in your ward, Rohini", `${fmt(w.reached)} <small>of ${fmt(w.A)}</small>`, P(w.reached / w.A) + " of children found alone here", "alone")}
-        ${stat("Your people", `${here.length} <small>here</small> · ${gone.filter(p => p.status === "stopped").length} <small>gone</small>`, `${gone.filter(p => p.status === "unconfirmed").length} not sure · ${nophone.length} without a phone`, "stopped")}
+        ${stat("Your people", `${here.length} <small>here</small> · ${gone.filter(p => p.status === "stopped").length} <small>missing</small>`, `${gone.filter(p => p.status === "unconfirmed").length} not sure · ${nophone.length} without a phone`, "stopped")}
       </div>`;
   };
 
@@ -194,13 +206,15 @@
     const a = S.requestMode === "active";
     const res = !S.requested ? "" : a
       ? `<div class="group" style="margin-top:14px"><div class="r t">${tile("check", "green")}<div class="tt"><b>Shalini Gupta is safe</b><span>She's your sister and has your number, so you can see her: she used her phone an hour ago, in Jaipur. We've asked her to message you.</span></div>${st("green", "Here")}</div></div>`
-      : `<div class="group" style="margin-top:14px"><div class="r t">${tile("shield", "gray")}<div class="tt"><b>We can't tell you about Savitri Devi</b><span>She isn't in your contacts and hasn't chosen you, so her details stay private. We've passed on that you're looking for her, and asked the community health worker (ASHA) in her area to check on her. If she wants to, she'll reply to you.</span></div>${st("", "Message passed on")}</div></div>`;
+      : `<div class="group" style="margin-top:14px"><div class="r t">${tile("search", "blue")}<div class="tt"><b>3 people named Savitri Devi are registered in Malviya Nagar, Jaipur</b><span>One of them is in your mother Kamla's contacts, so she's the one we chose. Her phone was used this morning.</span></div>${st("green", "Here")}</div>
+        <div class="r t">${tile("shield", "gray")}<div class="tt"><b>We can't show you her details</b><span>She doesn't have your number, so we've passed on that you're looking for her and asked the health worker (ASHA) in her area to check on her. If she wants to, she'll reply to you.</span></div>${st("", "Message passed on")}</div></div>`;
     return `${head("Find someone", "See whether someone you know is safe.", ["#home", "Your people"])}
       <div class="mapsearch" style="margin-top:22px"><label class="field">${I("search", 17)}<input type="search" value="${a ? "Shalini Gupta" : "Savitri Devi, Malviya Nagar, Jaipur"}" aria-label="Name or phone number" readonly></label></div>
       <div class="seg" style="margin:0 0 12px"><button class="${a ? "on" : ""}" data-action="reqmode" data-v="active">Someone Who Has Your Number</button><button class="${!a ? "on" : ""}" data-action="reqmode" data-v="nodevice">Someone Who Doesn't</button></div>
-      <p class="foot">Two examples are filled in: your sister Shalini, and Savitri Devi, an old friend of your mother's who doesn't have your number.</p>
+      <p class="foot">Two examples are filled in: your sister Shalini, and Savitri Devi, an old friend of your mother's who doesn't have your number and isn't online.</p>
       <div class="btn-row"><button class="btn btn-prominent btn-block" data-action="request">Find Them</button></div>${res}
       <p class="foot">Looking for a doctor rather than a person? <a href="#help">See doctors and nurses on duty near you</a>.</p>
+      ${disc("How we find someone who isn't online", "Every SIM card in India is registered to a name and an address, and ration cards and voter rolls list who lives where. So a name and a town is enough, even for someone with no internet, no Facebook and no email. We start with people in your contacts and your family's contacts, then the same name in that locality, so the right person comes first. Their phone tells us whether they're here.")}
       ${disc("Why you can't see everyone", "A list of who is alone, and where, would help thieves and people who prey on children. So you only ever see people who have your number too, or who chose you. Anyone else gets your message, and decides for themselves.")}`;
   };
 
@@ -221,7 +235,7 @@
     const named = c.circle.filter(p => !p.stopped), gone = c.circle.filter(p => p.stopped);
     const rstat = { lata: s.state === "notified" ? ["", "Read it"] : ["orange", "Going"], rakesh: S.rakeshCant ? ["", "Can't go"] : ["", "Read it"], farah: ["", "Delivered"], nair: ["", "Delivered"] };
     const circleGroup = `<div class="group">${named.map(p => `<div class="r"><span class="avatar">${initials(p.name)}</span><div class="tt"><b>${esc(p.name)}</b><span>${esc(p.rel)} · ${p.dist} km away · her parents called ${p.calls} times last month</span></div>${st(rstat[p.id][0], rstat[p.id][1])}</div>`).join("")}
-      ${gone.map(p => `<div class="r"><span class="avatar">${initials(p.name)}</span><div class="tt"><b style="color:var(--label2)">${esc(p.name)}</b><span>${esc(p.rel)} · also vanished at 2:32 pm</span></div>${st("red", "Gone")}</div>`).join("")}
+      ${gone.map(p => `<div class="r"><span class="avatar">${initials(p.name)}</span><div class="tt"><b style="color:var(--label2)">${esc(p.name)}</b><span>${esc(p.rel)} · also missing since 2:32 pm</span></div>${st("red", "Missing")}</div>`).join("")}
       <div class="r t">${tile("building-2", "gray")}<div class="tt"><b>Her building, ${esc(b.name)}</b><span>We asked the watchman and the residents' group only: "${esc(b.q)}" Two said no. We didn't tell them her name, her age, or that she's alone.</span></div></div></div>`;
     let body = "";
     if (s.state === "notified") body = `${sect("We messaged the people who know her", `<span class="fn">at 6:52 am</span>`)}${intro("The four people her parents called most who live in Mumbai. Each got the message in their own language and can reply with one digit.")}${circleGroup}
@@ -287,12 +301,13 @@
         <p class="foot">The example is filled in for you: your neighbour's son, who came to your flat last night.</p>
         <div class="btn-row" style="display:flex;gap:10px"><button class="btn" data-action="addelder">Add an Elder Instead</button><button class="btn btn-prominent" style="flex:1" data-action="withme-add">Add Him</button></div>`;
     else if (st0 === "unconfirmed") card = `<div class="group tiles"><div class="r"><span class="avatar">AM</span><div class="tt"><b>${esc(g.name)}, ${g.age}</b><span>Your neighbour's son · added at 7:12 am</span></div>${st("orange", "Waiting for his family")}</div>
-        <div class="r t">${tile("users", "orange")}<div class="tt"><b>We've asked his family to confirm</b><span>His aunt in Noida will see him with you on a video call. If she can't, Kiran, the area's community health worker (ASHA), will visit by 11 am.</span></div></div></div>
+        <div class="r t">${tile("search", "blue")}<div class="tt"><b>How we know who he is</b><span>A 7-year-old often has no Aadhaar, so we matched his name, age and address against the birth register, his school\'s roll and his vaccination record (U-WIN). That gave us his parents\' phones, and the people they called most.</span></div></div>
+        <div class="r t">${tile("users", "orange")}<div class="tt"><b>We've asked his family to confirm</b><span>His aunt in Noida, whom his parents called most, will see him with you on a video call. If she can't, Kiran, the area's community health worker (ASHA), will visit by 11 am.</span></div></div></div>
         <div class="btn-row"><button class="btn btn-block" data-action="withme-confirm">His Aunt Confirms on Video (demo)</button></div>
         <p class="foot">Until someone who knows him confirms, nothing changes for you.</p>`;
     else card = `<div class="group tiles"><div class="r"><span class="avatar">AM</span><div class="tt"><b>${esc(g.name)}, ${g.age}</b><span>Your neighbour's son · his aunt confirmed at 7:20 am</span></div>${st("green", "Safe with you")}</div>
         <div class="r t">${tile("check", "green")}<div class="tt"><b>His family knows he's with you</b><span>His aunt saw him on a video call and will come on Day 2.</span></div></div>
-        <div class="r t">${tile("package", "orange")}<div class="tt"><b>His food ration comes to you</b><span>${esc(g.ration)}, on your ration card from today.</span></div></div>
+        <div class="r t">${tile("package", "orange")}<div class="tt"><b>Your digital ration card now includes him</b><span>${esc(g.ration)} more from today. Show the card\'s QR code at any ration shop; no paper needed.</span></div><span class="val">RC-DL-4471</span></div>
         <div class="r t">${tile("shield", "blue")}<div class="tt"><b>A guardian pass</b><span>Code ${esc(g.code)}, valid for two weeks. Police, hospitals and schools can check it with the child helpline.</span></div></div>
         <div class="r t">${tile("heart-pulse", "red")}<div class="tt"><b>Someone checks on him</b><span>Kiran, the community health worker, visits on Day 3.</span></div></div></div>`;
     return `${head("Who's with you", "A child or an elderly person who is already in your care.")}
@@ -393,7 +408,7 @@
         ${crumbs()}
         <div class="filters" style="margin-top:0"><div class="seg">${MD.TIMES.map((t, i) => `<button class="${(S.ti || 0) === i ? "on" : ""}" data-action="time" data-v="${i}">${t.short}</button>`).join("")}</div><span class="proj ${isNow() ? "now" : ""}" data-help="projection">${isNow() ? "Now" : "Estimate"}</span></div>
         <div class="stats four" style="margin-bottom:14px">${stat(RC.TERMS.alone, C(v.A), `${name} · ${v.flagged >= v.A * 0.99 ? "all found" : C(v.flagged) + " found so far"}`, "alone")}${stat(RC.TERMS.reached, C(v.reached), P(v.share) + " of them", "reached")}${stat(RC.TERMS.claimed, C(v.claimed), "said they're going", "claimed")}${stat(RC.TERMS.unclaimed, C(v.unclaimed), "messaged, nobody going", "unclaimed")}</div>
-        <div class="mapgroup"><div class="mapbox" id="pubmap"></div>${M.legend()}</div>
+        <div class="mapgroup"><div class="mapbox" id="pubmap"></div>${M.legend()}</div><p class="stamp">${I("clock", 13)}${isNow() ? "Updated 7:10 am · refreshes every 5 minutes" : "Estimate for " + esc(TT().label)}</p>
         ${sel ? `${sect(esc(selName()), sel.nodata ? st("", "No data") : paceSt(sel.share, MD.scopes.india(h).share))}
           <div class="group pad">${sel.nodata ? `<p class="sub" style="margin:0">There's no phone network here, so we have no numbers. Grey stripes mean only that, not that things are bad.</p>` : `${CH.stack(sel)}<p class="fn" style="margin:10px 0 0">${C(sel.A)} children left alone here</p>
             <div class="h3" style="margin:18px 0 4px">Is it getting better?</div><p class="trendline">${esc(CH.trendSentence(selFn(), MD.NOW, selName().replace(", your ward", "")))}</p><div id="selchart"></div>`}</div>` : `<p class="foot">Tap any area on the map for its numbers and whether it is getting better.</p>`}
@@ -411,7 +426,7 @@
     o.sel = S.mapSel && S.mapSel.kind !== "state" ? S.mapSel.key : null;
     if (view === "city") {
       o.labels = o.sel && MD.byKey[o.sel] ? [{ k: o.sel, t: MD.byKey[o.sel].name, strong: true }] : [];
-      if (c === "delhi") { o.mine = WARD.key; o.labels.unshift({ k: WARD.key, t: "You · Rohini", strong: true }); }
+      if (c === "delhi") { o.mine = WARD.key; o.labels.unshift({ k: WARD.key, t: "Rohini", strong: true }); o.pins = [{ id: "me", lonlat: [77.115, 28.716], color: "var(--apple-blue)", r: 6, label: "You are here" }]; }
       if (c === "mumbai") o.pins = [{ id: "meera", lonlat: MEERA_LL, color: "var(--apple-red)", r: 6, label: "Meera" }];
       const big = MD.CITIES[c].wards.slice().sort((a, b) => b.A - a.A).slice(0, 8); o.labels = o.labels.concat(big.map(u => ({ k: u.key, t: u.name.replace(/^Ward /, "") })));
     } else if (view === "india") o.labels = Object.entries(RC.GEO.india.states).map(([n, st]) => ({ at: st.c, t: st.code, strong: S.mapSel && S.mapSel.key === n }));
@@ -468,10 +483,10 @@
     let body = "";
     if (t === "services") body = servicesGroup();
     else if (t === "notices") body = noticesGroups();
-    else if (t === "groups") body = `<div class="group tiles">${RC.communities.map((g, i) => `<div class="r t">${tile("users", g.accepting ? "indigo" : "gray")}<div class="tt"><b>${esc(g.name)}</b><span>${esc(g.members)} · ${esc(g.organiser)}</span></div>${g.accepting ? (S.joined[i] ? st("green", "Asked") : `<button class="btn btn-compact" data-action="join" data-i="${i}">Ask to Join</button>`) : st("", "Not taking anyone new")}</div>`).join("")}</div>`;
+    else if (t === "groups") body = `${intro("A group is run by a named organiser: a residents\u2019 association, a hostel, a temple committee or a factory. It can post notices to its members and ask them for help. Joining shares only your ward with the organiser, never your address.")}<div class="group tiles">${RC.communities.map((g, i) => `<div class="r t">${tile("users", g.accepting ? "indigo" : "gray")}<div class="tt"><b>${esc(g.name)}</b><span>${esc(g.members)} · ${esc(g.organiser)}</span></div>${g.accepting ? (S.joined[i] ? st("green", "Asked") : `<button class="btn btn-compact" data-action="join" data-i="${i}">Ask to Join</button>`) : st("", "Not taking anyone new")}</div>`).join("")}</div>`;
     else if (t === "authorities") body = `<div class="group tiles">${RC.authorities.map(a => `<div class="r t">${tile("shield", "blue")}<div class="tt"><b>${esc(a.name)}</b><span>${esc(a.staff)} · ${esc(a.dist)}</span></div><span class="val">${esc(a.phone)}</span></div>`).join("")}</div><p class="foot">We count staff at work by whose work phones are there now.</p>`;
     else body = `<div class="group tiles">${RC.places.map(p => `<div class="r t">${tile(p.kind === "worship" ? "landmark" : "building-2", p.open ? "green" : "gray")}<div class="tt"><b>${esc(p.name)}</b><span>${esc(p.staff)} · ${esc(p.dist)}</span></div>${p.open ? st("green", "Open") : st("", "Unknown")}</div>`).join("")}</div>`;
-    return `${head(RC.me.ward, "Your ward: the part of Delhi you live in. You see more detail here because your home is here.")}<div class="filters"><div class="seg">${tabs}</div></div>${body}${disc("Who sees what", "You see your own ward and the wards next to it in detail, and only totals everywhere else. Nobody sees the address of a child who is alone unless they're asked to go to her.")}`;
+    return `${head(RC.me.ward, "Your ward: the part of Delhi you live in. You see more detail here because your home is here.")}<div class="mapgroup" style="margin:14px 0 16px"><div class="mapbox" id="wardmap" style="height:300px;min-height:0"></div>${M.legend()}</div><div class="filters"><div class="seg">${tabs}</div></div>${body}${disc("Who sees what", "You see your own ward and the wards next to it in detail, and only totals everywhere else. Nobody sees the address of a child who is alone unless they're asked to go to her.")}`;
   };
 
   const AGE = { "under 5": "Child under 5", "6–12": "Child, 6 to 12", "over 75": "Elder over 75" };
@@ -560,9 +575,12 @@
     checkclaim() { const q = document.getElementById("claimq"); S.claim = q ? q.value : S.claim; markStep(10); },
     bot(d) { const m = S.bot || botStart(); m.push({ t: BOTMENU.find(x => x[0] === d.v)[1].slice(2), me: true }); m.push({ t: botReply(d.v) }); S.bot = m; markStep(10); },
     kid(d) { S.childAns = d.v || null; },
+    kidwho(d) { S.childWho = d.v || null; if (!d.v) S.childAns = null; },
     kidsay() { try { const u = new SpeechSynthesisUtterance(SAY.en); u.lang = "en-IN"; speechSynthesis.cancel(); speechSynthesis.speak(u); const h = new SpeechSynthesisUtterance(SAY.hi); h.lang = "hi-IN"; speechSynthesis.speak(h); } catch (e) {} },
     report() { S.reported = true; markStep(9); },
-    checkin(d) { S.checkins[d.id] = true; markStep(2); toast("Asked. They'll get a message: are you OK?"); },
+    askby(d) { S.askBy = d.v; },
+    checkin(d) { S.checkins[d.id] = true; markStep(2); const p = RC.people.find(x => x.id === d.id) || {}, how = { wa: "on WhatsApp", sms: "by SMS", both: "on WhatsApp and by SMS", call: "with an automated call" }[S.askBy || "both"];
+      toast(`Sent ${how}: \u201cSunita wants to know you're okay.\u201d ${(p.name || "They").split(" ")[0]}'s reply will show here.`); },
     "call-lata"() { S.called.lata = true; addLog("meera", "07:11", "You called Lata for 2 minutes. She had read the message and was looking for her keys."); toast("Calling Lata Pawar…"); },
     addsomeone() { toast("Type a name and number. If her parents were in touch with that number, they get her case too."); },
     addelder() { toast("You'd add an elder the same way: name, age and where they live."); },
@@ -614,7 +632,7 @@
   };
 
   /* ---------- chrome ---------- */
-  const NAV = [["sec", "Your people"], ["#home", "Who's here", "house"], ["#cases", "Cases", "users"], ["#find", "Find someone", "search"], ["#report", "Report someone alone", "siren"], ["#with", "Who's with you", "hand-helping"], ["sec", "Around you"], ["#map", "Map", "map-pinned"], ["#help", "Help is coming", "truck"], ["#ward", "Your ward", "building-2"], ["sec", "Tools"], ["#check", "Is this true?", "circle-help"], ["#bot", "WhatsApp bot", "message-circle"], ["#onmyown", "If you're on your own", "life-buoy"], ["#child", "Child alert", "baby"], ["#radar", "On duty", "radar"], ["#kit", "Offline kit", "download"], ["sec", "Prototype"], ["#about", "About", "info"], ["contributor.html", "Contributor portal", "building-2"], ["cockpit.html", "Government view", "landmark"]];
+  const NAV = [["sec", "Your people"], ["#home", "Who's here", "house"], ["#cases", "Cases", "users"], ["#find", "Find someone", "search"], ["#report", "Report someone alone", "siren"], ["#with", "Who's with you", "hand-helping"], ["sec", "Around you"], ["#map", "Map", "map-pinned"], ["#help", "Help is coming", "truck"], ["#ward", "Your ward", "building-2"], ["sec", "Tools"], ["#check", "Is this true?", "circle-help"], ["#bot", "Chat bot", "message-circle"], ["#onmyown", "If you're on your own", "life-buoy"], ["#child", "Child alert", "baby"], ["#radar", "On duty", "radar"], ["#kit", "Offline kit", "download"], ["sec", "Prototype"], ["#alert", "Back to the morning alert", "siren"], ["#about", "About", "info"], ["contributor.html", "Contributor portal", "building-2"], ["cockpit.html", "Government view", "landmark"]];
   function chrome() {
     $("#nav").innerHTML = NAV.map(n => n[0] === "sec" ? `<div class="sec">${n[1]}</div>` : `<a href="${n[0]}"${n[0].indexOf("#") ? ` target="_blank" rel="noopener"` : ""}>${I(n[2], 17)}<span>${n[1]}</span></a>`).join("");
     const tabs = [["#home", "People", "house"], ["#cases", "Cases", "users"], ["#map", "Map", "map-pinned"], ["#help", "Help", "truck"]];
@@ -623,7 +641,7 @@
     $("#topstatus").innerHTML = `${I("shield-check", 17)}<span class="full">Nobody has vanished since 2:32 pm yesterday</span><span class="short">No new vanishings</span><span class="long fn" style="font-weight:400">· checked every minute</span>`;
     const sh = document.querySelector('[data-action="share"]'); if (sh) sh.innerHTML = I("share-2", 17);
   }
-  const STEPS = ["Read the alert, then tap I'm Safe", "See your people: who's here, who's gone, and how it's known", "Open Meera: the people who know her were messaged at 6:52 am", "In Messages, answer as Lata: 1, I'm going", "Answer as Lata: HAVE HER, when she's with Meera", "Video-call Lata, then choose where Meera stays", "Your mother Kamla: I'm Going, then I'm With Her", "Map: search a city, then look at Day 2", "Find someone, report someone alone, or add Aarav to Who's with you", "Help is coming: supplies and what's open", "On duty, your ward and the offline kit", "About, then the government view"];
+  const STEPS = ["Read the alert, then tap I'm Safe", "See your people: who's here, who's missing, and how it's known", "Open Meera: the people who know her were messaged at 6:52 am", "In Messages, answer as Lata: 1, I'm going", "Answer as Lata: HAVE HER, when she's with Meera", "Video-call Lata, then choose where Meera stays", "Your mother Kamla: I'm Going, then I'm With Her", "Map: search a city, then look at Day 2", "Find someone, report someone alone, or add Aarav to Who's with you", "Help is coming: supplies and what's open", "On duty, your ward and the offline kit", "About, then the government view"];
   function renderThread() {
     const el = $("#thread"); if (!el) return;
     el.classList.toggle("mesh", S.mesh);
@@ -659,6 +677,12 @@
         xticks: [{ x: 6, l: "Noon" }, { x: 14, l: "8 pm" }, { x: 26, l: "Day 2" }, { x: 50, l: "Day 3" }],
         series: [{ name: "Safe with someone", color: "var(--st-reached)", area: true, pts: pts.map(p => ({ x: p.h, y: p.share })) }, { name: "Nobody going yet", color: "var(--st-nobody)", pts: pts.map(p => ({ x: p.h, y: p.unclaimedShare })) }] }); }
     const am = $("#avoidmap", root); if (am) M.render(am, { view: "delhi", aria: "Places to avoid in Delhi", mine: WARD.key, labels: [{ k: WARD.key, t: "You", strong: true }].concat(RC.avoid.map(z => ({ ll: [z.lonlat[0], z.lonlat[1] + 0.012], t: z.z }))), zones: RC.avoid.map((z, i) => Object.assign({ id: "z" + i }, z)), hover: k => { if (k.indexOf("zone:") === 0) { const z = RC.avoid[+k.slice(6)]; return z ? `<b>${esc(z.z)}</b><div>${esc(z.why)}</div>` : ""; } const u = MD.byKey[k]; return u ? `<b>${esc(u.name)}</b>` : ""; } });
+    // Your ward, zoomed in on Rohini: draw Delhi once, then zoom to the ward's own outline
+    const wm = $("#wardmap", root); if (wm) { const h = HH(), wo = { view: "delhi", aria: "Your ward and the wards around it", mine: WARD.key, fill: k => { const v = MD.scopes.unit(k, h); return v ? MD.color(v) : null; },
+        labels: [{ k: WARD.key, t: "Rohini", strong: true }], pins: [{ id: "me", lonlat: [77.115, 28.716], color: "var(--apple-blue)", r: 6, label: "You are here" }],
+        hover: k => { const v = MD.scopes.unit(k, h); return v && v.unit ? `<b>${esc(v.unit.name)}</b><div>${P(v.share)} of children found alone are safe</div>` : ""; } };
+      M.render(wm, wo); const p = wm.querySelector(`path[data-hk="${WARD.key}"]`);
+      if (p && wm._z && wm._z.k === 1) { const b = p.getBBox(); wm._z.k = 5; wm._z.cx = b.x + b.width / 2; wm._z.cy = b.y + b.height / 2; M.render(wm, wo); } }
     const fm = $("#flowmap", root); if (fm) { const ac = RC.communities.filter(c => c.accepting), fl = RC.flows.map((f, i) => Object.assign({ n: i + 1 }, f));
       M.render(fm, { view: "india", edges: false, aria: "Supplies on the way", arcs: fl.map(f => ({ from: f.fromLL, to: f.toLL, n: f.n, toLabel: f.to })), pins: ac.map((c, i) => ({ id: "c" + i, lonlat: c.lonlat, color: "var(--apple-indigo)", r: 5 })),
         labels: [{ ll: [77.2, 28.62], t: "Delhi", strong: true }],

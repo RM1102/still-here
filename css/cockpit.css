@@ -296,3 +296,18 @@ table.t td.grp { font-size: 12.5px; font-weight: 600; color: var(--label2); back
 @media (max-width: 1400px) { .hdr { gap: 12px; } .tabs button { padding: 0 9px; font-size: 13px; } .hdr-r { gap: 10px; } }
 @media (max-width: 1240px) and (min-width: 701px) { .brand span { display: none; } }
 @media (max-width: 1100px) and (min-width: 701px) { .tabs { min-width: 0; overflow-x: auto; scrollbar-width: none; } .tabs::-webkit-scrollbar { display: none; } }
+/* Safari stability (24 Oct, Rahul's crash): no live blur on anything that sits over or follows across a map.
+   Re-blurring hundreds of map shapes on every mouse move can crash a Safari tab; solid surfaces look the same. */
+.tip, .overlay, .mapzoom { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: var(--elev) !important; box-shadow: 0 6px 24px rgb(0 0 0 / .18), 0 0 0 1px var(--hair, rgb(0 0 0 / .08)); }
+[data-map] { contain: content; }
+.fb-toast { inset-block-end: auto !important; inset-block-start: 1rem !important; z-index: 60 !important; }
+:root { --q0: #D93B30; --q1: #EE6A3E; --q2: #F59E42; --q3: #F2C94C; --q4: #8CCB7E; --q5: #2E9E5B; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --q0: #B83229; --q1: #CF5A33; --q2: #D98A3A; --q3: #CFAE45; --q4: #6FAE66; --q5: #36A862; } }
+:root[data-theme="dark"] { --q0: #B83229; --q1: #CF5A33; --q2: #D98A3A; --q3: #CFAE45; --q4: #6FAE66; --q5: #36A862; }
+.fb-toast { background: var(--elev) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; box-shadow: 0 8px 28px rgb(0 0 0 / .28), 0 0 0 1px var(--hair) !important; }
+.l2row { margin-top: 8px; } .l2s { background: var(--fill); border-radius: 12px; padding: 8px 12px; display: grid; gap: 4px; }
+.l2s div { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--label2); } .l2s b { color: var(--label); font-weight: 600; } .l2s b.warn { color: var(--apple-orange); }
+.ess { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; } .ess div { background: var(--fill); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
+.ess b { font-size: 26px; font-weight: 700; letter-spacing: -.02em; } .ess .d { font-size: 12.5px; color: var(--label2); }
+.st-tab td.n, .st-tab th.n { text-align: right; white-space: nowrap; }
+@media (max-width: 980px) { .ess { grid-template-columns: 1fr 1fr; } }

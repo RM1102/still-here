@@ -346,23 +346,41 @@
     const bar = (v, g, c) => `<div class="ib"><i class="${c}" style="width:${Math.min(100, v * 100).toFixed(1)}%"></i><b style="left:${g * 100}%"></b></div>`;
     const f2 = x => x.toFixed(2);
     const step = (n, h, w, v, g, tip) => { const [c, l] = st(v, g); return `<div class="is"><div class="is-top"><span class="n">${n}</span><span class="st ${c}">${l}</span></div><h3>${esc(h)}</h3><div class="w">${esc(w)}</div><div class="v">${P(v)}</div>${bar(v, g, c)}<div class="g">Goal ${P(g)}</div><div class="h">${esc(tip)}</div></div>`; };
-    const [hc, hl] = st(ns, 0.7);
-    return `<div class="page"><div class="page-in"><h1>How we're doing</h1><p class="lede">Are children getting to someone they know, quickly and safely? Each number is timed from a child's first message, across ${where}. Green is on track, orange is close, red needs help.</p>
-      <div class="sec ind-hero"><div><div class="ih-k">Our main goal</div><div class="ih-v">${P(ns)}</div><div class="ih-t">of children found alone are safe with someone they know within 6 hours</div>
-        <div class="ib big"><i class="${hc}" style="width:${(ns * 100).toFixed(1)}%"></i><b style="left:70%"><span>Goal 70%</span></b></div>
-        <div class="ih-n"><span class="st ${hc}">${hl}</span><span>About ${C(ns * A)} of the ${C(A)} children found alone in ${where}</span></div></div>
-        <div class="ih-r"><b>Why this number?</b> It counts children safe, not messages sent. Six hours, because for a small child hours decide. Someone they know, because a stranger is the main risk. And only at the address: a promise to go is not a rescue.</div></div>
-      <div class="sec"><h2>How children get there</h2><p class="sub">When the main goal slips, the step in orange or red is where to help.</p>
-        <div class="ind-steps">${step(1, "Found", "With a case by 10 am, of the children the registers lead us to expect", D.found, 0.9, "The gap is homes on no register.")}
-        ${step(2, "Someone who knows her answered", "Within 30 minutes of her first message", rep, 0.85, "If it drops: SMS, then a voice call, in the family's language.")}
-        ${step(3, "Someone said they're going", "Within 2 hours, once someone answered", cl, 0.85, "One person is named, and all of them see \u201cnobody going yet\u201d.")}
-        ${step(4, "They arrived and she's safe", "Within 6 hours, of those going", ar, 0.97, `Slowest: ${slow.join(" and ")}. Send route notes and transport there.`)}</div>
-        <div class="src">Steps 2 to 4 multiply to the main goal: ${f2(rep)} \u00d7 ${f2(cl)} \u00d7 ${f2(ar)} \u2248 ${f2(ns)}.</div></div>
+    // One north star for children and dependent elders (the two pages, section 5). Elders' circles are smaller, so their share runs a little lower (simulated).
+    const EL = S.scope === "delhi" ? 0.047 : 0.093, ELF = 0.94, nsE = ns * ELF, Ae = A * EL, nsAll = (ns * A + nsE * Ae) / (A + Ae);
+    const [hc, hl] = st(nsAll, 0.7);
+    const l2 = rows => `<div class="l2s">${rows.map(([n, v, ok]) => `<div><span>${esc(n)}</span><b class="${ok ? "" : "warn"}">${esc(v)}</b></div>`).join("")}</div>`;
+    // India at a glance: the essentials, by state (simulated, stable per state)
+    const hsh = t => { let x = 7; for (let i = 0; i < t.length; i++) x = (x * 31 + t.charCodeAt(i)) % 9973; return x / 9973; };
+    const states = Object.keys(M.byState).map(n => { const v = M.scopes.state(n, H()), b = by[n] || { A: 0, s: 0 }, r = hsh(n);
+      return { n, A: v.A * (1 + EL), safe6: b.A ? b.s / b.A : 0, nobody: v.A ? Math.max(0, v.A - v.reached - v.claimed) / v.A : 0, food: Math.round(14 + 26 * r), water: Math.round(34 + 46 * hsh(n + "w")), power: Math.round(38 + 50 * hsh(n + "p")), hosp: Math.round(40 + 45 * hsh(n + "h")) }; })
+      .filter(x => x.A > 2e5);
+    const nat = k => Math.round(states.reduce((a, x) => a + x[k] * x.A, 0) / states.reduce((a, x) => a + x.A, 0));
+    const worst = states.slice().sort((a, b) => a.safe6 - b.safe6).slice(0, 6), best = states.slice().sort((a, b) => b.safe6 - a.safe6).slice(0, 3);
+    const tone = (v, lo, hi) => v < lo ? "red" : v < hi ? "orange" : "green";
+    const essentials = [["package", "Food in stock", `${nat("food")} days`, "of grain at ration shops and depots, at today's pace", tone(nat("food"), 14, 21)], ["droplets", "Water points open", `${nat("water")}%`, "of the points planned for today", tone(nat("water"), 40, 70)], ["zap", "Power restored", `${nat("power")}%`, "of homes, by feeder", tone(nat("power"), 40, 70)], ["heart-pulse", "Hospitals with an emergency team", `${nat("hosp")}%`, "counted from staff phones at each hospital", tone(nat("hosp"), 50, 75)]];
+    return `<div class="page"><div class="page-in"><h1>How we're doing</h1><p class="lede">Are children and elders who were left alone getting to someone they know, quickly and safely? Each number is timed from their first message, across ${where}. Green is on track, orange is close, red needs help.</p>
+      <div class="sec ind-hero"><div><div class="ih-k">Our main goal · dependents safe in time</div><div class="ih-v">${P(nsAll)}</div><div class="ih-t">of children and dependent elders found alone are safe with someone they know within 6 hours</div>
+        <div class="ib big"><i class="${hc}" style="width:${(nsAll * 100).toFixed(1)}%"></i><b style="left:70%"><span>Goal 70%</span></b></div>
+        <div class="ih-n"><span class="st ${hc}">${hl}</span><span>Children ${P(ns)} of ${C(A)}</span><span>Elders ${P(nsE)} of ${C(Ae)}</span></div></div>
+        <div class="ih-r"><b>Why this number?</b> It counts lives kept safe, not messages sent. Six hours, because for a small child or an elder without medicine, hours decide. Someone they know, because a stranger is the main risk. And only at the address: a promise to go is not a rescue.</div></div>
+      <div class="sec"><h2>How they get there</h2><p class="sub">Four steps. When the main goal slips, the step in orange or red is where to help, and the lines under it say why.</p>
+        <div class="ind-steps">${step(1, "Found", "With a case by 10 am, of those the registers lead us to expect", D.found, 0.9, "The gap is homes on no register.")}
+        ${step(2, "Someone who knows them answered", "Within 30 minutes of the first message", rep, 0.85, "If it drops: SMS, then a voice call, in the family's language.")}
+        ${step(3, "Someone said they're going", "Within 2 hours, once someone answered", cl, 0.85, "One person is named, and all of them see “nobody going yet”.")}
+        ${step(4, "They arrived, and it's confirmed", "Within 6 hours, of those going", ar, 0.97, `Slowest: ${slow.join(" and ")}. Send route notes and transport there.`)}</div>
+        <div class="ind-steps l2row">${l2(D.l2[0])}${l2(D.l2[1])}${l2(D.l2[2])}${l2(D.l2[3])}</div>
+        <div class="src">Steps 2 to 4 multiply to the children's share: ${f2(rep)} × ${f2(cl)} × ${f2(ar)} ≈ ${f2(ns)}.</div></div>
       <div class="sec"><h2>Mistakes we watch for</h2><p class="sub">Getting faster must never mean getting careless. Each check has a limit, and a step we take the moment it's crossed.</p>
         <table class="t ind-g"><thead><tr><th>What could go wrong</th><th>How we check</th><th>Today</th><th>Limit</th><th>If it's crossed</th></tr></thead><tbody>${D.guard.map(([w, how, v, lim, act, c]) => `<tr><td><b>${esc(w)}</b></td><td>${esc(how)}</td><td><span class="st ${c}">${esc(v)}</span></td><td>${esc(lim)}</td><td>${c === "green" ? esc(act) : `${esc(act)} <button class="btn btn-compact" data-page="situation">See where</button>`}</td></tr>`).join("")}</tbody></table></div>
+      <div class="sec"><h2>India at a glance</h2><p class="sub">The essentials everyone else depends on, and the states that need help first. Ranked by the main goal.</p>
+        <div class="ess">${essentials.map(([ic, h, v, d, c]) => `<div><span class="st ${c}">${esc(h)}</span><b>${v}</b><span class="d">${esc(d)}</span></div>`).join("")}</div>
+        <table class="t ind-g st-tab"><thead><tr><th>State</th><th class="n">Alone</th><th class="n">Safe in 6 h</th><th class="n">Nobody going yet</th><th class="n">Food</th><th class="n">Water</th><th class="n">Power</th><th class="n">Hospitals</th></tr></thead>
+          <tbody>${worst.map(x => `<tr><td><b>${esc(x.n)}</b></td><td class="n">${C(x.A)}</td><td class="n"><span class="st ${tone(x.safe6 * 100, 60, 70)}">${P(x.safe6)}</span></td><td class="n">${P(x.nobody)}</td><td class="n">${x.food} days</td><td class="n">${x.water}%</td><td class="n">${x.power}%</td><td class="n">${x.hosp}%</td></tr>`).join("")}</tbody></table>
+        <div class="src">Furthest ahead: ${best.map(x => `${esc(x.n)} ${P(x.safe6)}`).join(" · ")}. Food, water, power and hospital figures are simulated.</div></div>
       <div class="cols"><div class="sec"><h2>Do we need to change course?</h2><p class="sub">Our rule: if fewer than half of cases have someone going within 3 hours, we send the first message to the area's anganwadi worker instead.</p>
           <div class="ind-big"><b>${P(g3)}</b>have someone going within 3 hours</div><span class="st green">No change needed</span></div>
-        <div class="sec"><h2>Still safe a week later?</h2><p class="sub">Welfare calls on Days 3 and 7 check that every child is still with the adult who came. Limit: under 2% separated again.</p>
+        <div class="sec"><h2>Still safe a week later?</h2><p class="sub">Welfare calls on Days 3 and 7 check that everyone is still with the adult who came. Limit: under 2% separated again.</p>
           <div class="ind-big"><b>Day 3</b>first calls</div><span class="st">Not measured yet</span></div></div>
       <div class="src">Simulated numbers from the prototype's model. In use, every number comes from the case log, which timestamps each step, so nothing new is collected about anyone.</div></div></div>`;
   }

@@ -337,3 +337,20 @@ body.pre .mobilenav, body.pre .tabbar { display: none !important; }
 .ka-b span { display: block; font-size: 54px; line-height: 1.1; margin-bottom: 6px; }
 .ka-b.ok { background: #1E8E3E; } .ka-b.no { background: #D93025; }
 .kidalert .btn { background: rgb(255 255 255 / .14); color: #fff; }
+/* Safari stability (24 Oct, Rahul's crash): no live blur on anything that sits over or follows across a map.
+   Re-blurring hundreds of map shapes on every mouse move can crash a Safari tab; solid surfaces look the same. */
+.tip, .overlay, .mapzoom { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: var(--elev) !important; box-shadow: 0 6px 24px rgb(0 0 0 / .18), 0 0 0 1px var(--hair, rgb(0 0 0 / .08)); }
+[data-map] { contain: content; }
+/* Rahul's review, 24 Oct night */
+.persona { display: flex; gap: 12px; align-items: flex-start; margin-top: 22px; padding: 14px 16px; border-radius: 16px; background: color-mix(in srgb, var(--apple-blue) 10%, var(--group)); }
+.persona .avatar { flex: none; } .persona b { display: block; font-size: 16px; } .persona span:not(.avatar) { display: block; color: var(--label2); font-size: 14.5px; line-height: 1.45; margin-top: 2px; }
+.askby { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; flex-wrap: wrap; }
+.ka-b.kid { background: color-mix(in srgb, var(--apple-orange) 18%, var(--group)); }
+/* Toasts at the top, where they're seen */
+.fb-toast { inset-block-end: auto !important; inset-block-start: 1rem !important; z-index: 60 !important; }
+/* Map colours follow the situation: few children safe reads red, most safe reads green */
+:root { --q0: #D93B30; --q1: #EE6A3E; --q2: #F59E42; --q3: #F2C94C; --q4: #8CCB7E; --q5: #2E9E5B; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --q0: #B83229; --q1: #CF5A33; --q2: #D98A3A; --q3: #CFAE45; --q4: #6FAE66; --q5: #36A862; } }
+:root[data-theme="dark"] { --q0: #B83229; --q1: #CF5A33; --q2: #D98A3A; --q3: #CFAE45; --q4: #6FAE66; --q5: #36A862; }
+.stamp { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--label2); margin: 8px 2px 0; }
+.fb-toast { background: var(--elev) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; box-shadow: 0 8px 28px rgb(0 0 0 / .28), 0 0 0 1px var(--hair) !important; }
