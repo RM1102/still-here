@@ -446,6 +446,17 @@ window.RC = window.RC || {};
     { id: "gurudwara", name: "Gurudwara, Sector 7", kind: "Shelter and kitchen", tier: 3, how: "Vouched for by the ward officer; 6 volunteer phones here", open: true, queue: 10, stock: [["Meals", "Plenty"], ["Drinking water", "Plenty"], ["Blankets", "Low"]], capacity: "120 people tonight", needs: "Blankets; a doctor's visit" }
   ];
   // Emergency powers in use, in plain words
+  // "How we're doing": the case-log figures the model does not produce (simulated). The two pages, section 7 and 8, set the goals.
+  RC.govDoing = {
+    // cant: of the cases with nobody going within 2 hours, the share where someone still replied "2: can't go" within 30 minutes
+    cant: 0.3, found: 0.94,
+    guard: [
+      ["A child goes to the wrong person", "Wrong handovers, found by the Day 3 welfare call", "None so far", "None", "Pause handovers outside family in that ward", "green"],
+      ["A living person is marked gone", "\u201cGone\u201d later corrected", "0.4%", "Under 1%", "Hold that network's cases for a check by a person", "green"],
+      ["An adult was home all along", "False alarms (a wasted visit costs less than a missed child)", "12%", "Under 15%", "Ask the building first in that area", "green"],
+      ["Nobody takes a case", "Cases nobody claimed in 2 hours that 112, 1098 or the anganwadi worker picked up within an hour", "91%", "At least 95%", "Send paid teams there", "orange"],
+      ["The data is misused", "Lookups outside a case (there is no search for strangers)", "None", "None", "Daily audit of every access", "green"]]
+  };
   RC.govPowers = [
     { what: "Mobile networks search their own records for people alone and send out only each case", law: "Telecommunications Act 2023, s.20: temporary possession of a network in a public emergency, including disaster management (it replaced s.5 of the Telegraph Act)", by: "Union Home Ministry order, 03:40", ends: "Lapses on Day 30 unless renewed" },
     { what: "Empty buildings, vehicles and ownerless stock are taken over", law: "Disaster Management Act 2005, s.65: requisition of resources, premises and vehicles", by: "Each District Magistrate", ends: "Returned, or paid for, when an owner or heir claims" },

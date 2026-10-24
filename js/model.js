@@ -103,5 +103,5 @@ window.RC = window.RC || {};
   function compact(n) { n = Math.round(n); if (Math.abs(n) >= 1e7) return (n / 1e6).toFixed(1) + " M"; if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(2) + " M"; if (Math.abs(n) >= 1e5) return Math.round(n / 1e3) + " K"; return n.toLocaleString("en-IN"); }
   const pct = x => Math.round(x * 100) + "%";
 
-  RC.Model = { TIMES, NOW, F, RAMP, flaggedAt, perCase: (m, x) => perCase(kR, m, x), units, byKey, byState, CITIES, at, agg, scopes, series, BINS, color, hourLabel, compact, pct, myWard: byKey["W" + MYWARD.id], kR, kQ };
+  RC.Model = { TIMES, NOW, F, RAMP, flaggedAt, perCase: (m, x) => perCase(kR, m, x), perCaseQ: (m, x) => perCase(kQ, m, x), units, byKey, byState, CITIES, at, agg, scopes, series, BINS, color, hourLabel, compact, pct, myWard: byKey["W" + MYWARD.id], kR, kQ };
 })(window.RC);

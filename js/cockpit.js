@@ -43,7 +43,7 @@
 
   /* ---------- header ---------- */
   function header() {
-    $("#tabs").innerHTML = [["situation", "Situation"], ["resources", "Resources"], ["network", "Network"], ["sites", "Homes & sites"], ["info", "Information"], ["fair", "Fairness & law"], ["world", "World"]].map(([k, l]) => `<button class="${S.page === k ? "on" : ""}" data-page="${k}">${l}</button>`).join("");
+    $("#tabs").innerHTML = [["situation", "Situation"], ["doing", "How we're doing"], ["resources", "Resources"], ["network", "Network"], ["sites", "Homes & sites"], ["info", "Information"], ["fair", "Fairness & law"], ["world", "World"]].map(([k, l]) => `<button class="${S.page === k ? "on" : ""}" data-page="${k}">${l}</button>`).join("");
     $("#who").textContent = `${GV.persona.org} · ${GV.persona.role}`;
     const r = $("#restricted"); if (r && !r.querySelector("svg")) r.insertAdjacentHTML("afterbegin", I("shield-alert", 13));
   }
@@ -331,10 +331,46 @@
   }
 
   /* ---------- render ---------- */
+  /* ---------- how we're doing: the two pages' metrics, in plain words ---------- */
+  // Per case, from the model: safe within 6 hours (the main goal) and someone going or already there within 2 and 3 hours.
+  // Replies within 30 minutes are everyone who goes plus some who answer "can't go" (RC.govDoing.cant); the guardrails are simulated case-log figures.
+  function doing() {
+    const D = RC.govDoing, list = (S.scope === "delhi" ? M.byState.Delhi : M.units).filter(u => !u.nodata), by = {};
+    let A = 0, s6 = 0, q2 = 0, q3 = 0;
+    list.forEach(u => { const x = M.perCase(u.m, 6); A += u.A; s6 += u.A * x; q2 += u.A * M.perCaseQ(u.m, 2); q3 += u.A * M.perCaseQ(u.m, 3);
+      const k = S.scope === "delhi" ? u.name : u.state, b = by[k] = by[k] || { A: 0, s: 0 }; b.A += u.A; b.s += u.A * x; });
+    const ns = s6 / A, rep = q2 / A + D.cant * (1 - q2 / A), cl = q2 / A / rep, ar = ns / (q2 / A), g3 = q3 / A, where = S.scope === "delhi" ? "Delhi" : "India";
+    const slow = Object.entries(by).filter(([, b]) => b.A > (S.scope === "delhi" ? 800 : 1e6)).sort((a, b) => a[1].s / a[1].A - b[1].s / b[1].A).slice(0, 2).map(([n]) => n);
+    // Green: at or above the goal. Orange: within 3 points of it. Red: further behind.
+    const st = (v, g) => v >= g ? ["green", "On track"] : v >= g - 0.03 ? ["orange", "Close to goal"] : ["red", "Needs help"];
+    const bar = (v, g, c) => `<div class="ib"><i class="${c}" style="width:${Math.min(100, v * 100).toFixed(1)}%"></i><b style="left:${g * 100}%"></b></div>`;
+    const f2 = x => x.toFixed(2);
+    const step = (n, h, w, v, g, tip) => { const [c, l] = st(v, g); return `<div class="is"><div class="is-top"><span class="n">${n}</span><span class="st ${c}">${l}</span></div><h3>${esc(h)}</h3><div class="w">${esc(w)}</div><div class="v">${P(v)}</div>${bar(v, g, c)}<div class="g">Goal ${P(g)}</div><div class="h">${esc(tip)}</div></div>`; };
+    const [hc, hl] = st(ns, 0.7);
+    return `<div class="page"><div class="page-in"><h1>How we're doing</h1><p class="lede">Are children getting to someone they know, quickly and safely? Each number is timed from a child's first message, across ${where}. Green is on track, orange is close, red needs help.</p>
+      <div class="sec ind-hero"><div><div class="ih-k">Our main goal</div><div class="ih-v">${P(ns)}</div><div class="ih-t">of children found alone are safe with someone they know within 6 hours</div>
+        <div class="ib big"><i class="${hc}" style="width:${(ns * 100).toFixed(1)}%"></i><b style="left:70%"><span>Goal 70%</span></b></div>
+        <div class="ih-n"><span class="st ${hc}">${hl}</span><span>About ${C(ns * A)} of the ${C(A)} children found alone in ${where}</span></div></div>
+        <div class="ih-r"><b>Why this number?</b> It counts children safe, not messages sent. Six hours, because for a small child hours decide. Someone they know, because a stranger is the main risk. And only at the address: a promise to go is not a rescue.</div></div>
+      <div class="sec"><h2>How children get there</h2><p class="sub">When the main goal slips, the step in orange or red is where to help.</p>
+        <div class="ind-steps">${step(1, "Found", "With a case by 10 am, of the children the registers lead us to expect", D.found, 0.9, "The gap is homes on no register.")}
+        ${step(2, "Someone who knows her answered", "Within 30 minutes of her first message", rep, 0.85, "If it drops: SMS, then a voice call, in the family's language.")}
+        ${step(3, "Someone said they're going", "Within 2 hours, once someone answered", cl, 0.85, "One person is named, and all of them see \u201cnobody going yet\u201d.")}
+        ${step(4, "They arrived and she's safe", "Within 6 hours, of those going", ar, 0.97, `Slowest: ${slow.join(" and ")}. Send route notes and transport there.`)}</div>
+        <div class="src">Steps 2 to 4 multiply to the main goal: ${f2(rep)} \u00d7 ${f2(cl)} \u00d7 ${f2(ar)} \u2248 ${f2(ns)}.</div></div>
+      <div class="sec"><h2>Mistakes we watch for</h2><p class="sub">Getting faster must never mean getting careless. Each check has a limit, and a step we take the moment it's crossed.</p>
+        <table class="t ind-g"><thead><tr><th>What could go wrong</th><th>How we check</th><th>Today</th><th>Limit</th><th>If it's crossed</th></tr></thead><tbody>${D.guard.map(([w, how, v, lim, act, c]) => `<tr><td><b>${esc(w)}</b></td><td>${esc(how)}</td><td><span class="st ${c}">${esc(v)}</span></td><td>${esc(lim)}</td><td>${c === "green" ? esc(act) : `${esc(act)} <button class="btn btn-compact" data-page="situation">See where</button>`}</td></tr>`).join("")}</tbody></table></div>
+      <div class="cols"><div class="sec"><h2>Do we need to change course?</h2><p class="sub">Our rule: if fewer than half of cases have someone going within 3 hours, we send the first message to the area's anganwadi worker instead.</p>
+          <div class="ind-big"><b>${P(g3)}</b>have someone going within 3 hours</div><span class="st green">No change needed</span></div>
+        <div class="sec"><h2>Still safe a week later?</h2><p class="sub">Welfare calls on Days 3 and 7 check that every child is still with the adult who came. Limit: under 2% separated again.</p>
+          <div class="ind-big"><b>Day 3</b>first calls</div><span class="st">Not measured yet</span></div></div>
+      <div class="src">Simulated numbers from the prototype's model. In use, every number comes from the case log, which timestamps each step, so nothing new is collected about anyone.</div></div></div>`;
+  }
+
   function render() {
     MAP.hide(); header();
     const pg = $("#page");
-    pg.innerHTML = S.page === "situation" ? situation() : S.page === "resources" ? resources() : S.page === "network" ? network() : S.page === "info" ? info() : S.page === "sites" ? sites() : S.page === "fair" ? fair() : world();
+    pg.innerHTML = S.page === "situation" ? situation() : S.page === "doing" ? doing() : S.page === "resources" ? resources() : S.page === "network" ? network() : S.page === "info" ? info() : S.page === "sites" ? sites() : S.page === "fair" ? fair() : world();
     let ran = false; const draw = () => { if (ran) return; ran = true; if (S.page === "situation") { const el = $("#map"); if (el) MAP.render(el, mapOpts()); trend(); } if (S.page === "world") worldMap(); if (S.page === "sites") vacantMap(); };
     requestAnimationFrame(draw); setTimeout(draw, 60);
     save();
