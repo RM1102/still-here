@@ -1,10 +1,10 @@
 /* Still Here service worker: saves every file of the app on first visit, so it opens with no signal. */
-const CACHE = "stillhere-v9";
+const CACHE = "stillhere-v10";
 const FILES = [
   "./", "index.html", "lite.html", "lite-hi.html", "cockpit.html", "manifest.webmanifest",
   "css/app.css", "css/cockpit.css",
   "css/apple/apple-system-colors.css", "css/apple/apple-buttons.css", "css/apple/apple-materials.css", "css/apple/apple-feedback.css",
-  "js/icons.js", "js/geo.js", "js/data.js", "js/model.js", "js/map.js", "js/app.js", "js/cockpit.js",
+  "js/icons.js", "js/geo.js", "js/data.js", "js/model.js", "js/map.js", "js/app.js", "js/cockpit.js", "js/sw-register.js",
   "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png", "icons/favicon-32.png"
 ];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES.map(f => new Request(f, { cache: "reload" })))).then(() => self.skipWaiting())); });

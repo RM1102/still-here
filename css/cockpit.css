@@ -253,3 +253,13 @@ table.plan td:nth-child(1) { width: 25%; } table.plan td:nth-child(2) { width: 1
 table.plan td:last-child { width: 170px; } table.plan td:last-child .btn { white-space: normal; text-align: center; line-height: 1.25; padding-top: 6px; padding-bottom: 6px; min-width: 150px; }
 table.t .donetext { display: flex; gap: 6px; align-items: flex-start; } table.t .donetext svg { flex: none; margin-top: 2px; }
 @media (max-width: 700px) { .tabs { max-width: 100%; overflow-x: auto; scrollbar-width: none; } .tabs::-webkit-scrollbar { display: none; } html, body { overflow-x: hidden; } }
+/* Homes & sites */
+:root { --v0: #24243A; --v1: #30305C; --v2: #3E3E82; --v3: #5252AA; --v4: #6E6ED2; --v5: #9C9CF2; }
+.vstats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.vstats > div { background: var(--group); border-radius: 12px; padding: 10px 12px; } .vstats span { display: block; font-size: 12.5px; color: var(--label2); }
+.vstats b { display: block; font-size: 22px; font-weight: 600; letter-spacing: -.02em; } .vstats b.sm { font-size: 14px; font-weight: 500; line-height: 1.35; margin-top: 4px; } .vstats em { display: block; font-style: normal; font-size: 12.5px; color: var(--label2); }
+.vmapwrap { position: relative; height: 440px; background: var(--bg-map); border-radius: 14px; margin-top: 12px; overflow: hidden; }
+.rules { margin: 6px 0 0; padding-left: 18px; color: var(--label2); font-size: 13.5px; } .rules li { margin: 4px 0; }
+h3.mini { font-size: 14px; font-weight: 600; margin: 14px 0 2px; }
+@media (max-width: 700px) { .vstats { grid-template-columns: 1fr; } .vmapwrap { height: 320px; } }
+.vmapwrap svg { width: 100%; height: 100%; display: block; }

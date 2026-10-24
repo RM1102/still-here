@@ -9,7 +9,7 @@ window.RC = window.RC || {};
   RC.me = { name: "Sunita Sharma", age: 50, ward: "Rohini Sector 7", city: "Delhi", phone: "+91 98••• •4410", verifiedResidence: true };
 
   RC.people = [
-    { id: "rajesh", name: "Rajesh Sharma", rel: "Husband", age: 54, city: "Delhi", status: "stopped", ev: "Was on a call at 2:32 pm. The call cut off and nothing since" },
+    { id: "rajesh", name: "Rajesh Sharma", rel: "Husband", age: 54, city: "Delhi", status: "stopped", ev: "Was on a call at 2:32 pm. The other person heard nothing more, and his phone hasn't been touched since" },
     { id: "aman",   name: "Aman Sharma",   rel: "Son", age: 29, city: "Mumbai", status: "stopped", ev: "His watch was reading his pulse at 2:32 pm and stopped then" },
     { id: "priya",  name: "Priya Sharma",  rel: "Daughter-in-law", age: 28, city: "Mumbai", status: "stopped", ev: "Her phone was moving in a taxi at 2:32 pm. It hasn't moved since" },
     { id: "meera",  name: "Meera Sharma",  rel: "Granddaughter", age: 3, city: "Mumbai", status: "nodevice", alone: true },
@@ -243,7 +243,7 @@ window.RC = window.RC || {};
     circle: { t: "People who know her", b: "The people a child's parents called most who live in the same city: relatives, the nanny, close neighbours. They're ranked by how often they were called and how near they are. If four of them are in the same city, there's only a 6% chance that all four vanished.", s: "Call records held by the mobile networks" },
     urgent: { t: "Urgent problems not yet handled", b: "Problems where lives are at risk within hours. Each has a suggested action. The count drops when someone acts on it.", s: "Staff roll calls, satellite passes, official reports" },
     short: { t: "Essential sites short of staff", b: "Hospitals, water plants, substations, police stations and prisons where the staff roll call shows less than half the usual staff. The roll call uses the same phone signal: whose phone is at the site.", s: "Employer rosters matched to device location" },
-    stopped: { t: "Gone", b: "Their phone was being used or moving at 2:32 pm yesterday and stopped in that same second, while the network around it kept working. If that's wrong, tap This Is Wrong, or they can tap I'm Here on any phone and it's corrected everywhere.", s: "Mobile networks" },
+    stopped: { t: "Gone", b: "Their phone was being used or moving at 2:32 pm yesterday, fell still in that same second, and hasn't been moved, unlocked or used to call since, while the network around it kept working. If that's wrong, tap This Is Wrong, or they can tap I'm Here on any phone and it's corrected everywhere.", s: "Mobile networks (movement, calls, messages) and phone makers (unlocks)" },
     nodevice: { t: "No phone of their own", b: "They have no phone, so we check on them through the people they live with. If all of those phones went silent, they may be alone.", s: "Ration card, school, anganwadi and pension records" },
     active: { t: "Here", b: "Their phone has been used since 2:32 pm yesterday, so they're here.", s: "Mobile networks" },
     projection: { t: "Estimate", b: "Times after now are estimates, worked out from how fast children are being reached in each area right now. Every child left alone should be found by 10 am this morning. Once the people who know a child are messaged, about three in four children are with one of them within six hours. Only Now is real.", s: "The same model as every other number" },
@@ -295,6 +295,58 @@ window.RC = window.RC || {};
     { k: "hazmat", what: "Hazmat crews", who: "Delhi Fire Service, trained for chemical leaks", total: 3, busy: 2, unit: "crews" },
     { k: "tankers", what: "Water tankers", who: "Delhi Jal Board", total: 42, busy: 42, unit: "tankers", note: "All on routes until 10:00" },
     { k: "trucks", what: "Trucks for grain", who: "Food Corporation and hired", total: 38, busy: 0, unit: "trucks", note: "60 needed for the 1,200 t from Narela: 22 short" }
+  ];
+  // Homes, money and critical sites (Rahul, 24 Oct night): restricted, never on the public portal. Counts are simulated; names are real places.
+  RC.govHomes = {
+    total: 4600000, upscale: ["Vasant Vihar", "Vasantkunj", "Greater Kailash-I", "East Of Kailash", "Hauz Khas", "Malviya Nagar", "Punjabi Bagh", "Model Town", "Rajouri Garden", "Karol Bagh", "Pitampura South"],
+    essentials: { status: "Not needed yet", why: "Food Corporation grain in Delhi lasts about 40 days, and markets reopen on Day 2. Opening homes now would set a precedent that raiders would copy.",
+      rules: ["Only things that spoil or save a life: fresh food, medicines, baby formula, blankets. Never money, jewellery, papers or belongings.", "Only in a ward where ration shops have run out, and only on an order under the Disaster Management Act 2005, s.65.", "A team of two, one of them a police officer. Everything taken is photographed and listed.", "The door is sealed with a numbered seal and the family is told what was taken and where it went."] },
+    money: [
+      { what: "Bank accounts of people marked gone", rule: "Outgoing payments paused, except to a registered nominee", why: "Thieves use the phones of the vanished to empty their accounts. 2,340 attempts were blocked in Delhi since 06:00." },
+      { what: "UPI and wallets on their numbers", rule: "Paused for 30 days", why: "The same fraud, by phone" },
+      { what: "Lockers, homes and land", rule: "Sealed; titles unchanged", why: "Nothing changes hands until heirs claim" },
+      { what: "Money nobody claims", rule: "Stays in the account. It cannot be shared out", why: "By law it moves to the RBI's Depositor Education and Awareness Fund only after ten years" },
+      { what: "Declaring the vanished dead", rule: "Ordinance pending: a declaration after 90 days", why: "Otherwise families wait seven years (Bharatiya Sakshya Adhiniyam 2023, s.111) to inherit or claim insurance" }
+    ],
+    sites: [
+      { kind: "Hospitals", n: 87, short: 21, worst: "Dr. BSA Hospital and LNJP at under half their doctors", sev: "orange" },
+      { kind: "Newborn and intensive care units", n: 64, short: 9, worst: "9 units under half their nurses; babies on ventilators first", sev: "red" },
+      { kind: "Childcare homes", n: 92, short: 11, worst: "11 homes under half their staff, with 640 children", sev: "red" },
+      { kind: "Old-age homes", n: 54, short: 8, worst: "8 homes under half their staff", sev: "orange" },
+      { kind: "Disease labs (biosafety level 3)", n: 6, short: 2, worst: "All sealed at 03:00; 2 have no staff on site, guards posted", sev: "orange" },
+      { kind: "Chemical and hazardous units", n: 31, short: 3, worst: "3 Bawana units unmanned, one storing chlorine", sev: "red" },
+      { kind: "Fuel depots and gas plants", n: 9, short: 1, worst: "Shakurbasti depot at 44% of staff", sev: "orange" },
+      { kind: "Water treatment plants", n: 9, short: 2, worst: "Haiderpur: 6 of 11 operators", sev: "orange" },
+      { kind: "Power substations (220 kV)", n: 46, short: 5, worst: "Badarpur: 2 of 9 operators", sev: "orange" },
+      { kind: "Prisons", n: 3, short: 1, worst: "Tihar at 38% of guards", sev: "red" },
+      { kind: "Airport and air traffic control", n: 1, short: 1, worst: "IGI air traffic control at 58%; relief flights only", sev: "orange" },
+      { kind: "Zoo", n: 1, short: 1, worst: "National Zoological Park keepers at 40%; dangerous animals secured", sev: "" }
+    ],
+    india: [
+      { kind: "Nuclear power plants", n: 7, worst: "Tarapur shutting down with 4 of 14 operators", sev: "red" },
+      { kind: "Large dams and barrages", n: 32, worst: "Hathnikund barrage, which sends the Yamuna to Delhi, at 50% of operators", sev: "orange" }
+    ],
+    damage: [
+      { what: "Flights in the air at 2:32 pm", n: "412 over India", then: "Where both pilots vanished, about one in four: 97 aircraft crashed or are missing. Survivors found at 31 sites." },
+      { what: "Trains moving at 2:32 pm", n: "about 7,100", then: "All stopped within a minute: Indian locomotives brake on their own when the driver stops responding. 6 collisions where that failed." },
+      { what: "Road crashes in the first minute", n: "about 6,800 in Delhi", then: "Most of the injured are in hospitals now; 1,900 wrecks still block roads." },
+      { what: "Fires from stoves and machines left on", n: "1,140 calls in Delhi", then: "214 still burning, worst in the Okhla and Narela industrial areas." },
+      { what: "People trapped in lifts", n: "3,900 rescued", then: "About 300 buildings still to check." }
+    ]
+  };
+  // Critical sites in Delhi for the Situation map (real places, approximate positions; staff counts simulated)
+  RC.govSitePins = [
+    { n: "AIIMS", k: "H", ll: [77.210, 28.567], staff: "61% of staff", short: false }, { n: "Safdarjung Hospital", k: "H", ll: [77.206, 28.569], staff: "55% of staff", short: false },
+    { n: "LNJP Hospital", k: "H", ll: [77.238, 28.639], staff: "44% of doctors", short: true }, { n: "GTB Hospital", k: "H", ll: [77.311, 28.686], staff: "52% of staff", short: false },
+    { n: "Dr. BSA Hospital", k: "H", ll: [77.119, 28.716], staff: "46% of staff", short: true }, { n: "RML Hospital", k: "H", ll: [77.201, 28.626], staff: "58% of staff", short: false },
+    { n: "Haiderpur water plant", k: "W", ll: [77.149, 28.718], staff: "6 of 11 operators", short: true }, { n: "Wazirabad water plant", k: "W", ll: [77.228, 28.712], staff: "9 of 14 operators", short: false },
+    { n: "Chandrawal water plant", k: "W", ll: [77.227, 28.681], staff: "7 of 12 operators", short: false }, { n: "Sonia Vihar water plant", k: "W", ll: [77.253, 28.728], staff: "5 of 12 operators", short: true },
+    { n: "Okhla water plant", k: "W", ll: [77.290, 28.560], staff: "4 of 7 operators", short: false }, { n: "Nangloi water plant", k: "W", ll: [77.070, 28.680], staff: "4 of 8 operators", short: false },
+    { n: "Tihar Jail", k: "P", ll: [77.101, 28.628], staff: "118 of 310 guards", short: true }, { n: "Mandoli Jail", k: "P", ll: [77.309, 28.718], staff: "61 of 120 guards", short: false }, { n: "Rohini Jail", k: "P", ll: [77.094, 28.730], staff: "24 of 50 guards", short: true },
+    { n: "NCDC disease lab", k: "L", ll: [77.224, 28.674], staff: "sealed; 3 of 9 staff", short: true },
+    { n: "Shakurbasti fuel depot", k: "F", ll: [77.144, 28.683], staff: "44% of staff", short: true }, { n: "Bijwasan fuel terminal", k: "F", ll: [77.040, 28.530], staff: "57% of staff", short: false }, { n: "Tughlakabad LPG plant", k: "F", ll: [77.270, 28.500], staff: "50% of staff", short: false },
+    { n: "IGI Airport air traffic control", k: "A", ll: [77.100, 28.556], staff: "58% of controllers", short: false },
+    { n: "National Zoological Park", k: "Z", ll: [77.244, 28.603], staff: "keepers at 40%", short: true }
   ];
   // Emergency powers in use, in plain words
   RC.govPowers = [
@@ -366,7 +418,16 @@ window.RC = window.RC || {};
       { role: "ASHA and anganwadi workers", reg: "Health and child development department lists", alive: 5450, of: 10900, onduty: 3120, asked: 1400, came: 980, need: "The wards with the most small children nobody is going for" },
       { role: "Pharmacists", reg: "Pharmacy Council register", alive: 8400, of: 16900, onduty: 4200, asked: 2000, came: 960, need: "Insulin and blood pressure tablets in North West Delhi" },
       { role: "Water plant operators", reg: "Delhi Jal Board roster", alive: 61, of: 122, onduty: 31, asked: 30, came: 12, need: "Haiderpur plant: 6 of 11" },
-      { role: "Electrical engineers", reg: "Power company rosters", alive: 290, of: 580, onduty: 160, asked: 120, came: 77, need: "Badarpur substation: 2 of 9" }
+      { role: "Electrical engineers", reg: "Power company rosters", alive: 290, of: 580, onduty: 160, asked: 120, came: 77, need: "Badarpur substation: 2 of 9" },
+      { role: "Truck and bus drivers", reg: "Commercial driving licences (Sarathi, transport department)", alive: 41000, of: 82000, onduty: 9800, asked: 6000, came: 2900, need: "Narela godown: 22 trucks short for 1,200 t of grain" },
+      { role: "Electricians and linemen", reg: "Licensed wiremen and power company rosters", alive: 9600, of: 19200, onduty: 2700, asked: 1500, came: 640, need: "Substations and hospital generators" },
+      { role: "Plumbers and pump operators", reg: "Delhi Jal Board contractors and ITI records", alive: 5200, of: 10400, onduty: 1100, asked: 600, came: 240, need: "Pumping stations running on diesel" },
+      { role: "Teachers", reg: "School staff records (UDISE+)", alive: 52000, of: 104000, onduty: 3900, asked: 2000, came: 1450, need: "Care points in schools need two adults each" },
+      { role: "Cooks and caterers", reg: "Food licences (FSSAI) and the hotels' association", alive: 26000, of: 52000, onduty: 3400, asked: 1800, came: 1200, need: "Langars and care-point kitchens" },
+      { role: "Pilots and air traffic controllers", reg: "Licences issued by the DGCA", alive: 3100, of: 6200, onduty: 420, asked: 300, came: 210, need: "Relief flights from Hyderabad and Chennai" },
+      { role: "Network and payment engineers", reg: "Employer records (EPFO)", alive: 18000, of: 36000, onduty: 6200, asked: 900, came: 610, need: "Mobile networks and UPI, now on automation" },
+      { role: "Bank staff and chartered accountants", reg: "Bank rosters and the ICAI register", alive: 31000, of: 62000, onduty: 2100, asked: 0, came: 0, need: "Not today: branches reopen for cash on Day 2" },
+      { role: "Lawyers", reg: "Bar Council of Delhi", alive: 54000, of: 108000, onduty: 0, asked: 0, came: 0, need: "Not today: guardianship and inheritance cases from week 2" }
     ],
     supplies: [
       { what: "Grain and water, 40 t", how: "Train", from: "Mumbai Central", to: "Delhi", dep: "04:10", eta: "Day 1 22:00", route: "Western Railway via Vadodara and Kota", fromLL: [72.82, 18.97], toLL: [77.22, 28.64] },

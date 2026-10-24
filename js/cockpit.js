@@ -15,9 +15,10 @@
   const needShare = v => v && v.A ? Math.max(0, v.A - v.reached - v.claimed) / v.A : 0;
   const needColor = v => { if (!v || v.nodata) return "var(--nodata)"; const f = needShare(v); return (NEED.find(b => f < b.max) || NEED[NEED.length - 1]).c; };
   const needLegend = () => `<div class="legend compact"><span class="lt">Nobody going yet</span><span>${NEED[0].l}</span><span class="ramp">${NEED.map(b => `<i style="background:${b.c}"></i>`).join("")}</span><span>${NEED[NEED.length - 1].l}</span><span class="nd"><i></i>No network</span></div>`;
-  const marksLegend = () => `<div class="legend compact marks">${S.layers.problems ? `<span><i class="pin-k" style="background:var(--apple-red)">!</i>Problem, open</span><span><i class="pin-k" style="background:var(--green)">✓</i>Handled</span>` : ""}${S.layers.help ? `<span><i class="arr-k"></i>Supply moving (route shown here only)</span>` : ""}${S.layers.hazards ? `<span><i class="ring-k"></i>Keep away</span>` : ""}</div>`;
-  function def() { return { page: "situation", colour: "need", rebalanced: false, scope: "delhi", state: null, ti: 0, qtab: "problems", sel: null, done: {}, layers: { people: true, problems: true, help: true, hazards: true }, siteAsk: {}, asked: {}, mirror: true, wardTeam: {}, wsel: null }; }
-  let S = (() => { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.page) return Object.assign(def(), s); } catch (e) {} return def(); })();
+  const marksLegend = () => `<div class="legend compact marks">${S.layers.problems ? `<span><i class="pin-k" style="background:var(--apple-red)">!</i>Problem, open</span><span><i class="pin-k" style="background:var(--green)">✓</i>Handled</span>` : ""}${S.layers.sites && S.scope === "delhi" ? `<span><i class="pin-k" style="background:#6E6E73">H</i>Critical site (H hospital, W water, P prison, L lab, F fuel)</span>` : ""}${S.layers.help ? `<span><i class="arr-k"></i>Supply moving (route shown here only)</span>` : ""}${S.layers.hazards ? `<span><i class="ring-k"></i>Keep away</span>` : ""}</div>`;
+  const SITEK = { H: "Hospital", W: "Water plant", P: "Prison", L: "Disease lab", F: "Fuel site", A: "Air traffic control", Z: "Zoo" };
+  function def() { return { page: "situation", colour: "need", rebalanced: false, scope: "delhi", state: null, ti: 0, qtab: "problems", sel: null, done: {}, layers: { people: true, problems: true, sites: true, help: true, hazards: true }, siteAsk: {}, asked: {}, mirror: true, wardTeam: {}, wsel: null }; }
+  let S = (() => { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.page) { const o = Object.assign(def(), s); if (o.layers.sites == null) o.layers.sites = true; return o; } } catch (e) {} return def(); })();
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
   const T = () => M.TIMES[S.ti], H = () => T().h, now = () => S.ti === 0;
   const scopeAgg = h => S.scope === "delhi" ? M.scopes.delhi(h) : S.state ? M.scopes.state(S.state, h) : M.scopes.india(h);
@@ -42,7 +43,7 @@
 
   /* ---------- header ---------- */
   function header() {
-    $("#tabs").innerHTML = [["situation", "Situation"], ["resources", "Resources"], ["fair", "Fairness & law"], ["world", "World"]].map(([k, l]) => `<button class="${S.page === k ? "on" : ""}" data-page="${k}">${l}</button>`).join("");
+    $("#tabs").innerHTML = [["situation", "Situation"], ["resources", "Resources"], ["sites", "Homes & sites"], ["fair", "Fairness & law"], ["world", "World"]].map(([k, l]) => `<button class="${S.page === k ? "on" : ""}" data-page="${k}">${l}</button>`).join("");
     $("#who").textContent = `${GV.persona.org} · ${GV.persona.role}`;
     const r = $("#restricted"); if (r && !r.querySelector("svg")) r.insertAdjacentHTML("afterbegin", I("shield-alert", 13));
   }
@@ -76,7 +77,7 @@
     if (S.state) return `<button data-back="1">‹ India</button> › <b>${esc(S.state)}</b> · its districts`;
     return `<b>India</b> · click a state for its districts`;
   }
-  function chips() { return `<span class="lab">Colour areas by</span><div class="seg"><button class="${S.colour === "need" ? "on" : ""}" data-colour="need">Nobody going yet</button><button class="${S.colour === "safe" ? "on" : ""}" data-colour="safe">Now safe</button></div><span class="lab" style="margin-left:6px">Show</span>` + [["problems", "Problems", "var(--red)"], ["help", "Supplies", "var(--blue)"], ["hazards", "Hazards", "var(--amber)"]].map(([k, l, c]) => `<button class="chip ${S.layers[k] ? "on" : ""}" data-layer="${k}"><i style="background:${c}"></i>${l}</button>`).join(""); }
+  function chips() { return `<span class="lab">Colour areas by</span><div class="seg"><button class="${S.colour === "need" ? "on" : ""}" data-colour="need">Nobody going yet</button><button class="${S.colour === "safe" ? "on" : ""}" data-colour="safe">Now safe</button></div><span class="lab" style="margin-left:6px">Show</span>` + [["problems", "Problems", "var(--red)"], ["sites", "Critical sites", "var(--apple-gray)"], ["help", "Supplies", "var(--blue)"], ["hazards", "Hazards", "var(--amber)"]].map(([k, l, c]) => `<button class="chip ${S.layers[k] ? "on" : ""}" data-layer="${k}"><i style="background:${c}"></i>${l}</button>`).join(""); }
   function situation() {
     return `<div class="filters"><span class="lab">Area</span><div class="seg"><button class="${S.scope === "delhi" ? "on" : ""}" data-scope="delhi">Delhi</button><button class="${S.scope === "india" ? "on" : ""}" data-scope="india">India</button></div>${timeSeg()}</div>
       <div class="kpis">${kpis()}</div>
@@ -128,12 +129,15 @@
       its.filter(q => view === "delhi" ? q.scope === "delhi" : q.scope === "india").forEach(q => { const open = !q.done || q.inprog; o.pins.push({ id: q.id, lonlat: q.lonlat, color: open ? SEVC[q.sev] : "var(--green)", glyph: open ? "!" : "✓", pulse: q.sev === "urgent" && open, sel: S.sel && S.sel.type === "q" && S.sel.id === q.id, r: open ? (q.sev === "urgent" ? 12 : q.sev === "high" ? 10 : 8) : 7, label: open && q.sev !== "watch" ? PL(q).short : "" }); });
       if (view !== "delhi") { const n = its.filter(q => q.scope === "delhi" && !q.done).length; if (n) o.pins.push({ id: "delhi-cluster", lonlat: [77.2, 28.6], color: "var(--red)", glyph: String(n), r: 9, label: "Delhi" }); }
     }
+    // Critical sites: a letter for each kind, orange when under half their staff (Rahul: "the map looks premature, not exhaustive")
+    if (S.layers.sites && view === "delhi") RC.govSitePins.forEach((x, i) => o.pins.unshift({ id: "site" + i, lonlat: x.ll, color: x.short ? "var(--apple-orange)" : "#6E6E73", glyph: x.k, r: 7 }));
     if (S.layers.help) {
       const inD = ll => ll[0] > 76.83 && ll[0] < 77.35 && ll[1] > 28.4 && ll[1] < 28.89;
       o.arcs = GV.supplies.filter(f => view === "delhi" ? inD(f.fromLL) && inD(f.toLL) : !(inD(f.fromLL) && inD(f.toLL))).map(f => ({ from: f.fromLL, to: f.toLL, fromLabel: f.from, toLabel: view === "delhi" ? "" : f.to.split(" ")[0] }));
     }
     if (S.layers.hazards) { o.zones = ZONES; o.zoneColor = "var(--apple-orange)"; }
     o.hover = k => {
+      if (k.indexOf("pin:site") === 0) { const x = RC.govSitePins[+k.slice(8)]; return x ? `<b>${esc(x.n)}</b><div>${SITEK[x.k]} · ${esc(x.staff)}</div><div class="src">${x.short ? "Under half its usual staff" : "Enough staff for now"}</div>` : ""; }
       if (k.indexOf("pin:") === 0) { const id = k.slice(4); if (id === "delhi-cluster") return `<b>Delhi</b><div>${its.filter(q => q.scope === "delhi" && !q.done).length} problems open.</div><div class="hintl">Click to switch to Delhi</div>`; const q = its.find(x => x.id === id); return q ? `<b>${esc(q.title)}</b><div>${esc(q.what)}</div>${PL(q).have ? `<div class="src">Free now: ${esc(PL(q).have[0].n)} · ${esc(PL(q).have[0].eta)}</div>` : ""}<div class="hintl">Click for the plan</div>` : ""; }
       if (k.indexOf("zone:") === 0) { const z = ZONES.find(x => x.id === k.slice(5)); return z ? `<b>${esc(z.z)}</b><div>${esc(z.why)}</div>` : ""; }
       const v = valOf(k), name = view === "india" ? k : (M.byKey[k] || {}).name || k;
@@ -142,7 +146,7 @@
       return `<b>${esc(name)}</b>${row(RC.TERMS.alone, C(v.A))}${row("Nobody going yet", P(needShare(v)))}${row(RC.TERMS.reached, P(v.share))}${row(RC.TERMS.claimed, C(v.claimed))}${row("Small children, nobody coming", C(v.u5))}${projNote()}<div class="hintl">${view === "india" ? (k === "Delhi" ? "Click to open Delhi's wards" : "Click to see its districts") : "Click for detail"}</div>`;
     };
     o.click = k => { if (view === "india") { if (k === "Delhi") { S.scope = "delhi"; S.state = null; S.sel = null; } else { S.state = k; S.sel = { type: "region", kind: "state", key: k }; } } else S.sel = { type: "region", kind: view === "delhi" ? "ward" : "district", key: k }; render(); };
-    o.clickPin = id => { if (id === "delhi-cluster") { S.scope = "delhi"; S.state = null; S.sel = null; } else S.sel = { type: "q", id }; render(); };
+    o.clickPin = id => { if (String(id).indexOf("site") === 0) { S.page = "sites"; S.sel = null; render(); return; } if (id === "delhi-cluster") { S.scope = "delhi"; S.state = null; S.sel = null; } else S.sel = { type: "q", id }; render(); };
     o.clickEmpty = () => { if (S.sel) { S.sel = null; render(); } };
     return o;
   }
@@ -181,7 +185,7 @@
         <table class="t plan"><thead><tr><th>Problem</th><th>Needs</th><th>Free now</th><th>Plan</th><th></th></tr></thead><tbody>${planRows}</tbody></table></div>
       <div class="sec"><h2>Teams and vehicles you can send</h2><p class="sub">Counted from each team's phones and each vehicle's tracker at 07:10.</p>
         <table class="t"><thead><tr><th>What</th><th>Free now</th><th>Busy with</th></tr></thead><tbody>${pools}</tbody></table></div>
-      <div class="sec"><h2>Doctors, nurses and others on professional registers<span class="inl-info" data-help="register">${I("info", 15)}</span></h2><p class="sub">Who is still here, who is already at work, and who could still be asked (not at work and not waiting on an answer). Each ask is a message with the place, the shift and what it pays; nobody is ordered.</p>
+      <div class="sec"><h2>People by profession<span class="inl-info" data-help="register">${I("info", 15)}</span></h2><p class="sub">Every profession that matters in the first days, from the register each one comes from. A SIM's registration holds only a name, an address and an Aadhaar number, never a profession, so these come from the professional councils, licences and employer records, matched to phones still in use. Who is still here, who is already at work, and who could still be asked (not at work and not waiting on an answer). Each ask is a message with the place, the shift and what it pays; nobody is ordered.</p>
         <table class="t"><thead><tr><th>Who</th><th class="n">Still here</th><th class="n">At work now</th><th class="n">Free to ask</th><th class="n">Asked</th><th class="n">Said yes</th><th>Most needed at</th><th></th></tr></thead><tbody>${GV.people.map((x, i) => `<tr><td><b>${esc(x.role)}</b><div class="sub" style="margin:2px 0 0">${esc(x.reg)}</div></td><td class="n">${x.alive.toLocaleString("en-IN")}<div class="sub" style="margin:0">of ${x.of.toLocaleString("en-IN")}</div></td><td class="n">${x.onduty.toLocaleString("en-IN")}</td><td class="n">${Math.max(0, x.alive - x.onduty - (x.asked - x.came) - (S.asked[i] || 0)).toLocaleString("en-IN")}</td><td class="n">${(x.asked + (S.asked[i] || 0)).toLocaleString("en-IN")}</td><td class="n">${x.came.toLocaleString("en-IN")}</td><td>${esc(x.need)}</td><td class="n"><button class="btn btn-compact" data-ask="${i}" style="white-space:nowrap">Ask 50 More</button></td></tr>`).join("")}</tbody></table>
         <div class="src">Source: registers matched to phones that are still in use; "at work" means the phone is at a hospital, plant or care point now</div></div>
       <div class="sec"><h2>Essential sites short of staff<span class="inl-info" data-help="short">${I("info", 15)}</span></h2><p class="sub">Worst first. Under 30% of usual staff is red, under 60% is orange.</p>
@@ -190,6 +194,44 @@
       <div class="sec restricted"><span class="tag">${I("shield-alert", 14)}Restricted</span><h2>Supplies on the way</h2><p class="sub">Routes and arrival times stay in this view. The public sees only that a supply has left, two hours after it left.</p>
         <table class="t"><thead><tr><th>What</th><th>How</th><th>From → To</th><th>Left</th><th>Arrives</th><th>Route</th></tr></thead><tbody>${GV.supplies.map(f => `<tr><td><b>${esc(f.what)}</b></td><td>${esc(f.how)}</td><td>${esc(f.from)} → ${esc(f.to)}</td><td>${f.dep}</td><td>${esc(f.eta)}</td><td>${esc(f.route)}</td></tr>`).join("")}</tbody></table></div>
     </div></div>`;
+  }
+
+  /* ---------- homes & sites (restricted): empty homes, essentials, money of the vanished, critical sites, damage ---------- */
+  const HM = RC.govHomes, VB = [{ max: 0.07, c: "var(--v0)", l: "Under 7%" }, { max: 0.09, c: "var(--v1)", l: "7–9%" }, { max: 0.11, c: "var(--v2)", l: "9–11%" }, { max: 0.13, c: "var(--v3)", l: "11–13%" }, { max: 0.15, c: "var(--v4)", l: "13–15%" }, { max: 1, c: "var(--v5)", l: "Over 15%" }];
+  // Share of a ward's homes where every resident vanished: about 0.5^(household size), so wards with smaller households have more (simulated per ward)
+  const hash = s => { let h = 2166136261; for (const ch of String(s)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return ((h >>> 0) % 1000) / 1000; };
+  const vacant = u => 0.062 + 0.062 * hash(u.key) + (HM.upscale.includes(u.name) ? 0.05 : 0);
+  const vColor = f => (VB.find(b => f < b.max) || VB[VB.length - 1]).c;
+  function sites() {
+    const wards = M.byState.Delhi, per = HM.total / wards.length, emp = wards.reduce((n, u) => n + vacant(u) * per, 0), top = wards.slice().sort((a, b) => vacant(b) - vacant(a));
+    const sevSt = s => s === "red" ? `<span class="st red">Urgent</span>` : s === "orange" ? `<span class="st orange">Short</span>` : `<span class="st">Watch</span>`;
+    return `<div class="page"><div class="page-in"><h1>Homes and sites</h1><p class="lede">Which homes are now empty, what may and may not be taken from them, what happens to the money of the vanished, and every kind of site that can hurt people if it is left without staff. None of this is ever shown on the public app.</p>
+      <div class="sec restricted"><span class="tag">${I("shield-alert", 14)}Restricted · District Magistrates and Delhi Police</span><h2>Homes where everyone vanished</h2>
+        <p class="sub">A home counts as empty when every phone that slept there fell still at 2:32 pm and nobody has come home since. Shown by ward only. Street addresses go to a patrol team and nowhere else, and every look at this map is logged.</p>
+        <div class="vstats"><div><span>Homes in Delhi</span><b>${C(HM.total)}</b></div><div><span>Empty now</span><b>about ${C(emp)}</b><em>${P(emp / HM.total)} of homes</em></div><div><span>Most empty</span><b class="sm">${top.slice(0, 3).map(u => esc(u.name)).join(", ")}</b><em>wards with smaller households</em></div></div>
+        <div class="vmapwrap"><div class="mapsvg" id="vmap" style="position:absolute;inset:8px"></div><div class="overlay" style="left:12px;bottom:12px"><div class="legend compact"><span class="lt">Homes empty</span><span>${VB[0].l}</span><span class="ramp">${VB.map(b => `<i style="background:${b.c}"></i>`).join("")}</span><span>${VB[VB.length - 1].l}</span></div></div></div>
+        <div class="btn-row" style="margin-top:12px">${S.patrols ? `${done("Night patrols sent at 07:25 to the 10 wards with the most empty homes")} <button class="btn btn-compact btn-plain" data-patrol="1">Undo</button>` : `<button class="btn btn-compact" data-patrol="1">Send Patrols to the 10 Wards with Most Empty Homes</button>`}</div>
+        <p class="sub" style="margin-top:8px">Empty homes are where raiding starts. Guarding them, not opening them, is the first use of this map.</p></div>
+      <div class="cols">
+        <div class="sec"><h2>Essentials from empty homes</h2><p style="margin:6px 0 8px"><span class="st orange">${esc(HM.essentials.status)}</span></p><p class="sub">${esc(HM.essentials.why)}</p>
+          <h3 class="mini">If it is ever needed</h3><ul class="rules">${HM.essentials.rules.map(r => `<li>${esc(r)}</li>`).join("")}</ul>
+          <div class="btn-row" style="margin-top:10px">${S.essPlan ? done("Plan ready for Day 5: 12 two-person teams per district, used only in wards where ration shops run out") : `<button class="btn btn-compact" data-essplan="1">Prepare a Plan for Day 5</button>`}</div></div>
+        <div class="sec"><h2>Money and property of the vanished</h2><p class="sub">Nothing is shared out. The first job is to stop theft.</p>
+          ${HM.money.map(m => `<div class="zrow"><div class="zt"><b>${esc(m.what)}</b></div><div style="margin:2px 0 0">${esc(m.rule)}</div><div class="zr">${esc(m.why)}</div></div>`).join("")}</div>
+      </div>
+      <div class="sec"><h2>Critical sites in Delhi</h2><p class="sub">Every kind of place that can hurt people if it is left without staff, counted from staff phones at each site. "Short" means under half the usual staff.</p>
+        <table class="t"><thead><tr><th>Kind of site</th><th class="n">Sites</th><th class="n">Short of staff</th><th>Worst now</th><th></th></tr></thead><tbody>${HM.sites.map(x => `<tr><td><b>${esc(x.kind)}</b></td><td class="n">${x.n}</td><td class="n">${x.short}</td><td>${esc(x.worst)}</td><td>${sevSt(x.sev)}</td></tr>`).join("")}
+          ${HM.india.map(x => `<tr><td><b>${esc(x.kind)}</b><div class="sub" style="margin:0">India</div></td><td class="n">${x.n}</td><td class="n">—</td><td>${esc(x.worst)}</td><td>${sevSt(x.sev)}</td></tr>`).join("")}</tbody></table></div>
+      <div class="sec"><h2>Damage from 2:32 pm</h2><p class="sub">Half of all drivers, pilots and machine operators vanished in the middle of what they were doing. This is what broke in the first minute.</p>
+        <table class="t"><thead><tr><th>What</th><th>How many</th><th>Where it stands</th></tr></thead><tbody>${HM.damage.map(x => `<tr><td><b>${esc(x.what)}</b></td><td>${esc(x.n)}</td><td>${esc(x.then)}</td></tr>`).join("")}</tbody></table>
+        <div class="src">Counts on this page are simulated for the prototype; the places named are real.</div></div>
+    </div></div>`;
+  }
+  function vacantMap() {
+    const el = $("#vmap"); if (!el) return; const wards = M.byState.Delhi, per = HM.total / wards.length, top = wards.slice().sort((a, b) => vacant(b) - vacant(a)).slice(0, 10).map(u => u.key);
+    MAP.render(el, { view: "delhi", aria: "Share of homes empty, by ward", fill: k => { const u = M.byKey[k]; return u ? vColor(vacant(u)) : null; },
+      labels: wards.filter(u => top.slice(0, 5).includes(u.key)).map(u => ({ k: u.key, t: u.name, strong: true })),
+      hover: k => { const u = M.byKey[k]; return u ? `<b>${esc(u.name)}</b>${row("Homes empty", P(vacant(u)))}${row("About", C(vacant(u) * per) + " homes")}${top.includes(k) ? `<div class="hintl">${S.patrols ? "Patrol sent" : "Among the 10 with most empty homes"}</div>` : ""}` : ""; } });
   }
 
   /* ---------- fairness & law ---------- */
@@ -257,15 +299,17 @@
   function render() {
     MAP.hide(); header();
     const pg = $("#page");
-    pg.innerHTML = S.page === "situation" ? situation() : S.page === "resources" ? resources() : S.page === "fair" ? fair() : world();
-    let ran = false; const draw = () => { if (ran) return; ran = true; if (S.page === "situation") { const el = $("#map"); if (el) MAP.render(el, mapOpts()); trend(); } if (S.page === "world") worldMap(); };
+    pg.innerHTML = S.page === "situation" ? situation() : S.page === "resources" ? resources() : S.page === "sites" ? sites() : S.page === "fair" ? fair() : world();
+    let ran = false; const draw = () => { if (ran) return; ran = true; if (S.page === "situation") { const el = $("#map"); if (el) MAP.render(el, mapOpts()); trend(); } if (S.page === "world") worldMap(); if (S.page === "sites") vacantMap(); };
     requestAnimationFrame(draw); setTimeout(draw, 60);
     save();
   }
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-export],[data-page],[data-scope],[data-ti],[data-qtab],[data-layer],[data-colour],[data-rebalance],[data-do],[data-undo],[data-q],[data-close],[data-back],[data-team],[data-siteask],[data-ask],[data-mirror],[data-wsel]");
+    const t = e.target.closest("[data-patrol],[data-essplan],[data-export],[data-page],[data-scope],[data-ti],[data-qtab],[data-layer],[data-colour],[data-rebalance],[data-do],[data-undo],[data-q],[data-close],[data-back],[data-team],[data-siteask],[data-ask],[data-mirror],[data-wsel]");
     if (!t) return; const d = t.dataset;
     if (d.export) { exportLog(); return; }
+    if (d.patrol) { S.patrols = !S.patrols; render(); return; }
+    if (d.essplan) { S.essPlan = true; render(); return; }
     if (d.page) { S.page = d.page; S.sel = null; }
     else if (d.scope) { S.scope = d.scope; S.state = null; S.sel = null; }
     else if (d.ti != null) S.ti = +d.ti;
