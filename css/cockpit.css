@@ -1,16 +1,24 @@
-/* Still Here — government view. Same Apple HIG web tokens as the public app (css/apple/), always dark: a control room.
+/* Still Here — government view. Same Apple HIG web tokens as the public app (css/apple/): light by default, dark with the system.
    Layout: header · filter row · stat tiles · (queue | map with a sheet for detail). Explicit pane heights so Safari scrolls (audit A1).
    Status is a dot and a word. One filled button per sheet. No uppercase. Colour only for status and the map scale. */
 :root {
-  --canvas: #08080A; --group: rgb(255 255 255 / .055); --group2: rgb(255 255 255 / .085); --elev: #1C1C1E; --label: #F5F5F7; --label2: rgb(235 235 245 / .62); --label3: rgb(235 235 245 / .36);
-  --hair: rgb(255 255 255 / .08); --fill: rgb(120 120 128 / .24); --fill2: rgb(120 120 128 / .36); --thumb: #48484A;
+  /* Light by default, like the public app (Apple grouped style); dark only when the system is dark */
+  --canvas: #F2F2F7; --group: #FFFFFF; --group2: #F7F7FA; --elev: #FFFFFF; --label: #1D1D1F; --label2: #6E6E73; --label3: rgb(60 60 67 / .45);
+  --hair: rgb(0 0 0 / .08); --fill: rgb(120 120 128 / .12); --fill2: rgb(120 120 128 / .2); --thumb: #FFFFFF;
   --accent: var(--apple-blue); --red: var(--apple-red); --orange: var(--apple-orange); --amber: var(--apple-orange); --green: var(--apple-green); --grey: var(--apple-gray); --blue: var(--apple-blue);
-  --r0: #2B2526; --r1: #47272A; --r2: #682A2E; --r3: #8E2E33; --r4: #B8353A; --r5: #E04448; --q0: #1C2B21; --q1: #1D4830; --q2: #236C44; --q3: #2E9459; --q4: #4BBA72; --q5: #89DEA3; --nodata: #3A3A3E; --nodata-line: #4A4A50; --flow: #0091FF; --group-solid: #1C1C1E; --st-reached: var(--apple-green); --st-going: var(--apple-orange); --st-nobody: var(--apple-red); --s0: #df4b4b; --s3: #1b8a4d;
-  --land: #2c2c30; --edge: rgb(0 0 0 / .55); --outline: #636366; --sel: #F5F5F7; --bg-map: #0e0e10;
-  --btn-prominent-bg: #F5F5F7; --btn-prominent-fg: #1D1D1F; --ease: cubic-bezier(.32, .72, 0, 1);
+  --r0: #F8E5E3; --r1: #F4C6C1; --r2: #EFA49C; --r3: #EA8178; --r4: #E45F55; --r5: #DC4438; --nodata: #E5E5EA; --nodata-line: #D1D1D6; --flow: #007AFF; --group-solid: #FFFFFF; --st-reached: var(--apple-green); --st-going: var(--apple-orange); --st-nobody: var(--apple-red); --s0: #df4b4b; --s3: #1b8a4d;
+  --land: #E3E3E8; --edge: rgb(255 255 255 / .9); --outline: #8E8E93; --sel: #1D1D1F; --bg-map: #EAF0F6;
+  --btn-prominent-bg: var(--apple-blue); --btn-prominent-fg: #FFFFFF; --ease: cubic-bezier(.32, .72, 0, 1);
+  --card-shadow: 0 1px 2px rgb(0 0 0 / .05), 0 4px 16px rgb(0 0 0 / .05);
   --hdr: 60px; --filters: 52px; --kpis: 118px;
-  color-scheme: dark;
+  color-scheme: light dark;
 }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --canvas: #08080A; --group: #1C1C1E; --group2: #242426; --elev: #1C1C1E; --label: #F5F5F7; --label2: rgb(235 235 245 / .62); --label3: rgb(235 235 245 / .36);
+  --hair: rgb(255 255 255 / .08); --fill: rgb(120 120 128 / .24); --fill2: rgb(120 120 128 / .36); --thumb: #48484A;
+  --r0: #2B2526; --r1: #47272A; --r2: #682A2E; --r3: #8E2E33; --r4: #B8353A; --r5: #E04448; --nodata: #3A3A3E; --nodata-line: #4A4A50; --flow: #0091FF; --group-solid: #1C1C1E;
+  --land: #2c2c30; --edge: rgb(0 0 0 / .55); --outline: #636366; --sel: #F5F5F7; --bg-map: #0e0e10; --btn-prominent-bg: #F5F5F7; --btn-prominent-fg: #1D1D1F; --card-shadow: none;
+} }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
 body { background: var(--canvas); color: var(--label); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; letter-spacing: -.01em; -webkit-font-smoothing: antialiased; overflow: hidden; }
@@ -255,7 +263,8 @@ table.plan td:last-child { width: 170px; } table.plan td:last-child .btn { white
 table.t .donetext { display: flex; gap: 6px; align-items: flex-start; } table.t .donetext svg { flex: none; margin-top: 2px; }
 @media (max-width: 700px) { .tabs { max-width: 100%; overflow-x: auto; scrollbar-width: none; } .tabs::-webkit-scrollbar { display: none; } html, body { overflow-x: hidden; } }
 /* Homes & sites */
-:root { --v0: #24243A; --v1: #30305C; --v2: #3E3E82; --v3: #5252AA; --v4: #6E6ED2; --v5: #9C9CF2; }
+:root { --v0: #ECECFA; --v1: #D4D4F5; --v2: #B4B4EE; --v3: #8E8EE4; --v4: #6767D6; --v5: #4343C2; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --v0: #24243A; --v1: #30305C; --v2: #3E3E82; --v3: #5252AA; --v4: #6E6ED2; --v5: #9C9CF2; } }
 .vstats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
 .vstats > div { background: var(--group); border-radius: 12px; padding: 10px 12px; } .vstats span { display: block; font-size: 12.5px; color: var(--label2); }
 .vstats b { display: block; font-size: 22px; font-weight: 600; letter-spacing: -.02em; } .vstats b.sm { font-size: 14px; font-weight: 500; line-height: 1.35; margin-top: 4px; } .vstats em { display: block; font-style: normal; font-size: 12.5px; color: var(--label2); }
@@ -311,3 +320,15 @@ table.t td.grp { font-size: 12.5px; font-weight: 600; color: var(--label2); back
 .ess b { font-size: 26px; font-weight: 700; letter-spacing: -.02em; } .ess .d { font-size: 12.5px; color: var(--label2); }
 .st-tab td.n, .st-tab th.n { text-align: right; white-space: nowrap; }
 @media (max-width: 980px) { .ess { grid-template-columns: 1fr 1fr; } }
+
+/* Apple grouped style: white cards with a soft shadow on a light grey canvas */
+.kpi, .queue, .mapzone, .sec, .is, .ess div { box-shadow: var(--card-shadow); }
+.queue { background: var(--group); }
+
+/* No live blur (Safari crash, 24–25 Oct): glass surfaces become solid */
+*, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+:root { --glass-bg: #FAFAFC !important; --glass-clear-bg: #FAFAFC !important; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --glass-bg: #161617 !important; --glass-clear-bg: #161617 !important; } }
+:root[data-theme="dark"] { --glass-bg: #161617 !important; --glass-clear-bg: #161617 !important; }
+/* Apple tinted buttons for actions in lists */
+.qi .btn:not(.btn-prominent), table.t .btn:not(.btn-prominent), .drawer .btn:not(.btn-prominent) { background: color-mix(in srgb, var(--apple-blue) 12%, transparent); color: var(--apple-blue); }

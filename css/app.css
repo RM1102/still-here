@@ -354,3 +354,18 @@ body.pre .mobilenav, body.pre .tabbar { display: none !important; }
 :root[data-theme="dark"] { --q0: #B83229; --q1: #CF5A33; --q2: #D98A3A; --q3: #CFAE45; --q4: #6FAE66; --q5: #36A862; }
 .stamp { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--label2); margin: 8px 2px 0; }
 .fb-toast { background: var(--elev) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; box-shadow: 0 8px 28px rgb(0 0 0 / .28), 0 0 0 1px var(--hair) !important; }
+
+/* No live blur (Safari crash, 24–25 Oct): glass surfaces become solid */
+*, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+:root { --glass-bg: #FAFAFC !important; --glass-clear-bg: #FAFAFC !important; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --glass-bg: #161617 !important; --glass-clear-bg: #161617 !important; } }
+:root[data-theme="dark"] { --glass-bg: #161617 !important; --glass-clear-bg: #161617 !important; }
+
+/* Phone mode, 25 Oct: the tab bar is docked to the bottom of the screen like iOS, always shown, and nothing scrolls below it */
+.device .screen { position: relative; }
+.device .pcontent { padding-bottom: 20px; }
+.device .tabbar { position: static; flex: none; left: auto; right: auto; bottom: auto; border-radius: 0; padding: 6px 10px 22px; background: var(--group-solid, #fff) !important; border-top: 1px solid var(--hair); }
+.device .tabbar a { border-radius: 14px; }
+
+.demo-strip { display: flex; gap: 8px; align-items: flex-start; margin: 2px 0 14px; padding: 9px 12px; border-radius: 12px; background: color-mix(in srgb, var(--apple-blue) 10%, var(--group)); color: var(--label2); font-size: 13.5px; line-height: 1.4; }
+.demo-strip .ic { color: var(--apple-blue); margin-top: 2px; } .demo-strip b { color: var(--label); }

@@ -60,12 +60,15 @@
   const V = {};
 
   V["#alert"] = () => `
+    <div class="demo-strip">${I("info", 15)}<span><b>Demo:</b> you are Sunita Sharma, 50, in Rohini, Delhi, at 7:10 am the morning after. Your granddaughter Meera, 3, lives in Mumbai.</span></div>
     ${head("Still Here", "Find out who in your life is safe, who is alone, and who can get to them.")}
-    <div class="persona"><span class="avatar">SS</span><div><b>In this demo, you are Sunita Sharma, 50</b><span>You live in Rohini, Delhi. It's 7:10 am, the morning after the vanishing. Your granddaughter Meera, 3, lives in Mumbai, and your mother Kamla, 78, lives 3 km away. Everything here is what your phone would show.</span></div></div>
-    <div class="group" style="margin-top:18px">
-      <div class="alert-row">${tile("siren", "red", true)}<div class="tt"><b>Emergency alert from the Government of India</b><span>National Disaster Management Authority (NDMA) · 6:00 am today</span><span style="font-size:15px;color:var(--label);margin-top:8px">At 2:32 pm yesterday, half of all people vanished in the same second, all over the world. Nobody has vanished since. If you are safe, stay where you are unless someone needs you. Open Still Here to see who in your life is safe.</span></div></div>
-      <div class="r t">${tile("smartphone", "gray")}<div class="tt"><b>You: Sunita Sharma, +91 98••• •4410</b><span>Your phone has been used since 2:32 pm, so you're shown as here.</span></div>${st("green", "Here")}</div>
+    <div class="group" style="margin-top:16px">
+      <div class="alert-row">${tile("siren", "red", true)}<div class="tt"><b>Emergency alert · Government of India</b><span>National Disaster Management Authority · 6:00 am</span><span style="font-size:15px;color:var(--label);margin-top:6px">At 2:32 pm yesterday, half of all people vanished in the same second. Nobody has vanished since. Open Still Here to see who in your life is safe.</span></div></div>
     </div>
+    <div class="btn-row"><button class="btn btn-prominent btn-block" data-action="enter">I'm Safe. Show Me My People</button></div>
+    <div class="btn-row" style="margin-top:8px"><a class="btn btn-block" href="#onmyown">I'm On My Own and Need Someone</a></div>
+    <p class="foot">Tapping this tells your family you're safe. Only people who have your number and chose you can see you. Still Here never asks for money, an OTP, or for a message to be forwarded.</p>
+    <div class="group" style="margin-top:14px"><div class="r t">${tile("smartphone", "gray")}<div class="tt"><b>You: Sunita Sharma, +91 98••• •4410</b><span>Your phone has been used since 2:32 pm, so you're shown as here.</span></div>${st("green", "Here")}</div></div>
     ${sect("Where Still Here's information comes from")}
     <div class="group tiles">
       <div class="r t">${tile("radio-tower", "blue")}<div class="tt"><b>India's mobile networks</b><span>Jio, Airtel, Vi and BSNL know which phones went silent at 2:32 pm, roughly where each phone is, and who calls whom.</span></div></div>
@@ -74,9 +77,7 @@
       <div class="r t">${tile("users", "orange")}<div class="tt"><b>People on duty and places that are open</b><span>Police, health workers, clinics and shops post what they have and what they need.</span></div></div>
     </div>
     <p class="foot">Still Here works under an emergency order with these partners and the National Disaster Management Authority. It uses the data only to find people who are alone and the people who know them, and refreshes it every few minutes.</p>
-    <div class="btn-row"><button class="btn btn-prominent btn-block" data-action="enter">I'm Safe. Show Me My People</button></div>
-    <div class="btn-row" style="margin-top:8px"><a class="btn btn-block" href="#onmyown">I'm On My Own and Need Someone</a></div>
-    <p class="foot">Tapping this tells your family you're safe. Only people who have your number and chose you can see you. Still Here never asks for money, an OTP, or for a message to be forwarded. In this prototype, every person, place and personal number is made up.</p>`;
+    <p class="foot">In this prototype, every person, place and personal number is made up.</p>`;
 
   V["#welcome"] = () => `
     ${head("How Still Here works", "Three things, in this order.")}
@@ -637,7 +638,8 @@
     $("#nav").innerHTML = NAV.map(n => n[0] === "sec" ? `<div class="sec">${n[1]}</div>` : `<a href="${n[0]}"${n[0].indexOf("#") ? ` target="_blank" rel="noopener"` : ""}>${I(n[2], 17)}<span>${n[1]}</span></a>`).join("");
     const tabs = [["#home", "People", "house"], ["#cases", "Cases", "users"], ["#map", "Map", "map-pinned"], ["#help", "Help", "truck"]];
     $("#tabbar").innerHTML = tabs.concat([["#more", "More", "layers"]]).map(t => `<a href="${t[0]}">${I(t[2], 20)}${t[1]}</a>`).join("");
-    $("#mobilenav").innerHTML = tabs.concat([["#kit", "Kit", "download"], ["#more", "More", "layers"]]).map(t => `<a href="${t[0]}">${I(t[2], 20)}${t[1]}</a>`).join("");
+    // One set of five tabs for the phone frame and for real phones, the same everywhere (Rahul, 25 Oct)
+    $("#mobilenav").innerHTML = $("#tabbar").innerHTML;
     $("#topstatus").innerHTML = `${I("shield-check", 17)}<span class="full">Nobody has vanished since 2:32 pm yesterday</span><span class="short">No new vanishings</span><span class="long fn" style="font-weight:400">· checked every minute</span>`;
     const sh = document.querySelector('[data-action="share"]'); if (sh) sh.innerHTML = I("share-2", 17);
   }
@@ -706,7 +708,7 @@
     if (route === "#map" && !S.mapSel && cityOf() === "delhi") S.mapSel = { kind: "ward", key: WARD.key };
     const phone = S.mode === "phone" && window.innerWidth >= 760;
     document.body.classList.toggle("phone", phone);
-    document.body.classList.toggle("pre", route === "#alert" || route === "#welcome" || (route === "#onmyown" && !S.entered));
+    document.body.classList.toggle("pre", false);
     document.querySelectorAll("#modeseg button").forEach(b => b.classList.toggle("on", b.dataset.mode === S.mode));
     const target = phone ? $("#pview") : $("#view"), other = phone ? $("#view") : $("#pview");
     target.innerHTML = V[route](); other.innerHTML = "";
