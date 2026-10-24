@@ -74,8 +74,11 @@ h1, h2, h3 { margin: 0; }
 .inspector .closer { display: none; }
 
 /* phone mode */
-body.phone .main { display: flex; align-items: flex-start; justify-content: center; padding: 28px 16px; }
-body.phone .topbar, body.phone .content-desktop { display: none; }
+/* The top bar stays in phone mode so Desktop is always one click away; the frame is scaled to fit the window (fitDevice in app.js) */
+body.phone .main { display: flex; flex-direction: column; align-items: center; padding: 0 0 20px; }
+body.phone .topbar { align-self: stretch; }
+body.phone .content-desktop { display: none; }
+body.phone .device { margin-top: 18px; transform-origin: top center; }
 .device { display: none; }
 body.phone .device { display: block; width: 393px; height: 852px; flex: none; background: #0b0b0f; border-radius: 54px; padding: 12px; box-shadow: 0 30px 60px -30px rgb(0 0 0 / .45), inset 0 0 0 2px #2a2a30; position: relative; }
 .device .island { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); width: 120px; height: 34px; background: #0b0b0f; border-radius: 20px; z-index: 4; }

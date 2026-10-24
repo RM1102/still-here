@@ -76,7 +76,7 @@ window.RC = window.RC || {};
     if (V.outline) svg += `<path d="${V.outline}" fill-rule="evenodd" style="fill:none;stroke:var(--outline);stroke-width:${1 * s};pointer-events:none"/>`;
     // hazard zones
     (o.zones || []).forEach(z => { const p = V.proj(z.lonlat[0], z.lonlat[1]); if (!inside(p)) return; const r = Math.max(12 * s, z.km * V.kmU);
-      svg += `<g data-hk="zone:${esc(z.id)}"><circle cx="${p[0]}" cy="${p[1]}" r="${r}" style="fill:var(--red);fill-opacity:.14;stroke:var(--red);stroke-width:${1.2 * s};stroke-dasharray:${4 * s} ${3 * s}"/></g>`; });
+      const zc = o.zoneColor || "var(--red)"; svg += `<g data-hk="zone:${esc(z.id)}"><circle cx="${p[0]}" cy="${p[1]}" r="${r}" style="fill:${zc};fill-opacity:.14;stroke:${zc};stroke-width:${1.6 * s};stroke-dasharray:${4 * s} ${3 * s}"/></g>`; });
     // arcs: origin to destination, never the route. Arrowhead at the destination; numbered badge matches the list beside the map.
     const placed = [];
     (o.arcs || []).forEach((a, i) => { const p1 = V.proj(a.from[0], a.from[1]), p2 = V.proj(a.to[0], a.to[1]); const dx = p2[0] - p1[0], dy = p2[1] - p1[1], L = Math.hypot(dx, dy) || 1;
@@ -93,7 +93,7 @@ window.RC = window.RC || {};
     (o.labels || []).forEach(Lb => { let x, y; if (Lb.k) { const sh = V.shapes.find(q => q.k === Lb.k); if (!sh || !sh.c) return; [x, y] = sh.c; } else if (Lb.at) [x, y] = Lb.at; else if (Lb.ll) [x, y] = V.proj(Lb.ll[0], Lb.ll[1]); else return; placed.push({ x, y, t: Lb.t, strong: !!Lb.strong }); });
     const boxes = []; let lsvg = "";
     // pins label to their right and win over area labels
-    (o.pins || []).forEach(p => { if (!p.label) return; const q = V.proj(p.lonlat[0], p.lonlat[1]); placed.push({ x: q[0] + 12 * s, y: q[1] + 4 * s, t: p.label, strong: true, anchor: "start", pri: 2 }); });
+    (o.pins || []).forEach(p => { if (!p.label) return; const q = V.proj(p.lonlat[0], p.lonlat[1]); placed.push({ x: q[0] + ((p.r || 7) + 6) * s, y: q[1] + 4 * s, t: p.label, strong: true, anchor: "start", pri: 2 }); });
     placed.sort((a, b) => ((b.pri || 0) - (a.pri || 0)) || (b.strong - a.strong)).forEach(Lb => { if (!inside([Lb.x, Lb.y])) return; const fs = (Lb.strong ? 12 : 11) * s, w = Lb.t.length * fs * 0.56, h = fs * 1.2, st = Lb.anchor === "start";
       const bx = st ? [Lb.x - 2 * s, Lb.y - h, Lb.x + w + 2 * s, Lb.y + 3 * s] : [Lb.x - w / 2 - 2 * s, Lb.y - h, Lb.x + w / 2 + 2 * s, Lb.y + 3 * s];
       if (boxes.some(b => !(bx[2] < b[0] || bx[0] > b[2] || bx[3] < b[1] || bx[1] > b[3]))) return;
@@ -101,10 +101,10 @@ window.RC = window.RC || {};
     // pins, with a 16px invisible hit area
     (o.pins || []).forEach(p => { const q = V.proj(p.lonlat[0], p.lonlat[1]); if (!inside(q)) return;
       svg += `<g class="pin" data-pin="${esc(p.id)}" data-hk="pin:${esc(p.id)}" style="cursor:pointer"><circle cx="${q[0]}" cy="${q[1]}" r="${16 * s}" style="fill:transparent"/>`
-        + (p.pulse ? `<circle cx="${q[0]}" cy="${q[1]}" r="${7 * s}" style="fill:none;stroke:${p.color};stroke-width:${2 * s}"><animate attributeName="r" from="${7 * s}" to="${18 * s}" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" from=".9" to="0" dur="1.8s" repeatCount="indefinite"/></circle>` : "")
+        + (p.pulse ? `<circle cx="${q[0]}" cy="${q[1]}" r="${(p.r || 7) * s}" style="fill:none;stroke:${p.color};stroke-width:${2 * s}"><animate attributeName="r" from="${(p.r || 7) * s}" to="${(p.r || 7) * 2.4 * s}" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" from=".9" to="0" dur="1.8s" repeatCount="indefinite"/></circle>` : "")
         + (p.sel ? `<circle cx="${q[0]}" cy="${q[1]}" r="${12 * s}" style="fill:none;stroke:var(--sel);stroke-width:${2.5 * s}"/>` : "")
         + `<circle cx="${q[0]}" cy="${q[1]}" r="${(p.r || 7) * s}" style="fill:${p.color};stroke:var(--bg-map);stroke-width:${2 * s}"/>`
-        + (p.glyph ? `<text x="${q[0]}" y="${q[1] + 3.6 * s}" text-anchor="middle" style="font-size:${10 * s}px;font-weight:800;fill:#fff;pointer-events:none">${p.glyph}</text>` : "")
+        + (p.glyph ? `<text x="${q[0]}" y="${q[1] + (p.r || 7) * 0.45 * s}" text-anchor="middle" style="font-size:${Math.max(10, (p.r || 7) * 1.25) * s}px;font-weight:800;fill:#fff;pointer-events:none">${p.glyph}</text>` : "")
         + `</g>`; });
     svg += lsvg + `</svg>`;
     const zoomUI = opts.zoom === false ? "" : `<div class="mapzoom" aria-label="Zoom"><button type="button" data-z="in" aria-label="Zoom in">${RC.icon ? RC.icon("plus", 16) : "+"}</button><button type="button" data-z="out" aria-label="Zoom out"${el._z.k <= 1 ? " disabled" : ""}>${RC.icon ? RC.icon("minus", 16) : "−"}</button>${el._z.k > 1 ? `<button type="button" data-z="reset" aria-label="Show all">${RC.icon ? RC.icon("maximize", 15) : "⤢"}</button>` : ""}</div>`;
@@ -166,7 +166,7 @@ window.RC = window.RC || {};
     el.innerHTML = svg;
     const sv = el.querySelector("svg"), hair = sv.querySelector(".xhair"), dots = sv.querySelectorAll(".xdot");
     sv.querySelector(".hit").addEventListener("mousemove", e => {
-      const r = sv.getBoundingClientRect(), px = e.clientX - r.left, x = o.xmin + (px - L) / (W - L - R) * (o.xmax - o.xmin);
+      const r = sv.getBoundingClientRect(), px = (e.clientX - r.left) * W / r.width, x = o.xmin + (px - L) / (W - L - R) * (o.xmax - o.xmin);
       const idx = o.series[0].pts.reduce((b, p, i, a) => Math.abs(p.x - x) < Math.abs(a[b].x - x) ? i : b, 0);
       const X = xs(o.series[0].pts[idx].x); hair.setAttribute("x1", X); hair.setAttribute("x2", X); hair.style.display = "";
       dots.forEach((d, i) => { const p = o.series[i].pts[idx]; d.setAttribute("cx", X); d.setAttribute("cy", ys(p.y)); d.style.display = ""; });

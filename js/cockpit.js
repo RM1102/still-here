@@ -9,7 +9,14 @@
   const done = t => `<span class="donetext">${I("check", 15)}${esc(t)}</span>`;
   const COSI = Math.cos(22.5 * Math.PI / 180), toLL = ([x, y]) => [x / (30 * COSI) + 68, 37.3 - y / 30];
   const ZONES = RC.avoid.map((z, i) => Object.assign({ id: "a" + i }, z)).concat([{ id: "tar", z: "Tarapur exclusion zone", why: "Reactor shutdown in progress with too few operators. Keep 5 km away.", lonlat: [72.66, 19.83], km: 5 }, { id: "mum", z: "Mumbai creeks", why: "Mangrove loss. Flood risk at high tide, 13:40.", lonlat: [72.86, 19.07], km: 3 }]);
-  function def() { return { page: "situation", scope: "delhi", state: null, ti: 0, qtab: "problems", sel: null, done: {}, layers: { people: true, problems: true, help: true, hazards: true }, siteAsk: {}, asked: {}, mirror: true, wardTeam: {}, wsel: null }; }
+  const PL = q => RC.govPlan[q.dyn === "children" ? "children" : q.dyn === "slowest" ? "bihar" : q.id] || {};
+  // Map colour for need: the share of an area's children left alone who have nobody going yet, counting those not yet found
+  const NEED = [{ max: 0.05, c: "var(--r0)", l: "Under 5%" }, { max: 0.1, c: "var(--r1)", l: "5–10%" }, { max: 0.2, c: "var(--r2)", l: "10–20%" }, { max: 0.4, c: "var(--r3)", l: "20–40%" }, { max: 0.7, c: "var(--r4)", l: "40–70%" }, { max: 1.01, c: "var(--r5)", l: "Over 70%" }];
+  const needShare = v => v && v.A ? Math.max(0, v.A - v.reached - v.claimed) / v.A : 0;
+  const needColor = v => { if (!v || v.nodata) return "var(--nodata)"; const f = needShare(v); return (NEED.find(b => f < b.max) || NEED[NEED.length - 1]).c; };
+  const needLegend = () => `<div class="legend compact"><span class="lt">Nobody going yet</span><span>${NEED[0].l}</span><span class="ramp">${NEED.map(b => `<i style="background:${b.c}"></i>`).join("")}</span><span>${NEED[NEED.length - 1].l}</span><span class="nd"><i></i>No network</span></div>`;
+  const marksLegend = () => `<div class="legend compact marks">${S.layers.problems ? `<span><i class="pin-k" style="background:var(--apple-red)">!</i>Problem, open</span><span><i class="pin-k" style="background:var(--green)">✓</i>Handled</span>` : ""}${S.layers.help ? `<span><i class="arr-k"></i>Supply moving (route shown here only)</span>` : ""}${S.layers.hazards ? `<span><i class="ring-k"></i>Keep away</span>` : ""}</div>`;
+  function def() { return { page: "situation", colour: "need", rebalanced: false, scope: "delhi", state: null, ti: 0, qtab: "problems", sel: null, done: {}, layers: { people: true, problems: true, help: true, hazards: true }, siteAsk: {}, asked: {}, mirror: true, wardTeam: {}, wsel: null }; }
   let S = (() => { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.page) return Object.assign(def(), s); } catch (e) {} return def(); })();
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
   const T = () => M.TIMES[S.ti], H = () => T().h, now = () => S.ti === 0;
@@ -19,14 +26,14 @@
   const wardRank = h => M.byState.Delhi.map(u => ({ u, v: M.at(u, h) })).filter(x => !x.v.nodata && x.v.A > 0).sort((a, b) => b.v.u5 / b.v.A - a.v.u5 / a.v.A);
   const slowest = h => Object.keys(M.byState).map(n => ({ n, v: M.scopes.state(n, h) })).filter(x => x.v.A > 1e6).sort((a, b) => a.v.share - b.v.share)[0];
   const row = (l, v) => `<div class="row"><span>${l}</span><span>${v}</span></div>`;
-  const projNote = () => now() ? "" : `<div class="src">Projection for ${esc(T().label)}</div>`;
+  const projNote = () => now() ? "" : `<div class="src">Estimate for ${esc(T().label)}</div>`;
 
   function items() {
     const h = H();
     return GV.queue.filter(q => S.scope === "india" || q.scope === "delhi").map(q => {
       const o = Object.assign({}, q);
-      if (q.dyn === "children") { const v = M.scopes.delhi(h), top = wardRank(h).slice(0, 3), none = v.u5 * 0.16; o.title = `${C(v.u5)} small children nobody is coming for`; o.where = `Across Delhi, worst in ${top[0].u.name} and ${top[1].u.name}`; o.what = `Under five, in Delhi. About ${C(none)} have nobody left alive in their circle, known the moment they were flagged; ${C(v.u5 - none)} have a circle that hasn't said it's going. Worst wards: ${top.map(x => `${x.u.name} (${Math.round(x.v.u5)})`).join(", ")}.`; }
-      if (q.dyn === "slowest") { const sl = slowest(h); o.title = `${sl.n} is being reached slowest`; o.what = `${P(sl.v.share)} of ${C(sl.v.A)} people alone there have been reached, the lowest of any large state.`; o.state = sl.n; o.where = sl.n; o.lonlat = toLL(RC.GEO.india.states[sl.n].c); }
+      if (q.dyn === "children") { const v = M.scopes.delhi(h), top = wardRank(h).slice(0, 3), none = v.u5 * 0.16; o.title = `${C(v.u5)} small children nobody is coming for`; o.where = `Across Delhi, worst in ${top[0].u.name} and ${top[1].u.name}`; o.what = `Under five, in Delhi. About ${C(none)} have nobody left alive who knows them, known the moment they were found; ${C(v.u5 - none)} have people who haven't said they're going. Worst wards: ${top.map(x => `${x.u.name} (${Math.round(x.v.u5)})`).join(", ")}.`; }
+      if (q.dyn === "slowest") { const sl = slowest(h); o.title = `${sl.n} is being reached slowest`; o.what = `${P(sl.v.share)} of ${C(sl.v.A)} children alone there are now safe with someone, the lowest of any large state.`; o.state = sl.n; o.where = sl.n; o.lonlat = toLL(RC.GEO.india.states[sl.n].c); }
       o.done = S.done[q.id] || null; o.inprog = !!(q.keepOpen && o.done); return o;
     });
   }
@@ -39,15 +46,15 @@
     $("#who").textContent = `${GV.persona.org} · ${GV.persona.role}`;
     const r = $("#restricted"); if (r && !r.querySelector("svg")) r.insertAdjacentHTML("afterbegin", I("shield-alert", 13));
   }
-  const timeSeg = () => `<span class="lab">Time</span><div class="seg">${M.TIMES.map((t, i) => `<button class="${S.ti === i ? "on" : ""}" data-ti="${i}">${t.short}</button>`).join("")}</div><span class="proj ${now() ? "now" : ""}" data-help="projection">${now() ? "Live, 07:10" : "Projection for " + esc(T().label)}</span>`;
+  const timeSeg = () => `<span class="lab">Time</span><div class="seg">${M.TIMES.map((t, i) => `<button class="${S.ti === i ? "on" : ""}" data-ti="${i}">${t.short}</button>`).join("")}</div><span class="proj ${now() ? "now" : ""}" data-help="projection">${now() ? "Live, 07:10" : "Estimate for " + esc(T().label)}</span>`;
 
   /* ---------- situation ---------- */
   function kpis() {
     const h = H(), v = scopeAgg(h), its = items(), open = its.filter(i => i.sev === "urgent" && (!i.done || i.inprog)).length, all = its.filter(i => !i.done || i.inprog).length;
     const tile = (help, l, val, d, st) => `<div class="kpi" data-help="${help}"><span class="info">${I("info", 15)}</span><div class="l">${l}</div><div class="v">${val}</div><div class="d">${st ? `<span class="st ${st}">${d}</span>` : d}</div></div>`;
-    return tile("vanish", RC.TERMS.vanish, "0", "none since 14:32:07", "green")
+    return tile("vanish", RC.TERMS.vanish, "0", "checked every minute", "green")
       + tile("alone", RC.TERMS.alone, C(v.A), "in " + scopeName())
-      + tile("reached", RC.TERMS.reached, C(v.reached), `${P(v.share)} of them, since 06:00`)
+      + tile("reached", RC.TERMS.reached, C(v.reached), `${P(v.share)} of them · ${P(needShare(v))} have nobody going`)
       + tile("nocircle", RC.TERMS.nocircle, C(v.u5), "under 5 · nobody going yet", "red")
       + tile("urgent", RC.TERMS.urgent, String(open), `${all} open in ${S.scope === "delhi" ? "Delhi" : "India"}`, open ? "red" : "green");
   }
@@ -60,7 +67,8 @@
       return `<div class="qi ${q.sev} ${q.done ? "done" : ""} ${sel ? "on" : ""}" data-q="${q.id}" tabindex="0">
         <div class="qi-top">${sev(q)}<span>${q.t} · ${esc(q.where)}</span></div>
         <div class="qi-title">${esc(q.title)}</div><div class="qi-why">${esc(q.why)}</div>
-        <div class="qi-foot">${d ? done(d.done || "Opened") : `<button class="btn btn-compact" data-do="${q.id}" data-which="act">${esc(tc(q.act.label))}</button>`}</div></div>`; }).join("");
+        ${!d && PL(q).have ? `<div class="qi-have">${I("users", 13)}<span><b>Free now:</b> ${esc(PL(q).have[0].n)} · ${esc(PL(q).have[0].eta)}</span></div>` : ""}
+        <div class="qi-foot">${d ? `${done(d.done || "Opened")}${PL(q).left && PL(q).left[q.done] ? `<div class="qi-left">${esc(PL(q).left[q.done])}</div>` : ""}` : `<button class="btn btn-compact" data-do="${q.id}" data-which="act">${esc(tc(q.act.label))}</button>`}</div></div>`; }).join("");
     return head + `<div class="q-list">${list}</div>`;
   }
   function crumb() {
@@ -68,14 +76,14 @@
     if (S.state) return `<button data-back="1">‹ India</button> › <b>${esc(S.state)}</b> · its districts`;
     return `<b>India</b> · click a state for its districts`;
   }
-  function chips() { return [["people", "People", "var(--q3)"], ["problems", "Problems", "var(--red)"], ["help", "Supplies", "var(--blue)"], ["hazards", "Hazards", "var(--amber)"]].map(([k, l, c]) => `<button class="chip ${S.layers[k] ? "on" : ""}" data-layer="${k}"><i style="background:${c}"></i>${l}</button>`).join(""); }
+  function chips() { return `<span class="lab">Colour areas by</span><div class="seg"><button class="${S.colour === "need" ? "on" : ""}" data-colour="need">Nobody going yet</button><button class="${S.colour === "safe" ? "on" : ""}" data-colour="safe">Now safe</button></div><span class="lab" style="margin-left:6px">Show</span>` + [["problems", "Problems", "var(--red)"], ["help", "Supplies", "var(--blue)"], ["hazards", "Hazards", "var(--amber)"]].map(([k, l, c]) => `<button class="chip ${S.layers[k] ? "on" : ""}" data-layer="${k}"><i style="background:${c}"></i>${l}</button>`).join(""); }
   function situation() {
     return `<div class="filters"><span class="lab">Area</span><div class="seg"><button class="${S.scope === "delhi" ? "on" : ""}" data-scope="delhi">Delhi</button><button class="${S.scope === "india" ? "on" : ""}" data-scope="india">India</button></div>${timeSeg()}</div>
       <div class="kpis">${kpis()}</div>
       <div class="sit-body"><aside class="queue">${queueHtml()}</aside>
         <section class="mapzone ${S.sel ? "has-drawer" : ""}"><div class="map-tools"><span class="crumb">${crumb()}</span>${chips()}</div>
           <div class="stage"><div class="mapsvg" id="map"></div>
-            <div class="overlay" style="left:12px;top:12px">${MAP.legend({ compact: true })}</div>
+            <div class="overlay ov-legend">${S.colour === "need" ? needLegend() : MAP.legend({ compact: true })}${marksLegend()}</div>
             <div class="overlay ov-trend"><div class="t"><b>Is it getting better?</b> <span id="trendname"></span></div><p class="trendline" id="trendtxt"></p><div id="trend"></div></div>
           </div>${drawer()}</section></div>`;
   }
@@ -89,14 +97,16 @@
       const d = q.done ? (q[q.done] || q.act) : null;
       head = `<div>${sev(q)}<h2>${esc(q.title)}</h2><div class="who">${q.t} · ${esc(q.where)}</div></div>`;
       body = `<h3>What happened</h3><p>${esc(q.what)}</p><h3>Why it matters</h3><p>${esc(q.why)}</p>
-        <h3>What to do</h3>${d ? `<p>${done(d.done || "")}</p><button class="btn btn-compact btn-plain" data-undo="${q.id}">Undo</button>` : `<div style="display:flex;flex-direction:column;gap:8px"><button class="btn btn-prominent btn-block" data-do="${q.id}" data-which="act">${esc(tc(q.act.label))}</button>${q.alt && !q.alt.open ? `<button class="btn btn-block" data-do="${q.id}" data-which="alt">${esc(tc(q.alt.label))}</button>` : ""}</div>`}`;
+        ${PL(q).need ? `<h3>What it needs</h3><p>${esc(PL(q).need)}</p>` : ""}
+        ${PL(q).have ? `<h3>What you have</h3>${PL(q).have.map(x => `<div class="have"><b>${esc(x.n)}</b><span>${esc(x.what)} · ${esc(x.eta)}</span></div>`).join("")}` : ""}
+        <h3>What to do</h3>${d ? `<p>${done(d.done || "")}</p>${PL(q).left && PL(q).left[q.done] ? `<p><b style="color:var(--label)">What's left:</b> ${esc(PL(q).left[q.done])}</p>` : ""}<button class="btn btn-compact btn-plain" data-undo="${q.id}">Undo</button>` : `<div style="display:flex;flex-direction:column;gap:8px"><button class="btn btn-prominent btn-block" data-do="${q.id}" data-which="act">${esc(tc(q.act.label))}</button>${q.alt && !q.alt.open ? `<button class="btn btn-block" data-do="${q.id}" data-which="alt">${esc(tc(q.alt.label))}</button>` : ""}</div>`}`;
       if (q.dyn === "children") body += `<h3>By ward, worst first</h3><table class="rank">${wardRank(H()).slice(0, 10).map(x => `<tr><td>${esc(x.u.name)}</td><td class="n">${Math.round(x.v.u5)}</td><td class="n">${S.wardTeam[x.u.key] ? done("Team sent") : `<button class="btn btn-compact" data-team="${x.u.key}">Send a Team</button>`}</td></tr>`).join("")}</table>`;
       body += `<div class="src">Source: ${esc(q.src)}</div>`;
     } else if (s.type === "region") {
       const v = regionAgg(s), name = regionName(s), kind = s.kind === "ward" ? "Ward · Delhi" : s.kind === "district" ? `District · ${esc((M.byKey[s.key] || {}).state || "")}` : "State";
       head = `<div><span class="who">${kind}</span><h2>${esc(name)}</h2></div>`;
       if (!v || v.nodata) body = `<p>No phone network here, so there is no data. Shown grey on the map, never red. A runner was sent at 06:50.</p>`;
-      else body = `<div class="nums"><div class="num" data-help="alone"><div class="l">Children with no adult left</div><div class="v">${C(v.A)}</div></div><div class="num" data-help="reached"><div class="l">Reached and safe</div><div class="v">${P(v.share)}</div></div><div class="num" data-help="claimed"><div class="l">Someone on the way</div><div class="v">${C(v.claimed)}</div></div><div class="num" data-help="nocircle"><div class="l">Small children, nobody coming</div><div class="v">${C(v.u5)}</div></div></div>${CH.stack(v)}
+      else body = `<div class="nums"><div class="num" data-help="alone"><div class="l">${RC.TERMS.alone}</div><div class="v">${C(v.A)}</div></div><div class="num" data-help="unclaimed"><div class="l">Nobody going yet</div><div class="v">${P(needShare(v))}</div></div><div class="num" data-help="reached"><div class="l">${RC.TERMS.reached}</div><div class="v">${P(v.share)}</div></div><div class="num" data-help="nocircle"><div class="l">Small children, nobody coming</div><div class="v">${C(v.u5)}</div></div></div>${CH.stack(v)}
         <h3>Over the next three days</h3><div id="drchart"></div>${projNote()}`;
       const here = items().filter(q => (s.kind === "state" && q.state === name));
       if (here.length) body += `<h3>Problems here</h3>` + here.map(q => `<div class="qi" data-q="${q.id}"><div class="qi-top">${sev(q)}</div><div class="qi-title">${esc(q.title)}</div></div>`).join("");
@@ -107,28 +117,29 @@
     const h = H(), view = S.scope === "delhi" ? "delhi" : S.state ? "state" : "india", cache = {};
     const valOf = k => cache[k] || (cache[k] = view === "india" ? M.scopes.state(k, h) : M.scopes.unit(k, h));
     const its = items(), o = { view, state: S.state, aria: scopeName() + " map" };
-    if (S.layers.people) o.fill = k => { const v = valOf(k); return v ? M.color(v) : null; };
+    o.fill = k => { const v = valOf(k); return v ? (S.colour === "need" ? needColor(v) : M.color(v)) : null; };
     o.sel = S.sel && S.sel.type === "region" ? S.sel.key : null;
     if (view === "delhi") o.labels = wardRank(h).slice(0, 3).map(x => ({ k: x.u.key, t: x.u.name })).concat(o.sel && M.byKey[o.sel] ? [{ k: o.sel, t: M.byKey[o.sel].name, strong: true }] : []);
     else if (view === "india") o.labels = Object.entries(RC.GEO.india.states).filter(([n]) => (M.scopes.state(n, h).A > 3e5)).map(([n, st]) => ({ at: st.c, t: st.code }));
     else { const ds = (M.byState[S.state] || []).slice().sort((a, b) => b.A - a.A).slice(0, 6); o.labels = ds.map(u => ({ k: u.key, t: u.name })); }
     o.pins = [];
     if (S.layers.problems) {
-      its.filter(q => view === "delhi" ? q.scope === "delhi" : q.scope === "india").forEach(q => o.pins.push({ id: q.id, lonlat: q.lonlat, color: q.done ? "var(--green)" : SEVC[q.sev], glyph: q.done ? "✓" : "!", pulse: q.sev === "urgent" && !q.done, sel: S.sel && S.sel.type === "q" && S.sel.id === q.id, r: 8 }));
+      // Open problems are big, labelled and (if urgent) pulsing, so they read before the colours do
+      its.filter(q => view === "delhi" ? q.scope === "delhi" : q.scope === "india").forEach(q => { const open = !q.done || q.inprog; o.pins.push({ id: q.id, lonlat: q.lonlat, color: open ? SEVC[q.sev] : "var(--green)", glyph: open ? "!" : "✓", pulse: q.sev === "urgent" && open, sel: S.sel && S.sel.type === "q" && S.sel.id === q.id, r: open ? (q.sev === "urgent" ? 12 : q.sev === "high" ? 10 : 8) : 7, label: open && q.sev !== "watch" ? PL(q).short : "" }); });
       if (view !== "delhi") { const n = its.filter(q => q.scope === "delhi" && !q.done).length; if (n) o.pins.push({ id: "delhi-cluster", lonlat: [77.2, 28.6], color: "var(--red)", glyph: String(n), r: 9, label: "Delhi" }); }
     }
     if (S.layers.help) {
       const inD = ll => ll[0] > 76.83 && ll[0] < 77.35 && ll[1] > 28.4 && ll[1] < 28.89;
       o.arcs = GV.supplies.filter(f => view === "delhi" ? inD(f.fromLL) && inD(f.toLL) : !(inD(f.fromLL) && inD(f.toLL))).map(f => ({ from: f.fromLL, to: f.toLL, fromLabel: f.from, toLabel: view === "delhi" ? "" : f.to.split(" ")[0] }));
     }
-    if (S.layers.hazards) o.zones = ZONES;
+    if (S.layers.hazards) { o.zones = ZONES; o.zoneColor = "var(--apple-orange)"; }
     o.hover = k => {
-      if (k.indexOf("pin:") === 0) { const id = k.slice(4); if (id === "delhi-cluster") return `<b>Delhi</b><div>${its.filter(q => q.scope === "delhi" && !q.done).length} problems open.</div><div class="hintl">Click to switch to Delhi</div>`; const q = its.find(x => x.id === id); return q ? `<b>${esc(q.title)}</b><div>${esc(q.what)}</div><div class="hintl">Click for what to do</div>` : ""; }
+      if (k.indexOf("pin:") === 0) { const id = k.slice(4); if (id === "delhi-cluster") return `<b>Delhi</b><div>${its.filter(q => q.scope === "delhi" && !q.done).length} problems open.</div><div class="hintl">Click to switch to Delhi</div>`; const q = its.find(x => x.id === id); return q ? `<b>${esc(q.title)}</b><div>${esc(q.what)}</div>${PL(q).have ? `<div class="src">Free now: ${esc(PL(q).have[0].n)} · ${esc(PL(q).have[0].eta)}</div>` : ""}<div class="hintl">Click for the plan</div>` : ""; }
       if (k.indexOf("zone:") === 0) { const z = ZONES.find(x => x.id === k.slice(5)); return z ? `<b>${esc(z.z)}</b><div>${esc(z.why)}</div>` : ""; }
       const v = valOf(k), name = view === "india" ? k : (M.byKey[k] || {}).name || k;
       if (!v) return `<b>${esc(name)}</b>`;
       if (v.nodata) return `<b>${esc(name)}</b><div>No phone network, so no data. Shown grey, never red.</div>`;
-      return `<b>${esc(name)}</b>${row("Children with no adult left", C(v.A))}${row("Reached and safe", P(v.share))}${row("Someone on the way", C(v.claimed))}${row("Nobody yet", C(v.unclaimed))}${row("Small children, nobody coming", C(v.u5))}${projNote()}<div class="hintl">${view === "india" ? (k === "Delhi" ? "Click to open Delhi's wards" : "Click to see its districts") : "Click for detail"}</div>`;
+      return `<b>${esc(name)}</b>${row(RC.TERMS.alone, C(v.A))}${row("Nobody going yet", P(needShare(v)))}${row(RC.TERMS.reached, P(v.share))}${row(RC.TERMS.claimed, C(v.claimed))}${row("Small children, nobody coming", C(v.u5))}${projNote()}<div class="hintl">${view === "india" ? (k === "Delhi" ? "Click to open Delhi's wards" : "Click to see its districts") : "Click for detail"}</div>`;
     };
     o.click = k => { if (view === "india") { if (k === "Delhi") { S.scope = "delhi"; S.state = null; S.sel = null; } else { S.state = k; S.sel = { type: "region", kind: "state", key: k }; } } else S.sel = { type: "region", kind: view === "delhi" ? "ward" : "district", key: k }; render(); };
     o.clickPin = id => { if (id === "delhi-cluster") { S.scope = "delhi"; S.state = null; S.sel = null; } else S.sel = { type: "q", id }; render(); };
@@ -145,69 +156,91 @@
   }
   function drawTrend(el, fn, height) {
     const pts = M.series(fn, 2);
-    CH.line(el, { height, xmin: 0, xmax: 50, ymax: 1, yfmt: y => Math.round(y * 100) + "%", ytitle: "Share of children with no adult left", xlabel: h => M.hourLabel(h), marker: M.NOW, markerLabel: "Now", split: M.NOW, right: 96,
-      xticks: [{ x: 14, l: "20:00" }, { x: 26, l: "Day 2" }, { x: 50, l: "Day 3" }],
-      series: [{ name: "Reached", color: "var(--st-reached)", area: true, pts: pts.map(p => ({ x: p.h, y: p.share })) }, { name: "Nobody yet", color: "var(--st-nobody)", pts: pts.map(p => ({ x: p.h, y: p.unclaimedShare })) }] });
+    CH.line(el, { height, xmin: 0, xmax: 50, ymax: 1, yfmt: y => Math.round(y * 100) + "%", ytitle: "Share of children left alone", xlabel: h => M.hourLabel(h), marker: M.NOW, markerLabel: "Now", split: M.NOW, right: 112,
+      xticks: [{ x: 14, l: "8 pm" }, { x: 26, l: "Day 2" }, { x: 50, l: "Day 3" }],
+      series: [{ name: "Now safe", color: "var(--st-reached)", area: true, pts: pts.map(p => ({ x: p.h, y: p.share })) }, { name: "Nobody going", color: "var(--st-nobody)", pts: pts.map(p => ({ x: p.h, y: needShare(p) })) }] });
   }
 
-  /* ---------- resources ---------- */
+  /* ---------- resources: the plan ---------- */
+  // Free in a pool = total − already busy − what the actions taken so far use (an action on either page is the same action)
+  function poolUse(k) { return items().filter(q => q.done && PL(q).pool === k && q.done === "act").reduce((n, q) => n + (PL(q).uses || 0), 0); }
   function resources() {
+    const its = sorted();
+    const meter = (p, t, inv) => { const f = t ? p / t : 0, c = (inv ? 1 - f : f) < 0.3 ? "var(--apple-red)" : (inv ? 1 - f : f) < 0.6 ? "var(--apple-orange)" : "var(--apple-green)"; return `<div class="meter"><div class="bar"><i style="width:${Math.round(f * 100)}%;background:${c}"></i></div><span>${p.toLocaleString("en-IN")} of ${t.toLocaleString("en-IN")}</span></div>`; };
     const sites = GV.sites.map((x, i) => Object.assign({ i }, x)).sort((a, b) => a.present / a.total - b.present / b.total);
-    const meter = (p, t) => { const f = p / t, c = f < 0.3 ? "var(--apple-red)" : f < 0.6 ? "var(--apple-orange)" : "var(--apple-green)"; return `<div class="meter"><div class="bar"><i style="width:${Math.round(f * 100)}%;background:${c}"></i></div><span>${p.toLocaleString("en-IN")} of ${t.toLocaleString("en-IN")}</span></div>`; };
-    return `<div class="page"><div class="page-in"><h1>Resources</h1><p class="lede">Who is at the places that keep people alive, who can be asked to come, and what is already on its way. The staff counts use the same phone signal as everything else: whose phone is at the site.</p>
+    const planRows = its.map(q => { const pl = PL(q), d = q.done ? (q[q.done] || q.act) : null, h = pl.have || [];
+      return `<tr><td>${sev(q)}<div style="margin-top:4px"><b>${esc(q.title)}</b></div><div class="sub" style="margin:2px 0 0">${esc(q.where)}</div></td><td>${esc(pl.need || "")}</td>
+        <td>${h.map((x, k) => `<div${k ? ' class="sub" style="margin:6px 0 0"' : ""}><b>${esc(x.n)}</b> · ${esc(x.what)}<br><span class="sub">${esc(x.eta)}</span></div>`).join("")}</td>
+        <td>${d ? `${done(d.done || "Opened")}${pl.left && pl.left[q.done] ? `<div class="sub" style="margin:6px 0 0">${esc(pl.left[q.done])}</div>` : ""}` : `<span class="sub">Not planned yet</span>`}</td>
+        <td class="n">${d ? `<button class="btn btn-compact btn-plain" data-undo="${q.id}">Undo</button>` : `<button class="btn btn-compact" data-do="${q.id}" data-which="act">${esc(tc(q.act.label))}</button>`}</td></tr>`; }).join("");
+    const pools = RC.govPools.map(pl => { const used = poolUse(pl.k), free = Math.max(0, pl.total - pl.busy - used), users = items().filter(q => q.done === "act" && PL(q).pool === pl.k);
+      return `<tr><td><b>${esc(pl.what)}</b><div class="sub" style="margin:2px 0 0">${esc(pl.who)}</div></td><td>${meter(free, pl.total)}<div class="sub" style="margin:4px 0 0">free now</div></td>
+        <td>${pl.busy ? `${pl.busy} already busy` : "None busy"}${users.map(q => `<div>${done(`${PL(q).uses} → ${PL(q).short}`)}</div>`).join("")}${pl.note ? `<div class="sub" style="margin:4px 0 0">${esc(pl.note)}</div>` : ""}</td></tr>`; }).join("");
+    return `<div class="page"><div class="page-in"><h1>Resources and plan</h1><p class="lede">What each open problem needs, what you have free to send, and where everything already is. Pressing an action here or on the Situation page is the same action, and every count below follows it.</p>
+      <div class="sec"><h2>Plan for open problems</h2><p class="sub">Worst first. "Free now" is what could reach the problem soonest.</p>
+        <table class="t plan"><thead><tr><th>Problem</th><th>Needs</th><th>Free now</th><th>Plan</th><th></th></tr></thead><tbody>${planRows}</tbody></table></div>
+      <div class="sec"><h2>Teams and vehicles you can send</h2><p class="sub">Counted from each team's phones and each vehicle's tracker at 07:10.</p>
+        <table class="t"><thead><tr><th>What</th><th>Free now</th><th>Busy with</th></tr></thead><tbody>${pools}</tbody></table></div>
+      <div class="sec"><h2>Doctors, nurses and others on professional registers<span class="inl-info" data-help="register">${I("info", 15)}</span></h2><p class="sub">Who is still here, who is already at work, and who could still be asked (not at work and not waiting on an answer). Each ask is a message with the place, the shift and what it pays; nobody is ordered.</p>
+        <table class="t"><thead><tr><th>Who</th><th class="n">Still here</th><th class="n">At work now</th><th class="n">Free to ask</th><th class="n">Asked</th><th class="n">Said yes</th><th>Most needed at</th><th></th></tr></thead><tbody>${GV.people.map((x, i) => `<tr><td><b>${esc(x.role)}</b><div class="sub" style="margin:2px 0 0">${esc(x.reg)}</div></td><td class="n">${x.alive.toLocaleString("en-IN")}<div class="sub" style="margin:0">of ${x.of.toLocaleString("en-IN")}</div></td><td class="n">${x.onduty.toLocaleString("en-IN")}</td><td class="n">${Math.max(0, x.alive - x.onduty - (x.asked - x.came) - (S.asked[i] || 0)).toLocaleString("en-IN")}</td><td class="n">${(x.asked + (S.asked[i] || 0)).toLocaleString("en-IN")}</td><td class="n">${x.came.toLocaleString("en-IN")}</td><td>${esc(x.need)}</td><td class="n"><button class="btn btn-compact" data-ask="${i}" style="white-space:nowrap">Ask 50 More</button></td></tr>`).join("")}</tbody></table>
+        <div class="src">Source: registers matched to phones that are still in use; "at work" means the phone is at a hospital, plant or care point now</div></div>
       <div class="sec"><h2>Essential sites short of staff<span class="inl-info" data-help="short">${I("info", 15)}</span></h2><p class="sub">Worst first. Under 30% of usual staff is red, under 60% is orange.</p>
-        <table class="t"><thead><tr><th>Site</th><th>What It Does</th><th>Staff on Site Now</th><th></th></tr></thead><tbody>${sites.map(x => `<tr><td><b>${esc(x.site)}</b></td><td>${esc(x.does)}</td><td>${meter(x.present, x.total)}</td><td class="n">${S.siteAsk[x.i] ? done(`Asked 07:2${x.i} · first arrivals 08:30`) : `<button class="btn btn-compact" data-siteask="${x.i}">Ask for Staff</button>`}</td></tr>`).join("")}</tbody></table>
+        <table class="t"><thead><tr><th>Site</th><th>What It Does</th><th>Staff There Now</th><th></th></tr></thead><tbody>${sites.map(x => `<tr><td><b>${esc(x.site)}</b></td><td>${esc(x.does)}</td><td>${meter(x.present, x.total)}</td><td class="n">${S.siteAsk[x.i] ? done(`Asked 07:2${x.i} · first arrivals 08:30`) : `<button class="btn btn-compact" data-siteask="${x.i}">Ask for Staff</button>`}</td></tr>`).join("")}</tbody></table>
         <div class="src">Source: employer rosters matched to phone location, 07:10</div></div>
-      <div class="sec"><h2>People on professional registers<span class="inl-info" data-help="register">${I("info", 15)}</span></h2><p class="sub">Asked, not conscripted. Each ask is a message with the site, the shift and what it earns.</p>
-        <table class="t"><thead><tr><th>Who</th><th>Register</th><th class="n">Still Here</th><th class="n">Asked</th><th class="n">Came</th><th></th></tr></thead><tbody>${GV.people.map((p, i) => `<tr><td><b>${esc(p.role)}</b></td><td>${esc(p.reg)}</td><td class="n">${p.alive.toLocaleString("en-IN")} of ${p.of.toLocaleString("en-IN")}</td><td class="n">${(p.asked + (S.asked[i] || 0)).toLocaleString("en-IN")}</td><td class="n">${p.came.toLocaleString("en-IN")}</td><td class="n"><button class="btn btn-compact" data-ask="${i}">Ask 50 More</button></td></tr>`).join("")}</tbody></table></div>
       <div class="sec restricted"><span class="tag">${I("shield-alert", 14)}Restricted</span><h2>Supplies on the way</h2><p class="sub">Routes and arrival times stay in this view. The public sees only that a supply has left, two hours after it left.</p>
-        <table class="t"><thead><tr><th>What</th><th>How</th><th>From → To</th><th>Departs</th><th>Arrives</th><th>Route</th></tr></thead><tbody>${GV.supplies.map(f => `<tr><td><b>${esc(f.what)}</b></td><td>${esc(f.how)}</td><td>${esc(f.from)} → ${esc(f.to)}</td><td>${f.dep}</td><td>${esc(f.eta)}</td><td>${esc(f.route)}</td></tr>`).join("")}</tbody></table></div>
+        <table class="t"><thead><tr><th>What</th><th>How</th><th>From → To</th><th>Left</th><th>Arrives</th><th>Route</th></tr></thead><tbody>${GV.supplies.map(f => `<tr><td><b>${esc(f.what)}</b></td><td>${esc(f.how)}</td><td>${esc(f.from)} → ${esc(f.to)}</td><td>${f.dep}</td><td>${esc(f.eta)}</td><td>${esc(f.route)}</td></tr>`).join("")}</tbody></table></div>
     </div></div>`;
   }
 
   /* ---------- fairness & law ---------- */
   function fair() {
-    const rows = GV.fair, W = 760, L = 170, R = 200, rh = 30, Ht = rows.length * rh + 34, max = 0.25, x = v => L + v / max * (W - L - R);
-    let svg = `<svg class="dumb" viewBox="0 0 ${W} ${Ht}" role="img" aria-label="Share of people against share of supplies by district">`;
+    const rows = GV.fair.map(r => Object.assign({}, r, { now: r.alloc, alloc: S.rebalanced ? r.pop : r.alloc })), W = 760, L = 170, R = 210, rh = 30, Ht = rows.length * rh + 34, max = 0.25, x = v => L + v / max * (W - L - R);
+    let svg = `<svg class="dumb" viewBox="0 0 ${W} ${Ht}" role="img" aria-label="Each district's share of people against its share of supplies">`;
     [0, 0.05, 0.1, 0.15, 0.2, 0.25].forEach(g => svg += `<line x1="${x(g)}" x2="${x(g)}" y1="6" y2="${Ht - 24}" class="grid"/><text x="${x(g)}" y="${Ht - 8}" text-anchor="middle" class="axis">${Math.round(g * 100)}%</text>`);
     rows.forEach((r, i) => { const y = 18 + i * rh, over = r.alloc > r.pop * 1.3, under = r.alloc < r.pop * 0.7;
-      svg += `<g data-help=""><text x="${L - 10}" y="${y + 4}" text-anchor="end" style="font-size:12.5px;fill:var(--label)">${esc(r.d)}</text><line x1="${x(r.pop)}" x2="${x(r.alloc)}" y1="${y}" y2="${y}" style="stroke:${over ? "var(--apple-red)" : under ? "var(--apple-orange)" : "var(--label3)"};stroke-width:3;stroke-linecap:round"/><circle cx="${x(r.pop)}" cy="${y}" r="6" style="fill:var(--label2)"/><circle cx="${x(r.alloc)}" cy="${y}" r="6" style="fill:var(--apple-blue)"/>${over || under ? `<text x="${Math.max(x(r.pop), x(r.alloc)) + 12}" y="${y + 4}" style="font-size:12.5px;font-weight:500;fill:var(--label2)">${over ? "gets more than its share" : "gets less than its share"}</text>` : ""}</g>`; });
+      svg += `<g><text x="${L - 10}" y="${y + 4}" text-anchor="end" style="font-size:12.5px;fill:var(--label)">${esc(r.d)}</text><line x1="${x(r.pop)}" x2="${x(r.alloc)}" y1="${y}" y2="${y}" style="stroke:${over ? "var(--apple-red)" : under ? "var(--apple-orange)" : "var(--label3)"};stroke-width:3;stroke-linecap:round"/><circle cx="${x(r.pop)}" cy="${y}" r="6" style="fill:var(--label2)"/>${S.rebalanced && Math.abs(r.now - r.alloc) > 0.004 ? `<line x1="${x(r.now)}" x2="${x(r.alloc)}" y1="${y}" y2="${y}" style="stroke:var(--apple-blue);stroke-opacity:.35;stroke-width:2;stroke-dasharray:3 3"/><circle cx="${x(r.now)}" cy="${y}" r="5" style="fill:none;stroke:var(--apple-blue);stroke-opacity:.55;stroke-width:1.5"/>` : ""}<circle cx="${x(r.alloc)}" cy="${y}" r="6" style="fill:var(--apple-blue)"/><text x="${Math.max(x(r.pop), x(r.alloc), S.rebalanced ? x(r.now) : 0) + 12}" y="${y + 4}" style="font-size:12.5px;font-weight:500;fill:var(--label2)">${over ? `gets ${(r.alloc / r.pop).toFixed(1)}× its share` : under ? `gets ${Math.round(r.alloc / r.pop * 100)}% of its share` : S.rebalanced && Math.abs(r.now - r.alloc) > 0.004 ? `about right (was ${r.now > r.pop ? (r.now / r.pop).toFixed(1) + "× its share" : Math.round(r.now / r.pop * 100) + "% of its share"})` : "about right"}</text></g>`; });
     svg += `</svg>`;
-    return `<div class="page"><div class="page-in"><h1>Fairness & law</h1><p class="lede">Is help going where the people are, what can be done with places nobody owns any more, and who is reached first when there are not enough teams.</p>
-      <div class="sec"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><h2>Is help going where the people are?</h2><p class="sub" style="margin:0">Grey dot: the district's share of Delhi's surviving people. Blue dot: its share of the food, water and staff sent today.</p></div>
+    return `<div class="page"><div class="page-in"><h1>Fairness & law</h1><p class="lede">Three checks on the people running the response: is help going where the people are, which emergency powers are in use and when they end, and who is reached first when there are not enough teams.</p>
+      <div class="sec"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h2>Is help going where the people are?</h2><p class="sub" style="margin:0;max-width:44em">Each row is a district of Delhi. The grey dot is its share of Delhi's surviving people; the blue dot is its share of the food, water and staff sent ${S.rebalanced ? "tomorrow, after rebalancing" : "today"}. A red line means far more than its share, orange far less.</p></div>
         <button class="toggle ${S.mirror ? "on" : ""}" data-mirror="1" data-help="mirror" aria-pressed="${S.mirror}"><span>Shown to the public</span><span class="sw"></span></button></div>
         <div style="margin-top:12px">${svg}</div>
-        <p class="sub" style="margin-top:8px">${S.mirror ? "Anyone can see that New Delhi, the capital, is getting three times its share while North East Delhi gets half. This public view is the only check the product offers against a government that looks after the capital first. It is not enough on its own." : "<span class='st red'>Hidden. The public can no longer see this, and the fact that it was turned off is itself recorded and shown publicly.</span>"}</p></div>
+        <p class="sub" style="margin-top:8px">${S.rebalanced ? "Tomorrow's trucks follow where people are: North East Delhi goes from 7% to 13% of supplies, and New Delhi from 12% to 4%." : "Today New Delhi, the capital, gets three times its share while North East Delhi gets about half."} ${S.mirror ? "Anyone can see this chart. Making it public is the only check the product offers against a government that looks after the capital first, and it is not enough on its own." : "<span class='st red'>Hidden from the public. Turning it off is itself recorded and shown publicly.</span>"}</p>
+        <div class="btn-row" style="margin-top:10px">${S.rebalanced ? `${done("Tomorrow's plan follows where people are")} <button class="btn btn-compact btn-plain" data-rebalance="1">Undo</button>` : `<button class="btn btn-compact" data-rebalance="1">Rebalance Tomorrow's Trucks</button>`}</div></div>
+      <div class="sec"><h2>Emergency powers in use</h2><p class="sub">Every power the response relies on, the law it comes from, who used it, and when it ends.</p>
+        <table class="t"><thead><tr><th>What it allows</th><th>Law</th><th>Used by</th><th>Ends</th></tr></thead><tbody>${RC.govPowers.map(w => `<tr><td><b>${esc(w.what)}</b></td><td>${esc(w.law)}</td><td>${esc(w.by)}</td><td>${esc(w.ends)}</td></tr>`).join("")}</tbody></table></div>
       <div class="cols">
-        <div class="sec"><h2>Places nobody owns any more<span class="inl-info" data-help="openzone">${I("info", 15)}</span></h2><p class="sub">Declared under Section 65 of the Disaster Management Act 2005.</p>
+        <div class="sec"><h2>Places nobody owns any more<span class="inl-info" data-help="openzone">${I("info", 15)}</span></h2><p class="sub">Where everyone vanished, the district can take over the building and its stock for the response (Disaster Management Act 2005, s.65).</p>
           ${GV.zones.map(z => `<div class="zrow"><div class="zt"><b>${esc(z.zone)}</b><span class="st ${z.status === "Open" ? "green" : z.status.indexOf("Taken") === 0 ? "orange" : ""}">${esc(z.status)}</span></div><div class="sub" style="margin:2px 0 0">${esc(z.what)}</div><div class="zr">${esc(z.rule)}</div></div>`).join("")}
-          <p class="sub" style="margin-top:10px">A declared open zone is a declared target. Declare only what can't be held anyway.</p></div>
-        <div class="sec restricted"><span class="tag">${I("shield-alert", 14)}Restricted · District Magistrate and Chief Medical Officer</span><h2>Who is reached first<span class="inl-info" data-help="triage">${I("info", 15)}</span></h2><p class="sub">When there are more cases than teams.</p>
+          <p class="sub" style="margin-top:10px">An open zone draws people looking for food away from homes, but it is also a target. Declare only what can't be guarded anyway.</p></div>
+        <div class="sec restricted"><span class="tag">${I("shield-alert", 14)}Restricted · District Magistrate and Chief Medical Officer</span><h2>Who is reached first<span class="inl-info" data-help="triage">${I("info", 15)}</span></h2><p class="sub">When there are more children and elders alone than teams, this order decides who the next free team goes to. Only these two officers can change it, and each change is recorded with their name.</p>
           <table class="t"><thead><tr><th>Group</th><th class="n">Cases</th><th>Order</th></tr></thead><tbody>${GV.triage.map(t => `<tr><td>${esc(t.q)}</td><td class="n">${t.n.toLocaleString("en-IN")}</td><td>${t.order}</td></tr>`).join("")}</tbody></table>
-          <h2 style="margin-top:16px">Health records</h2><p class="sub" style="margin:2px 0 0">Anyone verified as caring for a survivor can open that person's health record at a care point. India's ABHA system already holds 79.7 crore accounts and 65 crore linked records.</p></div>
+          <div class="src">Last changed 05:40 by the District Magistrate, North West: under-fives moved ahead of over-75s</div></div>
       </div></div></div>`;
   }
 
   /* ---------- world ---------- */
   const wshare = (iso, h) => { const s0 = RC.world.reached[iso]; if (s0 == null) return null; const k = -Math.log(1 - s0) / M.NOW; return 1 - Math.exp(-k * h); };
+  const wnames = () => { const names = { SGP: "Singapore" }; RC.GEO.world.countries.forEach(c => names[c.id] = c.n); return names; };
   function world() {
-    const h = H(), names = { SGP: "Singapore" }; RC.GEO.world.countries.forEach(c => names[c.id] = c.n);
+    const h = H(), names = wnames();
     const ranked = Object.keys(RC.world.reached).map(iso => ({ iso, n: names[iso] || iso, s: wshare(iso, h) })).sort((a, b) => a.s - b.s);
     const sel = S.wsel ? ranked.find(r => r.iso === S.wsel) : null;
     const aidN = iso => GV.world.aid.filter(a => a.to === iso), aidF = iso => GV.world.aid.filter(a => a.from === iso);
-    return `<div class="filters">${timeSeg()}</div><div class="world"><div class="wmap"><div class="mapsvg" id="wmap" style="position:absolute;inset:10px"></div><div class="overlay" style="left:12px;bottom:12px">${MAP.legend({ compact: true })}</div></div>
-      <div class="wside">${sel ? `<div class="sec"><h2>${esc(sel.n)}</h2><div class="nums" style="margin-top:8px"><div class="num"><div class="l">Alone people reached</div><div class="v">${P(sel.s)}</div></div><div class="num"><div class="l">Aid arriving</div><div class="v">${aidN(sel.iso).length}</div></div></div>${aidN(sel.iso).map(a => `<p class="sub" style="margin:8px 0 0">From ${esc(names[a.from] || a.from)}: ${esc(a.what)}, left ${a.t}</p>`).join("")}${aidF(sel.iso).map(a => `<p class="sub" style="margin:8px 0 0">Sending to ${esc(names[a.to] || a.to)}: ${esc(a.what)}</p>`).join("")}<button class="btn btn-compact" style="margin-top:12px" data-wsel="">Close</button></div>` : ""}
-        <div class="sec"><h2>Furthest behind</h2><p class="sub">Share of people alone who have been reached. Countries doing better send aid to these.</p>${ranked.slice(0, 8).map(r => `<div class="wrow" data-wsel="${r.iso}"><span class="wn">${esc(r.n)}</span><div class="meter" style="flex:1;min-width:0"><div class="bar"><i style="width:${Math.round(r.s * 100)}%;background:${M.color({ share: r.s })}"></i></div><span>${P(r.s)}</span></div></div>`).join("")}</div>
-        <div class="sec"><h2>Aid on the way</h2>${GV.world.aid.map(a => `<div class="aid"><b>${esc(names[a.from] || a.from)} → ${esc(names[a.to] || a.to)}</b><span>${esc(a.what)}, left ${a.t}</span></div>`).join("")}</div>
-        <div class="sec"><h2>Live world layer</h2><p class="sub">World Monitor, an open-source dashboard by koala73, already shows live news, flights, ships and outages for the whole world. In the real product it runs beside this view on the government network. Still Here adds the one layer it lacks: people.</p><a class="btn btn-prominent btn-block" href="${RC.WMON}" target="_blank" rel="noopener">Open World Monitor ${I("external-link", 15)}</a><p class="sub" style="margin:10px 0 0">Opens the public site, which shows today's real world, not the Snap.</p></div>
+    return `<div class="filters">${timeSeg()}</div><div class="world"><div class="wmap"><div class="mapsvg" id="wmap" style="position:absolute;inset:10px"></div>
+        <div class="overlay" style="left:12px;bottom:12px">${MAP.legend({ compact: true })}<div class="legend compact" style="margin-top:6px"><span class="lt">Blue arrows</span><span>aid on its way, from the country sending it, numbered as in the list</span></div></div></div>
+      <div class="wside">${sel ? `<div class="sec"><h2>${esc(sel.n)}</h2><div class="nums" style="margin-top:8px"><div class="num"><div class="l">Children alone, now safe</div><div class="v">${P(sel.s)}</div></div><div class="num"><div class="l">Aid arriving</div><div class="v">${aidN(sel.iso).length}</div></div></div>${aidN(sel.iso).map(a => `<p class="sub" style="margin:8px 0 0">From ${esc(names[a.from] || a.from)}: ${esc(a.what)}, left ${a.t}</p>`).join("")}${aidF(sel.iso).map(a => `<p class="sub" style="margin:8px 0 0">Sending to ${esc(names[a.to] || a.to)}: ${esc(a.what)}</p>`).join("")}<button class="btn btn-compact" style="margin-top:12px" data-wsel="">Close</button></div>` : ""}
+        <div class="sec"><h2>Furthest behind</h2><p class="sub">The share of children left alone who are now safe with someone, lowest first. Countries further ahead send aid to these.</p>${ranked.slice(0, 8).map(r => `<div class="wrow" data-wsel="${r.iso}"><span class="wn">${esc(r.n)}</span><div class="meter" style="flex:1;min-width:0"><div class="bar"><i style="width:${Math.max(2, Math.round(r.s * 100))}%;background:${M.color({ share: r.s })}"></i></div><span>${P(r.s)}</span></div></div>`).join("")}</div>
+        <div class="sec"><h2>Aid on the way</h2><p class="sub">The blue arrows on the map.</p>${GV.world.aid.map((a, i) => `<div class="aid"><b><span class="anum">${i + 1}</span>${esc(names[a.from] || a.from)} → ${esc(names[a.to] || a.to)}</b><span>${esc(a.what)}, left ${a.t}</span></div>`).join("")}</div>
+        <div class="sec"><h2>Live world layer</h2><p class="sub">World Monitor, an open-source dashboard by koala73, already shows live news, flights, ships and outages for the whole world. In the real product it runs beside this view on the government network. Still Here adds the one layer it lacks: people.</p><a class="btn btn-prominent btn-block" href="${RC.WMON}" target="_blank" rel="noopener">Open World Monitor ${I("external-link", 15)}</a><p class="sub" style="margin:10px 0 0">Opens the public site, which shows today's real world, not this scenario.</p></div>
       </div></div>`;
   }
   function worldMap() {
-    const el = $("#wmap"); if (!el) return; const h = H(), cents = {}; RC.GEO.world.countries.forEach(c => cents[c.id] = [c.c[0] / 3 - 180, 90 - c.c[1] / 3]);
+    const el = $("#wmap"); if (!el) return; const h = H(), cents = { SGP: [103.8, 1.35] }; RC.GEO.world.countries.forEach(c => cents[c.id] = [c.c[0] / 3 - 180, 90 - c.c[1] / 3]);
+    const AR = GV.world.aid.map((a, i) => ({ a, n: i + 1 })).filter(x => cents[x.a.from] && cents[x.a.to]);
     MAP.render(el, { view: "world", aria: "World map", sel: S.wsel, fill: iso => { const s = wshare(iso, h); return s == null ? null : M.color({ share: s }); },
       labels: ["IND", "CHN", "USA", "BRA", "RUS", "AUS", "NGA", "IDN", "DEU", "ZAF", "SAU", "CAN", "ARG", "EGY"].filter(i => cents[i]).map(i => ({ ll: cents[i], t: (RC.GEO.world.countries.find(c => c.id === i) || {}).n })),
-      arcs: GV.world.aid.filter(a => cents[a.from] && cents[a.to]).map(a => ({ from: cents[a.from], to: cents[a.to] })),
-      hover: iso => { const c = RC.GEO.world.countries.find(x => x.id === iso); const s = wshare(iso, h); return c ? `<b>${esc(c.n)}</b>${s == null ? "<div>No data yet</div>" : row("Alone people reached", P(s))}${projNote()}<div class="hintl">Click for detail</div>` : ""; },
+      arcs: AR.map(x => ({ from: cents[x.a.from], to: cents[x.a.to], n: x.n })),
+      hover: iso => { if (String(iso).indexOf("arc:") === 0) { const x = AR[+String(iso).slice(4)], nm = wnames(); return x ? `<b>${x.n}. ${esc(nm[x.a.from] || x.a.from)} → ${esc(nm[x.a.to] || x.a.to)}</b><div>${esc(x.a.what)}, left ${x.a.t}</div>` : ""; } const c = RC.GEO.world.countries.find(x => x.id === iso); const s = wshare(iso, h); return c ? `<b>${esc(c.n)}</b>${s == null ? "<div>No data yet</div>" : row("Children alone, now safe", P(s))}${projNote()}<div class="hintl">Click for detail</div>` : ""; },
       click: iso => { S.wsel = iso; render(); }, clickEmpty: () => { if (S.wsel) { S.wsel = null; render(); } } });
   }
 
@@ -230,7 +263,7 @@
     save();
   }
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-export],[data-page],[data-scope],[data-ti],[data-qtab],[data-layer],[data-do],[data-undo],[data-q],[data-close],[data-back],[data-team],[data-siteask],[data-ask],[data-mirror],[data-wsel]");
+    const t = e.target.closest("[data-export],[data-page],[data-scope],[data-ti],[data-qtab],[data-layer],[data-colour],[data-rebalance],[data-do],[data-undo],[data-q],[data-close],[data-back],[data-team],[data-siteask],[data-ask],[data-mirror],[data-wsel]");
     if (!t) return; const d = t.dataset;
     if (d.export) { exportLog(); return; }
     if (d.page) { S.page = d.page; S.sel = null; }
@@ -238,6 +271,8 @@
     else if (d.ti != null) S.ti = +d.ti;
     else if (d.qtab) S.qtab = d.qtab;
     else if (d.layer) S.layers[d.layer] = !S.layers[d.layer];
+    else if (d.colour) S.colour = d.colour;
+    else if (d.rebalance) S.rebalanced = !S.rebalanced;
     else if (d.do) { const q = GV.queue.find(x => x.id === d.do); if (d.which === "alt" && q.alt && q.alt.open) { S.sel = { type: "q", id: q.id }; } else { S.done[d.do] = d.which; S.sel = { type: "q", id: d.do }; } e.stopPropagation(); }
     else if (d.undo) delete S.done[d.undo];
     else if (d.close) S.sel = null;

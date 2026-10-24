@@ -5,7 +5,7 @@
   --canvas: #08080A; --group: rgb(255 255 255 / .055); --group2: rgb(255 255 255 / .085); --elev: #1C1C1E; --label: #F5F5F7; --label2: rgb(235 235 245 / .62); --label3: rgb(235 235 245 / .36);
   --hair: rgb(255 255 255 / .08); --fill: rgb(120 120 128 / .24); --fill2: rgb(120 120 128 / .36); --thumb: #48484A;
   --accent: var(--apple-blue); --red: var(--apple-red); --orange: var(--apple-orange); --amber: var(--apple-orange); --green: var(--apple-green); --grey: var(--apple-gray); --blue: var(--apple-blue);
-  --q0: #1C2B21; --q1: #1D4830; --q2: #236C44; --q3: #2E9459; --q4: #4BBA72; --q5: #89DEA3; --nodata: #3A3A3E; --nodata-line: #4A4A50; --flow: #0091FF; --group-solid: #1C1C1E; --st-reached: var(--apple-green); --st-going: var(--apple-orange); --st-nobody: var(--apple-red); --s0: #df4b4b; --s3: #1b8a4d;
+  --r0: #2B2526; --r1: #47272A; --r2: #682A2E; --r3: #8E2E33; --r4: #B8353A; --r5: #E04448; --q0: #1C2B21; --q1: #1D4830; --q2: #236C44; --q3: #2E9459; --q4: #4BBA72; --q5: #89DEA3; --nodata: #3A3A3E; --nodata-line: #4A4A50; --flow: #0091FF; --group-solid: #1C1C1E; --st-reached: var(--apple-green); --st-going: var(--apple-orange); --st-nobody: var(--apple-red); --s0: #df4b4b; --s3: #1b8a4d;
   --land: #2c2c30; --edge: rgb(0 0 0 / .55); --outline: #636366; --sel: #F5F5F7; --bg-map: #0e0e10;
   --btn-prominent-bg: #F5F5F7; --btn-prominent-fg: #1D1D1F; --ease: cubic-bezier(.32, .72, 0, 1);
   --hdr: 60px; --filters: 52px; --kpis: 118px;
@@ -229,3 +229,27 @@ table.t td.n, table.t th.n { text-align: right; font-variant-numeric: tabular-nu
 .trendline { font-size: 13px; color: var(--label); margin: 2px 0 6px; line-height: 1.4; }
 .legend.compact { gap: 8px; flex-wrap: nowrap; white-space: nowrap; }
 .legend.compact .ramp i { width: 16px; }
+
+/* 24 Oct evening: plans inside problems, the need map's legend, numbered world arrows */
+.qi-have { display: flex; gap: 6px; align-items: flex-start; margin-top: 8px; font-size: 13px; color: var(--label2); line-height: 1.35; }
+.qi-have svg { flex: none; margin-top: 2px; color: var(--apple-blue); } .qi-have b { color: var(--label); font-weight: 500; }
+.qi-left { font-size: 13px; color: var(--label2); margin-top: 6px; line-height: 1.35; }
+.dr-body .have { padding: 8px 10px; background: var(--group); border-radius: 10px; margin-top: 6px; }
+.dr-body .have b { display: block; font-weight: 600; color: var(--label); font-size: 14px; } .dr-body .have span { color: var(--label2); font-size: 13px; }
+.legend.marks { margin-top: 6px; }
+.legend .pin-k { width: 14px; height: 14px; border-radius: 50%; display: inline-grid; place-items: center; color: #fff; font-size: 9px; font-weight: 800; font-style: normal; vertical-align: -3px; }
+.legend .arr-k { width: 18px; height: 2px; border-radius: 1px; background: var(--flow); vertical-align: 3px; }
+.legend .ring-k { width: 12px; height: 12px; border-radius: 50%; background: transparent; box-shadow: inset 0 0 0 2px var(--apple-orange); vertical-align: -2px; }
+.aid .anum { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--flow); color: #fff; font-size: 11px; font-weight: 700; margin-right: 8px; vertical-align: 1px; }
+table.plan td { vertical-align: top; } table.plan td:nth-child(1) { width: 26%; } table.plan td:nth-child(2) { width: 20%; } table.plan td:nth-child(3) { width: 24%; }
+table.t td .sub { font-size: 12.5px; }
+.ov-legend { right: 12px; bottom: 12px; max-width: 46%; }
+.has-drawer .ov-legend { right: 396px; }
+.ov-legend { max-width: calc(100% - 420px); }
+.legend.compact.marks { flex-wrap: wrap; white-space: normal; row-gap: 4px; }
+.legend.compact.marks span { white-space: nowrap; }
+.map-tools .lab { white-space: nowrap; font-size: 13px; color: var(--label2); }
+table.plan td:nth-child(1) { width: 25%; } table.plan td:nth-child(2) { width: 17%; } table.plan td:nth-child(3) { width: 22%; } table.plan td:nth-child(4) { width: 24%; }
+table.plan td:last-child { width: 170px; } table.plan td:last-child .btn { white-space: normal; text-align: center; line-height: 1.25; padding-top: 6px; padding-bottom: 6px; min-width: 150px; }
+table.t .donetext { display: flex; gap: 6px; align-items: flex-start; } table.t .donetext svg { flex: none; margin-top: 2px; }
+@media (max-width: 700px) { .tabs { max-width: 100%; overflow-x: auto; scrollbar-width: none; } .tabs::-webkit-scrollbar { display: none; } html, body { overflow-x: hidden; } }

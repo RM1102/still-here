@@ -157,6 +157,7 @@
       <div class="seg" style="margin:0 0 12px"><button class="${a ? "on" : ""}" data-action="reqmode" data-v="active">Someone Who Has Your Number</button><button class="${!a ? "on" : ""}" data-action="reqmode" data-v="nodevice">Someone Who Doesn't</button></div>
       <p class="foot">Two examples are filled in: your sister Shalini, and Savitri Devi, an old friend of your mother's who doesn't have your number.</p>
       <div class="btn-row"><button class="btn btn-prominent btn-block" data-action="request">Find Them</button></div>${res}
+      <p class="foot">Looking for a doctor rather than a person? <a href="#help">See doctors and nurses on duty near you</a>.</p>
       ${disc("Why you can't see everyone", "A list of who is alone, and where, would help thieves and people who prey on children. So you only ever see people who have your number too, or who chose you. Anyone else gets your message, and decides for themselves.")}`;
   };
 
@@ -392,6 +393,9 @@
       <p class="foot">Each arrow runs from the city a supply left to the city it's going to, numbered as in the list. We show a supply only two hours after it leaves, and never its route or arrival time, so nobody can wait for it on the road. Nothing moving inside a city is shown.</p>
       <div class="mapgroup" style="margin-top:14px"><div class="mapbox" id="flowmap" style="height:460px;min-height:0"></div><div class="legend"><span><i style="background:var(--flow);border-radius:50%"></i>Supply on its way, numbered as in the list</span><span><i style="background:var(--apple-indigo);border-radius:50%"></i>Community taking people in</span></div></div>
       ${sect("Services back in Delhi")}${intro("Compared with a normal day.")}<div class="stats">${RC.restoration.map(r => stat(r.k, `${r.v} <small>${esc(r.unit)}</small>`)).join("")}</div>
+      ${sect("Doctors and nurses on duty near you")}${intro("Counted from staff phones at each place, so you know who is there before you walk.")}
+      <div class="group tiles">${RC.clinics.map(c => `<div class="r t">${tile("heart-pulse", "red")}<div class="tt"><b>${esc(c.name)}</b><span>${c.doctors} doctor${c.doctors === 1 ? "" : "s"}${c.nurses ? ` and ${c.nurses} nurse${c.nurses === 1 ? "" : "s"}` : ""} there ${c.since ? `since ${esc(c.since)}` : "now"} · ${esc(c.treats)} · wait ${esc(c.wait)}</span></div><span class="val">${esc(c.dist)}</span></div>`).join("")}</div>
+      <p class="foot">If someone can't breathe, is bleeding heavily or won't wake up, call 112. An ambulance comes if one is free; if not, the call goes to the nearest doctor on duty.</p>
       ${sect("Open now, with staff there")}
       <div class="group tiles">${RC.onDuty.map(o => `<div class="r t">${tile(o.icon, o.tile)}<div class="tt"><b>${esc(o.name)}</b><span>${esc(o.what)}${o.queue ? ` · ${esc(o.queue)}` : ""}</span></div><span class="val">${esc(o.dist)}</span></div>`).join("")}</div>
       <p class="foot">We know someone is working because their work phone is at the counter now: the ration shop dealer, a pharmacist, an ATM guard. Queue sizes come from the number of phones waiting there.</p>
@@ -600,11 +604,19 @@
         hover: k => { if (k.indexOf("arc:") === 0) { const f = fl[+k.slice(4)]; return f ? `<b>${f.n}. ${esc(f.what)}</b><div>${esc(f.from)} to ${esc(f.to)}, left at ${clock(f.dep)}</div><div class="src">Shown two hours after it left, with no route or arrival time</div>` : ""; }
           if (k.indexOf("pin:c") === 0) { const c = ac[+k.slice(5)]; return c ? `<b>${esc(c.name)}</b><div>${esc(c.note || "")}</div>` : ""; } return `<b>${esc(k)}</b>`; } }); }
   }
+  // Scale the phone frame down so the whole phone fits the window, keeping its proportions
+  function fitDevice() {
+    const d = document.querySelector(".device"); if (!d) return;
+    if (!document.body.classList.contains("phone")) { d.style.transform = ""; d.style.marginBottom = ""; return; }
+    const tb = $(".topbar"), avail = $(".main").clientHeight - (tb ? tb.offsetHeight : 0) - 38, h = d.offsetHeight, k = Math.max(0.55, Math.min(1, avail / h));
+    d.style.transform = k < 1 ? `scale(${k.toFixed(3)})` : ""; d.style.marginBottom = k < 1 ? `${Math.round((k - 1) * h)}px` : "";
+  }
   function render() {
     let route = location.hash || "#alert";
     if (route === "#request") route = "#find";
     if (!V[route]) route = "#alert";
-    if (!S.entered && route !== "#alert" && route !== "#onmyown") route = "#alert";
+    // Any link opens its screen, even before I'm Safe is tapped, so an evaluator can explore from anywhere
+    if (!S.entered && route !== "#alert" && route !== "#onmyown" && route !== "#welcome") { S.entered = true; S.welcomed = true; }
     if (S.mapArea === "delhi") { S.mapArea = "city"; S.mapCity = "delhi"; }
     if (route === "#map" && !S.mapSel && cityOf() === "delhi") S.mapSel = { kind: "ward", key: WARD.key };
     const phone = S.mode === "phone" && window.innerWidth >= 760;
@@ -615,6 +627,7 @@
     target.innerHTML = V[route](); other.innerHTML = "";
     $("#view").classList.toggle("wide", route === "#map" || route === "#help");
     if (phone) $("#pview").scrollTop = 0; else $(".main").scrollTop = 0;
+    fitDevice();
     document.querySelectorAll(".nav a, .tabbar a, .mobilenav a").forEach(a => a.classList.toggle("on", a.getAttribute("href") === route || (route.startsWith("#case") && a.getAttribute("href") === "#cases") || ((route === "#find" || route === "#report") && a.getAttribute("href") === "#cases" && a.closest(".tabbar, .mobilenav"))));
     document.querySelectorAll(".inspector .tabs [data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === S.tab));
     $("#pane-thread").style.display = S.tab === "thread" ? "" : "none"; $("#pane-demo").style.display = S.tab === "demo" ? "" : "none";

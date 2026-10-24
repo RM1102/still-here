@@ -124,6 +124,13 @@ window.RC = window.RC || {};
     { name: "Apollo Pharmacy, Sec 8", what: "Pharmacist there since 6:58 am · has insulin", queue: "", dist: "1.1 km", icon: "heart-pulse", tile: "red" },
     { name: "Indian Oil pump, Sec 11", what: "2 attendants · petrol and diesel", queue: "about 60 vehicles waiting", dist: "1.6 km", icon: "truck", tile: "orange" }
   ];
+  // Doctors and nurses on duty (Rahul, 24 Oct evening): counted from staff phones at each place, like every other "on duty"
+  RC.clinics = [
+    { name: "Mohalla Clinic, Sector 7", dist: "0.6 km", doctors: 1, nurses: 2, since: "7:00 am", wait: "about 40 minutes", treats: "fever, wounds, repeat prescriptions" },
+    { name: "First-aid point at the Sector 7 govt school", dist: "0.7 km", doctors: 1, nurses: 0, since: "6:30 am", wait: "under 10 minutes", treats: "first aid and checking medicines; Dr. Rao, your family doctor, runs it" },
+    { name: "Dr. BSA Hospital, emergency ward", dist: "2.4 km", doctors: 14, nurses: 31, since: "", wait: "about 2 hours", treats: "injuries, breathing trouble, childbirth; 38 doctors on a normal day" },
+    { name: "Jaipur Golden Hospital, Sector 3", dist: "3.0 km", doctors: 6, nurses: 12, since: "", wait: "about 1 hour", treats: "dialysis and heart patients first" }
+  ];
   // Who's with you (audit section 6, #1, #2 and #7): a child already with Sunita, from next door
   RC.withMeSuggest = { name: "Aarav Malhotra", age: 7, from: "C-7/110, next door", why: "Both his parents vanished at 2:32 pm yesterday. He came to your flat last night.", ration: "5 kg a month", code: "7K3Q" };
 
@@ -250,6 +257,53 @@ window.RC = window.RC || {};
   };
 
   /* ---------- Government view (audit C1–C3, C11) ---------- */
+  // For each problem: a short map label, what it needs, what is free to solve it, and what is still short after each action (Rahul, 24 Oct evening:
+  // "to look at what resources I have to solve it I have to go to another tab")
+  RC.govPlan = {
+    children: { short: "Small children, nobody going", need: "One police officer and one health or childcare worker for each of the five worst wards", pool: "teams", uses: 5,
+      have: [{ what: "Paired child teams (police and a health or childcare worker)", n: "46 free in Delhi", eta: "30 to 60 min" }, { what: "Anganwadi workers on duty in those wards", n: "38", eta: "already in their ward" }],
+      left: { act: "Five wards covered. 41 teams still free for the next ten wards." } },
+    tihar: { short: "Tihar: 38% of guards", need: "Two armed police companies", pool: "police", uses: 2,
+      have: [{ what: "Delhi Armed Police, 3rd Battalion", n: "2 companies free", eta: "40 min from Kingsway Camp" }, { what: "CRPF reserve", n: "1 company free", eta: "55 min from Jharoda Kalan" }],
+      left: { act: "Nothing short once they arrive at 08:00.", alt: "Lockdown holds for about 12 hours; guards are still needed by tonight." } },
+    armoury: { short: "Armoury unguarded", need: "One police team of six", pool: "station", uses: 1,
+      have: [{ what: "Rohini police station, team 1", n: "6 officers free", eta: "22 min" }],
+      left: { act: "Nothing short.", alt: "Armoury empty by 10:00; no guard needed after that." } },
+    water: { short: "Water plant: 6 of 11 operators", need: "Five more operators", pool: null,
+      have: [{ what: "Operators on the Delhi Jal Board register, still here", n: "61, of whom 9 live within 10 km", eta: "about 1 hour" }, { what: "Wazirabad plant", n: "2 operators can be spared", eta: "80 min" }],
+      left: { act: "2 accepted, arriving 08:30. Still 3 short: ask Wazirabad too." } },
+    bawana: { short: "Chlorine store unmanned", need: "One hazmat crew", pool: "hazmat", uses: 1,
+      have: [{ what: "Rohini fire station hazmat crew", n: "1 crew of 5 free", eta: "34 min" }],
+      left: { act: "Nothing short.", alt: "Residents warned; the store is still unmanned until a crew goes." } },
+    power: { short: "Substation: 2 of 9 operators", need: "Three engineers", pool: null,
+      have: [{ what: "Electrical engineers on power company rosters, still here", n: "290, of whom 14 live within 10 km", eta: "about 1 hour" }],
+      left: { act: "Cuts approved; hospitals stay on. Engineers are still needed.", alt: "1 accepted. Still 2 short." } },
+    yamuna: { short: "Embankment unchecked", need: "One engineer", pool: null,
+      have: [{ what: "Irrigation department engineers", n: "3 free", eta: "by 10:00" }], left: { act: "Nothing short unless it rains." } },
+    tarapur: { short: "Tarapur: 4 of 14 operators", need: "Six reactor operators", pool: null,
+      have: [{ what: "Kudankulam plant operators", n: "6 can be spared", eta: "13:00 by Air Force flight" }], left: { act: "Nothing short once they land at 13:00." } },
+    mumbai: { short: "Mumbai flood at 13:40", need: "A warning to six wards and boats on standby", pool: null,
+      have: [{ what: "NDRF teams already in Mumbai", n: "4 teams with boats", eta: "in place by 12:00" }], left: { act: "Boats still to be moved to Kurla and Sion." } },
+    bihar: { short: "Bihar slowest", need: "About 40 response teams", pool: null,
+      have: [{ what: "Kerala response teams, ahead of pace", n: "40 spare", eta: "by air from 11:00" }], left: { act: "Nothing short once they land." } }
+  };
+  // Teams and vehicles that can be sent. Free = total − already busy − what the actions above take.
+  RC.govPools = [
+    { k: "teams", what: "Paired child teams", who: "One police officer and one health or childcare worker", total: 120, busy: 74, unit: "teams" },
+    { k: "police", what: "Armed police companies", who: "Delhi Armed Police and the CRPF reserve", total: 14, busy: 11, unit: "companies" },
+    { k: "station", what: "Police station teams", who: "Six officers each, at 41 stations", total: 96, busy: 61, unit: "teams" },
+    { k: "hazmat", what: "Hazmat crews", who: "Delhi Fire Service, trained for chemical leaks", total: 3, busy: 2, unit: "crews" },
+    { k: "tankers", what: "Water tankers", who: "Delhi Jal Board", total: 42, busy: 42, unit: "tankers", note: "All on routes until 10:00" },
+    { k: "trucks", what: "Trucks for grain", who: "Food Corporation and hired", total: 38, busy: 0, unit: "trucks", note: "60 needed for the 1,200 t from Narela: 22 short" }
+  ];
+  // Emergency powers in use, in plain words
+  RC.govPowers = [
+    { what: "Mobile networks search their own records for people alone and send out only each case", law: "Telecommunications Act 2023, s.20: temporary possession of a network in a public emergency, including disaster management (it replaced s.5 of the Telegraph Act)", by: "Union Home Ministry order, 03:40", ends: "Lapses on Day 30 unless renewed" },
+    { what: "Empty buildings, vehicles and ownerless stock are taken over", law: "Disaster Management Act 2005, s.65: requisition of resources, premises and vehicles", by: "Each District Magistrate", ends: "Returned, or paid for, when an owner or heir claims" },
+    { what: "Anyone who takes in a child must report it within a day", law: "Juvenile Justice Act 2015, s.32", by: "Standing law", ends: "Still Here files the report for them" },
+    { what: "A verified carer can see a dependant's medicines", law: "Disaster Management Act 2005, s.34: the district's emergency directions", by: "Delhi Disaster Management Authority order, 06:30", ends: "Ends with the emergency" },
+    { what: "Doctors, nurses and operators are asked to work, not ordered", law: "No order: a policy choice", by: "Delhi Disaster Management Authority", ends: "Nobody is conscripted" }
+  ];
   RC.gov = {
     persona: { org: "Delhi Disaster Management Authority", role: "Control room" },
     queue: [
@@ -258,13 +312,13 @@ window.RC = window.RC || {};
         act: { label: "Send 2 armed police companies", done: "Requested 07:12. Delhi Armed Police 3rd Battalion confirmed 07:20, arriving 08:00." },
         alt: { label: "Order a lockdown", done: "Lockdown ordered 07:12. Cells sealed, yard closed." }, src: "Prison staff roll call, 05:30–07:10" },
       { id: "armoury", scope: "delhi", sev: "urgent", t: "05:50", title: "Rohini police armoury has nobody guarding it", where: "Sector 14, Rohini", lonlat: [77.09, 28.74],
-        what: "No staff phone has been at the armoury since 14:32 yesterday.", why: "Weapons are stored on site. An unguarded armoury is the fastest way for raiders to arm.",
+        what: "No staff phone has been at the armoury since 2:32 pm yesterday.", why: "Weapons are stored on site. An unguarded armoury is the fastest way for raiders to arm.",
         act: { label: "Send a team to secure it", done: "Rohini police team 1 sent 07:13, arriving 07:35." },
         alt: { label: "Move the weapons out", done: "Transfer to Kingsway Camp approved, convoy 09:00." }, src: "Police staff roll call" },
       { id: "children", scope: "delhi", sev: "urgent", t: "07:10", dyn: "children", title: "Small children nobody is coming for", where: "Across Delhi, worst in the north-west", lonlat: [77.05, 28.70],
-        what: "", why: "They are under five, and nobody in their circle is going: some have no one left, others have a circle that hasn't answered. Their addresses are known. A toddler has two or three days without water.", keepOpen: true,
+        what: "", why: "They are under five, and nobody who knows them is going: some have nobody left, and the others' people haven't answered. Their addresses are known. A toddler has two or three days without water.", keepOpen: true,
         act: { label: "Send paired teams to the five worst wards", done: "Police and ASHA pairs sent 07:14 to the five worst wards. Reports due by 09:00; the item stays open until they confirm children reached." },
-        alt: { label: "See the list by ward", open: "wards" }, src: "Circle routing and the anganwadi register" },
+        alt: { label: "See the list by ward", open: "wards" }, src: "Case messages and the anganwadi register" },
       { id: "water", scope: "delhi", sev: "high", t: "06:40", title: "Haiderpur water plant is short of operators", where: "Haiderpur, North West Delhi", lonlat: [77.14, 28.72],
         what: "6 of 11 operators are on site.", why: "Below 5, output drops and about 1.2 million people in north and west Delhi lose water pressure.",
         act: { label: "Ask 4 operators from the register", done: "4 operators asked 07:15. 2 accepted, arriving 08:30." }, src: "Delhi Jal Board roster roll call" },
@@ -286,7 +340,7 @@ window.RC = window.RC || {};
         what: "A satellite pass at 06:20 shows 48% of the mangroves gone along the Mithi river.", why: "The mangroves soaked up the tide. Kurla, Sion and BKC lie below the high-tide line.",
         act: { label: "Warn the 6 low-lying wards now", done: "Flood warning sent 07:19 to 6 Mumbai wards: move to upper floors before 13:00." }, src: "Satellite pass 06:20, tide tables" },
       { id: "bihar", scope: "india", sev: "high", t: "07:00", dyn: "slowest", title: "Bihar is being reached slowest", where: "Bihar", lonlat: [85.3, 25.6], state: "Bihar",
-        what: "", why: "It has the second-largest number of people alone and the fewest responders per head.",
+        what: "", why: "It has the second-largest number of children alone and the fewest responders per head.",
         act: { label: "Move 40 response teams from Kerala", done: "40 teams reassigned 07:20, arriving by air from 11:00." }, src: "The model" }
     ],
     updates: [
@@ -307,11 +361,12 @@ window.RC = window.RC || {};
       { site: "Fair price shops, North West", does: "Rations", present: 2214, total: 4480, lonlat: [77.10, 28.70] }
     ],
     people: [
-      { role: "Doctors", reg: "National Medical Commission register", alive: 1120, of: 2260, asked: 540, came: 211 },
-      { role: "Nurses", reg: "Delhi Nursing Council register", alive: 2410, of: 4830, asked: 900, came: 388 },
-      { role: "Water plant operators", reg: "Delhi Jal Board roster", alive: 61, of: 122, asked: 30, came: 12 },
-      { role: "Electrical engineers", reg: "Power company rosters", alive: 290, of: 580, asked: 120, came: 77 },
-      { role: "Pharmacists", reg: "Pharmacy Council register", alive: 840, of: 1690, asked: 200, came: 96 }
+      { role: "Doctors", reg: "National Medical Commission register", alive: 11200, of: 22600, onduty: 6400, asked: 2600, came: 1180, need: "Dr. BSA Hospital and LNJP: emergency wards at under half their doctors" },
+      { role: "Nurses", reg: "Delhi Nursing Council register", alive: 24100, of: 48300, onduty: 15200, asked: 4800, came: 2050, need: "Dialysis and newborn units in every district" },
+      { role: "ASHA and anganwadi workers", reg: "Health and child development department lists", alive: 5450, of: 10900, onduty: 3120, asked: 1400, came: 980, need: "The wards with the most small children nobody is going for" },
+      { role: "Pharmacists", reg: "Pharmacy Council register", alive: 8400, of: 16900, onduty: 4200, asked: 2000, came: 960, need: "Insulin and blood pressure tablets in North West Delhi" },
+      { role: "Water plant operators", reg: "Delhi Jal Board roster", alive: 61, of: 122, onduty: 31, asked: 30, came: 12, need: "Haiderpur plant: 6 of 11" },
+      { role: "Electrical engineers", reg: "Power company rosters", alive: 290, of: 580, onduty: 160, asked: 120, came: 77, need: "Badarpur substation: 2 of 9" }
     ],
     supplies: [
       { what: "Grain and water, 40 t", how: "Train", from: "Mumbai Central", to: "Delhi", dep: "04:10", eta: "Day 1 22:00", route: "Western Railway via Vadodara and Kota", fromLL: [72.82, 18.97], toLL: [77.22, 28.64] },
@@ -320,6 +375,7 @@ window.RC = window.RC || {};
       { what: "60 doctors and 4 t of medicine", how: "Air Force", from: "Hyderabad", to: "Patna", dep: "03:50", eta: "07:40", route: "C-17 flight", fromLL: [78.49, 17.39], toLL: [85.14, 25.59] },
       { what: "120 power engineers", how: "Train", from: "Chennai", to: "Bhubaneswar", dep: "04:30", eta: "Day 1 23:00", route: "Coromandel line", fromLL: [80.27, 13.08], toLL: [85.82, 20.30] }
     ],
+    // Each district's share of Delhi's surviving people (pop) and of today's food, water and staff (alloc)
     fair: [
       { d: "New Delhi (capital)", pop: 0.04, alloc: 0.12 }, { d: "Central", pop: 0.04, alloc: 0.06 }, { d: "North West", pop: 0.22, alloc: 0.15 },
       { d: "North East", pop: 0.13, alloc: 0.07 }, { d: "North", pop: 0.05, alloc: 0.05 }, { d: "South", pop: 0.16, alloc: 0.17 },
@@ -331,10 +387,10 @@ window.RC = window.RC || {};
       { zone: "Okhla industrial estate", what: "Ownerless stock", status: "Being assessed", rule: "Not open", lonlat: [77.27, 28.53] }
     ],
     triage: [
-      { q: "Under five, no circle, alone over 12 hours", n: 735, order: "First" },
-      { q: "On a ventilator or dialysis, site short of staff", n: 212, order: "First" },
-      { q: "Over 75, no circle", n: 1140, order: "Second" },
-      { q: "Age 6–17, no circle", n: 980, order: "Second" }
+      { q: "Under five, nobody going, alone over 12 hours", n: 735, order: "First" },
+      { q: "On a ventilator or dialysis, where the site is short of staff", n: 212, order: "First" },
+      { q: "Over 75, nobody going", n: 1140, order: "Second" },
+      { q: "Age 6 to 17, nobody going", n: 980, order: "Second" }
     ],
     world: {
       aid: [ { from: "SGP", to: "IDN", what: "Medical teams, 12 aircraft", t: "06:40" }, { from: "ARE", to: "IND", what: "Water units, 40 t", t: "06:55" }, { from: "KOR", to: "VNM", what: "Grid engineers, 60", t: "07:00" }, { from: "DEU", to: "UKR", what: "Fuel, 18 trucks", t: "07:05" } ]
