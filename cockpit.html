@@ -8,6 +8,7 @@
 <meta name="description" content="The restricted control-room side of Still Here, a prototype for the morning after half of everyone vanished. Simulated data.">
 <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#08080A" media="(prefers-color-scheme: dark)">
+<script src="js/theme.js"></script>
 <link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="stylesheet" href="css/apple/apple-system-colors.css">
 <link rel="stylesheet" href="css/apple/apple-buttons.css">
@@ -19,7 +20,7 @@
   <header class="hdr">
     <div class="brand"><span class="mark" aria-hidden="true"><i></i></span><div><b>Still Here</b><span data-help="govview" id="restricted">Government view · restricted</span></div></div>
     <nav class="tabs" id="tabs" aria-label="Pages"></nav>
-    <div class="hdr-r"><span class="who" id="who"></span><span class="badge" data-help="simulated">Simulated data</span><span class="clock">Day 1 · 07:10</span></div>
+    <div class="hdr-r"><button class="btn btn-compact btn-icon btn-plain" data-theme-toggle aria-label="Light or dark" title="Light or dark"></button><span class="who" id="who"></span><span class="badge" data-help="simulated">Simulated data</span><span class="clock">Day 1 · 07:10</span></div>
   </header>
   <main id="page"></main>
 </div>
