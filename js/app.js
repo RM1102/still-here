@@ -706,7 +706,7 @@
     if (route === "#request") route = "#find";
     if (!V[route]) route = "#alert";
     // Any link opens its screen, even before I'm Safe is tapped, so an evaluator can explore from anywhere
-    if (!S.entered && route !== "#alert" && route !== "#onmyown" && route !== "#welcome") { S.entered = true; S.welcomed = true; }
+    if (!S.entered && route !== "#alert" && route !== "#onmyown" && route !== "#welcome" && route !== "#child") { S.entered = true; S.welcomed = true; }
     if (S.mapArea === "delhi") { S.mapArea = "city"; S.mapCity = "delhi"; }
     if (route === "#map" && !S.mapSel && cityOf() === "delhi") S.mapSel = { kind: "ward", key: WARD.key };
     const phone = S.mode === "phone" && window.innerWidth >= 760;
