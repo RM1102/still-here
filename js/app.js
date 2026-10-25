@@ -77,7 +77,7 @@
       <div class="r t">${tile("users", "orange")}<div class="tt"><b>People on duty and places that are open</b><span>Police, health workers, clinics and shops post what they have and what they need.</span></div></div>
     </div>
     <p class="foot">Still Here works under an emergency order with these partners and the National Disaster Management Authority. It uses the data only to find people who are alone and the people who know them, and refreshes it every few minutes.</p>
-    <p class="foot">In this prototype, every person, place and personal number is made up.</p>`;
+    <p class="foot">In this prototype, every person, place and personal number is made up. <a href="journey.html">See the phone walkthrough</a>: how the alert reaches a phone, screen by screen.</p>`;
 
   V["#welcome"] = () => `
     ${head("How Still Here works", "Three things, in this order.")}
@@ -137,20 +137,20 @@
   /* The child alert (24 Oct night): for a young child holding a parent's phone (STRATEGY §8) */
   const SAY = { en: "Are you okay? Is a grown-up with you? Press the green face if a grown-up is with you. Press the red face if you are alone.", hi: "क्या तुम ठीक हो? क्या कोई बड़ा तुम्हारे साथ है? अगर कोई बड़ा साथ है तो हरा चेहरा दबाओ। अगर तुम अकेले हो तो लाल चेहरा दबाओ।" };
   V["#child"] = () => { const a = S.childAns, who = S.childWho;
+    const say = `<button class="ga-say" data-action="kidsay" aria-label="Read this aloud">${I("volume-2", 18)}<span>Read aloud</span></button>`;
     return `${head("The child alert", "Part of the morning alert that reaches every phone. Whoever is holding the phone says who they are, so a child gets a child's version, read aloud.", ["#more", "More"])}
-      <div class="kidalert">
-        <div class="ka-top">${I("siren", 18)}<span>Emergency alert · Government of India</span></div>
-        ${!who ? `<p class="ka-q">Who is holding this phone?</p><p class="ka-hi" lang="hi">यह फ़ोन किसके हाथ में है?</p>
-          <div class="ka-btns"><button class="ka-b ok" data-action="kidwho" data-v="adult"><span>🧑</span>I'm a grown-up</button><button class="ka-b kid" data-action="kidwho" data-v="child"><span>🧒</span>I'm a child</button></div>`
-        : who === "adult" ? `<p class="ka-q">Thank you.</p><p class="ka-s">If you're safe, open Still Here and tap I'm Safe.</p>
+      <div class="galert">
+        <div class="ga-head">${I("triangle-alert", 22)}<div><b>Emergency alert: extreme</b><span>Government of India · NDMA · 6:00 am</span></div>${say}</div>
+        ${!who ? `<p class="ga-q">Who is holding this phone?</p><p class="ga-hi" lang="hi">यह फ़ोन किसके हाथ में है?</p>
+          <div class="ga-btns"><button class="ga-b adult" data-action="kidwho" data-v="adult">${I("user-round", 26)}<span>I'm a grown-up</span></button><button class="ga-b child" data-action="kidwho" data-v="child">${I("baby", 26)}<span>I'm a child</span></button></div>`
+        : who === "adult" ? `<p class="ga-q">Thank you.</p><p class="ga-s">If you're safe, open Still Here and tap I'm Safe.</p>
           <a class="ka-open" href="#alert"><img src="icons/icon-192.png" alt="" width="56" height="56"><span><b>Open Still Here</b><small>See who in your life is safe</small></span>${I("chevron-right", 20)}</a>
-          <p class="ka-s ka-small">If someone else's child is with you, add them, so nobody is sent to an empty home.</p>
+          <p class="ga-s ga-small">If someone else's child is with you, add them, so nobody is sent to an empty home.</p>
           <a class="btn btn-compact" href="#with">${I("hand-helping", 15)}A Child Is With Me</a>`
-        : !a ? `<p class="ka-q">Are you okay?<br>Is a grown-up with you?</p><p class="ka-hi" lang="hi">क्या तुम ठीक हो? क्या कोई बड़ा तुम्हारे साथ है?</p>
-          <div class="ka-btns"><button class="ka-b ok" data-action="kid" data-v="ok"><span>🙂</span>A grown-up is with me</button><button class="ka-b no" data-action="kid" data-v="alone"><span>😟</span>I'm alone</button></div>
-          <button class="btn btn-compact" data-action="kidsay">${I("message-circle", 15)}Say It Again</button>`
-        : a === "alone" ? `<p class="ka-q">Help is coming.</p><p class="ka-s">Stay inside and keep the door shut. A grown-up who knows you will come. They will say this word:</p><p class="ka-code">🥭 MANGO</p><p class="ka-s">Open the door only for the person who says it.</p>`
-        : `<p class="ka-q">Good. 🙂</p><p class="ka-s">Ask the grown-up to tap I'm Safe on their own phone.</p>`}
+        : !a ? `<p class="ga-q">Are you okay? Is a grown-up with you?</p><p class="ga-hi" lang="hi">क्या तुम ठीक हो? क्या कोई बड़ा तुम्हारे साथ है?</p>
+          <div class="ga-btns"><button class="ga-b ok" data-action="kid" data-v="ok">${I("check", 30)}<span>A grown-up is with me</span></button><button class="ga-b no" data-action="kid" data-v="alone">${I("circle-alert", 30)}<span>I'm alone</span></button></div>`
+        : a === "alone" ? `<p class="ga-q">Help is coming.</p><p class="ga-s">Stay inside and keep the door shut. A grown-up who knows you will come. They will say this word:</p><p class="ga-code">MANGO</p><p class="ga-s">Open the door only for the person who says it.</p>`
+        : `<p class="ga-q">Good.</p><p class="ga-s">Ask the grown-up to tap I'm Safe on their own phone.</p>`}
       </div>
       ${who ? `<div class="btn-row"><button class="btn btn-block" data-action="kidwho" data-v="">Show the Alert Again</button></div>` : ""}
       ${disc("How it works", "It is part of the 6 am alert from the verified government sender, so it reaches every phone, and the phone can\'t guess who is holding it. So it asks. On a phone whose owner went missing at 2:32 pm and which someone has started using again, it reads itself aloud, because a child is the most likely person holding it. A red tap, or no tap within two minutes while no adult's phone is at home, starts a case for that child, sent to the people the parents called most. The person who goes is told the code word, so the child knows who to open the door for. No photo is taken.")}`; };
@@ -580,7 +580,9 @@
     bot(d) { const m = S.bot || botStart(); m.push({ t: BOTMENU.find(x => x[0] === d.v)[1].slice(2), me: true }); m.push({ t: botReply(d.v) }); S.bot = m; markStep(10); },
     kid(d) { S.childAns = d.v || null; },
     kidwho(d) { S.childWho = d.v || null; if (!d.v) S.childAns = null; },
-    kidsay() { try { const u = new SpeechSynthesisUtterance(SAY.en); u.lang = "en-IN"; speechSynthesis.cancel(); speechSynthesis.speak(u); const h = new SpeechSynthesisUtterance(SAY.hi); h.lang = "hi-IN"; speechSynthesis.speak(h); } catch (e) {} },
+    kidsay() { try { const W = { en: "Who is holding this phone? Tap I'm a grown-up, or I'm a child.", hi: "यह फ़ोन किसके हाथ में है? बड़े हैं तो पहला बटन दबाओ, बच्चे हो तो दूसरा।" };
+      const T = !S.childWho ? W : S.childWho === "adult" ? { en: "Thank you. If you're safe, open Still Here and tap I'm Safe.", hi: "धन्यवाद। अगर आप सुरक्षित हैं, तो स्टिल हियर खोलें।" } : S.childAns === "alone" ? { en: "Help is coming. Stay inside and keep the door shut. Open the door only for the person who says the word mango.", hi: "मदद आ रही है। दरवाज़ा बंद रखो। सिर्फ़ उसी के लिए दरवाज़ा खोलो जो आम कहे।" } : SAY;
+      const u = new SpeechSynthesisUtterance(T.en); u.lang = "en-IN"; speechSynthesis.cancel(); speechSynthesis.speak(u); const h = new SpeechSynthesisUtterance(T.hi); h.lang = "hi-IN"; speechSynthesis.speak(h); } catch (e) {} },
     report() { S.reported = true; markStep(9); },
     askby(d) { S.askBy = d.v; },
     checkin(d) { S.checkins[d.id] = true; markStep(2); const p = RC.people.find(x => x.id === d.id) || {}, how = { wa: "on WhatsApp", sms: "by SMS", both: "on WhatsApp and by SMS", call: "with an automated call" }[S.askBy || "both"];
@@ -636,7 +638,7 @@
   };
 
   /* ---------- chrome ---------- */
-  const NAV = [["sec", "Your people"], ["#home", "Who's here", "house"], ["#cases", "Cases", "users"], ["#find", "Find someone", "search"], ["#report", "Report someone alone", "siren"], ["#with", "Who's with you", "hand-helping"], ["sec", "Around you"], ["#map", "Map", "map-pinned"], ["#help", "Help is coming", "truck"], ["#ward", "Your ward", "building-2"], ["sec", "Tools"], ["#check", "Is this true?", "circle-help"], ["#bot", "Chat bot", "message-circle"], ["#onmyown", "If you're on your own", "life-buoy"], ["#child", "Child alert", "baby"], ["#radar", "On duty", "radar"], ["#kit", "Offline kit", "download"], ["sec", "Other portals"], ["contributor.html", "Contributor portal", "building-2"], ["cockpit.html", "Government view", "landmark"], ["sec", "Help"], ["#alert", "The morning alert", "siren"], ["#about", "About Still Here", "info"]];
+  const NAV = [["sec", "Your people"], ["#home", "Who's here", "house"], ["#cases", "Cases", "users"], ["#find", "Find someone", "search"], ["#report", "Report someone alone", "siren"], ["#with", "Who's with you", "hand-helping"], ["sec", "Around you"], ["#map", "Map", "map-pinned"], ["#help", "Help is coming", "truck"], ["#ward", "Your ward", "building-2"], ["sec", "Tools"], ["#check", "Is this true?", "circle-help"], ["#bot", "Chat bot", "message-circle"], ["#onmyown", "If you're on your own", "life-buoy"], ["#child", "Child alert", "baby"], ["#radar", "On duty", "radar"], ["#kit", "Offline kit", "download"], ["sec", "Other portals"], ["contributor.html", "Contributor portal", "building-2"], ["cockpit.html", "Government view", "landmark"], ["sec", "Help"], ["journey.html", "Phone walkthrough", "smartphone"], ["#alert", "The morning alert", "siren"], ["#about", "About Still Here", "info"]];
   function chrome() {
     $("#nav").innerHTML = NAV.map(n => n[0] === "sec" ? `<div class="sec">${n[1]}</div>` : `<a href="${n[0]}"${n[0].indexOf("#") ? ` target="_blank" rel="noopener"` : ""}>${I(n[2], 17)}<span>${n[1]}</span></a>`).join("");
     const tabs = [["#home", "People", "house"], ["#cases", "Cases", "users"], ["#map", "Map", "map-pinned"], ["#help", "Help", "truck"]];

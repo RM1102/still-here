@@ -1,7 +1,7 @@
 /* Still Here service worker: saves every file of the app on first visit, so it opens with no signal. */
-const CACHE = "stillhere-v17";
+const CACHE = "stillhere-v18";
 const FILES = [
-  "./", "index.html", "lite.html", "lite-hi.html", "cockpit.html", "contributor.html", "manifest.webmanifest",
+  "./", "index.html", "lite.html", "lite-hi.html", "cockpit.html", "contributor.html", "journey.html", "img/journey/1-who.png", "img/journey/2c-child-ask.png", "img/journey/3c-child-code.png", "img/journey/3a-alert.png", "img/journey/4a-welcome.png", "img/journey/5a-home.png", "manifest.webmanifest",
   "css/app.css", "css/cockpit.css",
   "css/apple/apple-system-colors.css", "css/apple/apple-buttons.css", "css/apple/apple-materials.css", "css/apple/apple-feedback.css",
   "js/icons.js", "js/theme.js", "js/geo.js", "js/data.js", "js/model.js", "js/map.js", "js/app.js", "js/cockpit.js", "js/contributor.js", "js/sw-register.js",

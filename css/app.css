@@ -374,3 +374,19 @@ body.pre .mobilenav, body.pre .tabbar { display: none !important; }
 
 .demo-strip { display: flex; gap: 8px; align-items: flex-start; margin: 2px 0 14px; padding: 9px 12px; border-radius: 12px; background: color-mix(in srgb, var(--apple-blue) 10%, var(--group)); color: var(--label2); font-size: 13.5px; line-height: 1.4; }
 .demo-strip .ic { color: var(--apple-blue); margin-top: 2px; } .demo-strip b { color: var(--label); }
+
+/* The child alert as a government emergency alert (25 Oct): no emojis, a read-aloud button on every step */
+.galert { margin-top: 20px; border-radius: 22px; padding: 18px 18px 20px; background: var(--group); box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 8px 28px rgb(0 0 0 / .08); border: 1px solid var(--hair); text-align: center; }
+.ga-head { display: flex; align-items: center; gap: 10px; text-align: left; padding-bottom: 12px; border-bottom: 1px solid var(--hair); }
+.ga-head > .ic { color: #D93025; flex: none; } .ga-head > div { flex: 1; min-width: 0; }
+.ga-head b { display: block; font-size: 16px; letter-spacing: -.01em; } .ga-head span { display: block; font-size: 13px; color: var(--label2); }
+.ga-say { flex: none; display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; padding: 7px 12px; font-family: inherit; font-weight: 600; font-size: 13px; line-height: 1; background: color-mix(in srgb, var(--apple-blue) 14%, transparent); color: var(--apple-blue); cursor: pointer; }
+.ga-q { font-size: 26px; font-weight: 700; line-height: 1.2; margin: 18px 0 4px; letter-spacing: -.02em; }
+.ga-hi { font-size: 17px; color: var(--label2); margin: 0 0 16px; }
+.ga-s { font-size: 16px; color: var(--label); margin: 8px auto; max-width: 30em; } .ga-small { font-size: 14px; color: var(--label2); }
+.ga-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0 4px; }
+.ga-b { display: flex; flex-direction: column; align-items: center; gap: 8px; border: 0; border-radius: 16px; padding: 18px 10px; font-family: inherit; font-weight: 600; font-size: 17px; line-height: 1.25; cursor: pointer; }
+.ga-b.adult { background: #0B2E6B; color: #fff; } .ga-b.child { background: #FFE11B; color: #0B2E6B; }
+.ga-b.ok { background: #1E8E3E; color: #fff; } .ga-b.no { background: #D93025; color: #fff; }
+.ga-code { display: inline-block; font-size: 34px; font-weight: 800; letter-spacing: .12em; margin: 10px 0; padding: 8px 22px; border-radius: 12px; background: #FFE11B; color: #0B2E6B; }
+.galert .btn { margin-top: 6px; }

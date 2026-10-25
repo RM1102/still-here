@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file:; style-src 'self' 'unsafe-inline' file:; img-src 'self' data: file:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<title>Still Here · Phone walkthrough</title>
+<meta name="description" content="How Still Here reaches a phone on the morning after: the alert, who is holding the phone, I'm safe, and your people. Every screen opens the live prototype.">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#08080A" media="(prefers-color-scheme: dark)">
+<script src="js/theme.js"></script>
+<link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="stylesheet" href="css/apple/apple-system-colors.css">
+<link rel="stylesheet" href="css/apple/apple-materials.css">
+<link rel="stylesheet" href="css/apple/apple-buttons.css">
+<link rel="stylesheet" href="css/app.css">
+<style>
+  /* A page of phones: the same journey as the two-page document, each screen a link to the live one */
+  body.walk { overflow-y: auto; height: auto; background: var(--canvas); }
+  .wbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 22px; border-bottom: 1px solid var(--hair); background: var(--group); position: sticky; top: 0; z-index: 5; }
+  .wbar a.brand { color: inherit; text-decoration: none; }
+  .wwrap { max-width: 1240px; margin: 0 auto; padding: 30px 22px 70px; }
+  .wwrap h1 { font-size: 34px; letter-spacing: -.02em; margin: 0 0 6px; }
+  .wwrap .lede { font-size: 18px; color: var(--label2); margin: 0 0 6px; max-width: 46em; }
+  .wwrap .tip { font-size: 14px; color: var(--label2); margin: 0 0 26px; }
+  .wwrap h2 { font-size: 22px; letter-spacing: -.02em; margin: 34px 0 4px; }
+  .wwrap h2 + p { color: var(--label2); margin: 0 0 18px; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 26px 22px; }
+  .step { display: block; color: inherit; text-decoration: none; }
+  .step:hover .phone { transform: translateY(-3px); box-shadow: 0 18px 36px -18px rgb(0 0 0 / .45); }
+  .phone { position: relative; aspect-ratio: 390 / 844; border-radius: 36px; padding: 9px; background: #111317; box-shadow: 0 10px 30px -16px rgb(0 0 0 / .4); transition: transform .2s ease, box-shadow .2s ease; }
+  .phone .island { position: absolute; top: 15px; left: 50%; width: 30%; height: 18px; margin-left: -15%; border-radius: 12px; background: #111317; z-index: 2; }
+  .phone .screen { width: 100%; height: 100%; border-radius: 28px; overflow: hidden; background: #fff; }
+  .phone .screen { display: flex; flex-direction: column; }
+  .phone .sb { flex: none; height: 7%; display: flex; align-items: center; justify-content: space-between; padding: 0 9% 0 11%; background: #fff; color: #111; font: 600 12px -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  .phone .sig { display: inline-flex; gap: 2px; align-items: flex-end; } .phone .sig i { width: 3px; background: #111; border-radius: 1px; } .phone .sig i:nth-child(1){height:4px} .phone .sig i:nth-child(2){height:6px} .phone .sig i:nth-child(3){height:8px} .phone .sig i:nth-child(4){height:10px}
+  .phone img { display: block; width: 100%; flex: 1; min-height: 0; object-fit: cover; object-position: top; }
+  .step .n { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--label); color: var(--canvas); font-size: 13px; font-weight: 700; margin: 14px 8px 0 0; }
+  .step b { font-size: 16px; letter-spacing: -.01em; }
+  .step p { margin: 4px 0 0; font-size: 14px; line-height: 1.45; color: var(--label2); }
+  .step .live { display: inline-block; margin-top: 6px; font-size: 13px; font-weight: 600; color: var(--apple-blue); }
+  /* The lock screen, drawn in HTML: wallpaper, time, the alert as it arrives */
+  .lock { position: relative; height: 100%; color: #fff; text-align: center; background: linear-gradient(165deg, #0B2E6B 0%, #1F5FD6 55%, #7FB0FF 100%); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; }
+  .lock .date { padding-top: 15%; font-size: 15px; font-weight: 600; opacity: .9; }
+  .lock .time { font-size: 64px; font-weight: 700; letter-spacing: -.02em; line-height: 1; margin-top: 2px; }
+  .lock .note { position: absolute; left: 4%; right: 4%; top: 40%; text-align: left; color: #111; background: #F4F4F7; border-radius: 18px; padding: 10px 12px 11px; box-shadow: 0 8px 24px rgb(0 0 0 / .25); }
+  .lock .nh { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; color: #6E6E73; letter-spacing: .02em; text-transform: uppercase; }
+  .lock .nh i { display: inline-flex; width: 20px; height: 20px; border-radius: 5px; background: #D93025; align-items: center; justify-content: center; }
+  .lock .nh .ago { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .lock .note b { display: block; font-size: 14px; margin-top: 6px; }
+  .lock .note span { display: block; font-size: 13px; line-height: 1.35; margin-top: 2px; }
+  .lock .note small { display: block; font-size: 12px; color: #6E6E73; margin-top: 4px; }
+  .lock .tools { position: absolute; left: 9%; right: 9%; bottom: 5%; display: flex; justify-content: space-between; }
+  .lock .tools i { width: 42px; height: 42px; border-radius: 50%; background: rgb(0 0 0 / .28); }
+  .lock .bar { position: absolute; bottom: 1.6%; left: 50%; width: 36%; height: 4px; margin-left: -18%; border-radius: 3px; background: #fff; opacity: .9; }
+  @media (max-width: 560px) { .steps { grid-template-columns: 1fr 1fr; gap: 20px 14px; } .wwrap h1 { font-size: 28px; } }
+</style>
+</head>
+<body class="walk">
+<div class="wbar"><a class="brand" href="index.html"><span class="mark"><i></i></span><div><b>Still Here</b><span>Phone walkthrough</span></div></a>
+  <div style="display:flex;gap:8px;align-items:center"><button class="btn btn-compact btn-icon btn-plain" data-theme-toggle aria-label="Light or dark"></button><a class="btn btn-compact" href="index.html">Open the Prototype</a></div></div>
+<main class="wwrap">
+  <h1>How Still Here reaches a phone</h1>
+  <p class="lede">On the morning after, the government sends one alert to every phone in India. This is what happens next, screen by screen, for a grown-up and for a child.</p>
+  <p class="tip">Tap any screen to open it in the working prototype.</p>
+
+  <h2>If a grown-up is holding the phone</h2>
+  <p>Sunita, 50, in Delhi. Her granddaughter Meera, 3, is in Mumbai.</p>
+  <div class="steps">
+    <a class="step" href="index.html#child"><div class="phone"><span class="island"></span><div class="screen">
+      <div class="lock"><div class="date">Monday, 26 October</div><div class="time">6:00</div>
+        <div class="note"><div class="nh"><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></i>Emergency alert<span class="ago">now</span></div>
+          <b>Extreme alert · Government of India</b><span>At 2:32 pm yesterday, half of all people vanished. Nobody has vanished since. Tap to see who in your life is safe.</span><small>Still Here · NDMA</small></div>
+        <div class="tools"><i></i><i></i></div><div class="bar"></div></div></div></div>
+      <span class="n">1</span><b>The alert arrives</b><p>On every phone at once, even a locked one, through the same system India already uses for disaster alerts.</p><span class="live">Open it live</span></a>
+    <a class="step" href="index.html#child"><div class="phone"><span class="island"></span><div class="screen"><div class="sb"><span>7:10</span><span class="sig"><i></i><i></i><i></i><i></i></span></div><img src="img/journey/1-who.png" alt="Who is holding this phone?"></div></div>
+      <span class="n">2</span><b>Who is holding this phone?</b><p>The phone asks, and can read the question aloud, because a child may be the one holding it.</p><span class="live">Open it live</span></a>
+    <a class="step" href="index.html#alert"><div class="phone"><span class="island"></span><div class="screen"><div class="sb"><span>7:10</span><span class="sig"><i></i><i></i><i></i><i></i></span></div><img src="img/journey/3a-alert.png" alt="I'm Safe. Show Me My People"></div></div>
+      <span class="n">3</span><b>I'm safe. Show me my people</b><p>One tap tells her family she is safe, and opens Still Here.</p><span class="live">Open it live</span></a>
+    <a class="step" href="index.html#welcome"><div class="phone"><span class="island"></span><div class="screen"><div class="sb"><span>7:10</span><span class="sig"><i></i><i></i><i></i><i></i></span></div><img src="img/journey/4a-welcome.png" alt="How Still Here works"></div></div>
+      <span class="n">4</span><b>How it works</b><p>Three things, in order: your people, anyone left alone, and someone they know going to them.</p><span class="live">Open it live</span></a>
+    <a class="step" href="index.html#home"><div class="phone"><span class="island"></span><div class="screen"><div class="sb"><span>7:10</span><span class="sig"><i></i><i></i><i></i><i></i></span></div><img src="img/journey/5a-home.png" alt="Your people"></div></div>
+      <span class="n">5</span><b>Your people</b><p>Who in her family is here, missing or not sure, and the two who need someone now: Meera and her mother.</p><span class="live">Open it live</span></a>
+  </div>
+
+  <h2>If a child is holding the phone</h2>
+  <p>A child who picks up a parent's phone gets a child's version, read aloud in Hindi and English.</p>
+  <div class="steps">
+    <a class="step" href="index.html#child"><div class="phone"><span class="island"></span><div class="screen"><div class="sb"><span>7:10</span><span class="sig"><i></i><i></i><i></i><i></i></span></div><img src="img/journey/2c-child-ask.png" alt="Are you okay? Is a grown-up with you?"></div></div>
+      <span class="n">1</span><b>Are you okay?</b><p>Two big buttons: a grown-up is with me, or I'm alone. No reading needed.</p><span class="live">Open it live</span></a>
+    <a class="step" href="index.html#child"><div class="phone"><span class="island"></span><div class="screen"><div class="sb"><span>7:10</span><span class="sig"><i></i><i></i><i></i><i></i></span></div><img src="img/journey/3c-child-code.png" alt="Help is coming: the code word"></div></div>
+      <span class="n">2</span><b>Help is coming</b><p>Stay inside. The grown-up who comes will say the code word, MANGO. Open the door only for them.</p><span class="live">Open it live</span></a>
+  </div>
+</main>
+</body>
+</html>
