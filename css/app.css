@@ -337,6 +337,11 @@ body.pre .mobilenav, body.pre .tabbar { display: none !important; }
 .ka-b span { display: block; font-size: 54px; line-height: 1.1; margin-bottom: 6px; }
 .ka-b.ok { background: #1E8E3E; } .ka-b.no { background: #D93025; }
 .kidalert .btn { background: rgb(255 255 255 / .14); color: #fff; }
+.ka-open { display: flex; align-items: center; gap: 14px; max-width: 440px; margin: 16px auto 12px; padding: 14px 16px; border-radius: 20px; background: #fff; color: #111; text-decoration: none; text-align: left; box-shadow: 0 12px 26px -14px rgb(0 0 0 / .7); }
+.ka-open img { width: 56px; height: 56px; border-radius: 14px; flex: none; }
+.ka-open span { flex: 1; } .ka-open b { display: block; font-size: 19px; letter-spacing: -.01em; } .ka-open small { display: block; font-size: 14px; color: #555; margin-top: 2px; }
+.ka-open svg { color: #999; flex: none; }
+.ka-small { font-size: 15px; opacity: .75; }
 /* Safari stability (24 Oct, Rahul's crash): no live blur on anything that sits over or follows across a map.
    Re-blurring hundreds of map shapes on every mouse move can crash a Safari tab; solid surfaces look the same. */
 .tip, .overlay, .mapzoom { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: var(--elev) !important; box-shadow: 0 6px 24px rgb(0 0 0 / .18), 0 0 0 1px var(--hair, rgb(0 0 0 / .08)); }

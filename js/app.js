@@ -142,7 +142,10 @@
         <div class="ka-top">${I("siren", 18)}<span>Emergency alert · Government of India</span></div>
         ${!who ? `<p class="ka-q">Who is holding this phone?</p><p class="ka-hi" lang="hi">यह फ़ोन किसके हाथ में है?</p>
           <div class="ka-btns"><button class="ka-b ok" data-action="kidwho" data-v="adult"><span>🧑</span>I'm a grown-up</button><button class="ka-b kid" data-action="kidwho" data-v="child"><span>🧒</span>I'm a child</button></div>`
-        : who === "adult" ? `<p class="ka-q">Thank you.</p><p class="ka-s">If you're safe, open Still Here and tap I'm Safe. If someone else's child is with you, add them under Who's with you, so nobody is sent to an empty home.</p>`
+        : who === "adult" ? `<p class="ka-q">Thank you.</p><p class="ka-s">If you're safe, open Still Here and tap I'm Safe.</p>
+          <a class="ka-open" href="#alert"><img src="icons/icon-192.png" alt="" width="56" height="56"><span><b>Open Still Here</b><small>See who in your life is safe</small></span>${I("chevron-right", 20)}</a>
+          <p class="ka-s ka-small">If someone else's child is with you, add them, so nobody is sent to an empty home.</p>
+          <a class="btn btn-compact" href="#with">${I("hand-helping", 15)}A Child Is With Me</a>`
         : !a ? `<p class="ka-q">Are you okay?<br>Is a grown-up with you?</p><p class="ka-hi" lang="hi">क्या तुम ठीक हो? क्या कोई बड़ा तुम्हारे साथ है?</p>
           <div class="ka-btns"><button class="ka-b ok" data-action="kid" data-v="ok"><span>🙂</span>A grown-up is with me</button><button class="ka-b no" data-action="kid" data-v="alone"><span>😟</span>I'm alone</button></div>
           <button class="btn btn-compact" data-action="kidsay">${I("message-circle", 15)}Say It Again</button>`
