@@ -323,7 +323,7 @@ window.RC = window.RC || {};
       { what: "UPI and wallets on their numbers", rule: "Paused for 30 days", why: "The same fraud, by phone" },
       { what: "Lockers, homes and land", rule: "Sealed; titles unchanged", why: "Nothing changes hands until heirs claim" },
       { what: "Money nobody claims", rule: "Stays in the account. It cannot be shared out", why: "By law it moves to the RBI's Depositor Education and Awareness Fund only after ten years" },
-      { what: "Declaring the vanished dead", rule: "Ordinance pending: a declaration after 90 days", why: "Otherwise families wait seven years (Bharatiya Sakshya Adhiniyam 2023, s.111) to inherit or claim insurance" }
+      { what: "Declaring the vanished dead", rule: "Ordinance pending: a declaration after 90 days", why: "Otherwise families wait seven years (Indian Evidence Act 1872, s.108) to inherit or claim insurance" }
     ],
     sites: [
       { kind: "Hospitals", n: 87, short: 21, worst: "Dr. BSA Hospital and LNJP at under half their doctors", sev: "orange" },
@@ -487,7 +487,7 @@ window.RC = window.RC || {};
       ["The data is misused", "Lookups outside a case (there is no search for strangers)", "None", "None", "Daily audit of every access", "green"]]
   };
   RC.govPowers = [
-    { what: "Mobile networks search their own records for people alone and send out only each case", law: "Telecommunications Act 2023, s.20: temporary possession of a network in a public emergency, including disaster management (it replaced s.5 of the Telegraph Act)", by: "Union Home Ministry order, 03:40", ends: "Lapses on Day 30 unless renewed" },
+    { what: "Mobile networks search their own records for people alone and send out only each case", law: "Indian Telegraph Act 1885, s.5: in a public emergency the government can take temporary possession of any licensed network and have messages disclosed", by: "Union Home Ministry order, 03:40", ends: "Lapses on Day 30 unless renewed" },
     { what: "Empty buildings, vehicles and ownerless stock are taken over", law: "Disaster Management Act 2005, s.65: requisition of resources, premises and vehicles", by: "Each District Magistrate", ends: "Returned, or paid for, when an owner or heir claims" },
     { what: "Anyone who takes in a child must report it within a day", law: "Juvenile Justice Act 2015, s.32", by: "Standing law", ends: "Still Here files the report for them" },
     { what: "A verified carer can see a dependant's medicines", law: "Disaster Management Act 2005, s.34: the district's emergency directions", by: "Delhi Disaster Management Authority order, 06:30", ends: "Ends with the emergency" },
