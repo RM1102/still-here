@@ -248,18 +248,18 @@ body.phone .device .mapbox { height: 380px; min-height: 0; }
   .topbar .status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 }
 @media (max-width: 959px) { .topbar .status .full { display: none; } .topbar .status .short { display: inline; } }
-@media (max-width: 759px) {
+@media (max-width: 759px), (pointer: coarse) and (max-height: 500px) {
   .shell { grid-template-columns: minmax(0, 1fr); }
   .sidebar { display: none; }
   .topbar { padding: 8px 14px; } .content { padding: 20px 16px 96px; }
-  #modeseg, .topbar .tools [data-action="reset"] { display: none; }
+  #modeseg { display: none; }
   .topbar .status .full { display: none; } .topbar .status .short { display: inline; }
   .topbar .status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
   .mobilenav { display: flex; }
   .title { font-size: 30px; }
   .mapbox { height: 52vh; min-height: 300px; max-height: 440px; }
 }
-@media (min-width: 760px) { .mobilenav { display: none !important; } }
+@media (min-width: 760px) and (pointer: fine), (min-width: 760px) and (min-height: 501px) { .mobilenav { display: none !important; } }
 body.pre .mobilenav, body.pre .tabbar { display: none !important; }
 .mobilenav { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 20; padding: 6px; border-radius: 28px; }
 .mobilenav a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10.5px; font-weight: 600; color: var(--label2); padding: 6px 2px; border-radius: 20px; min-height: 46px; justify-content: center; }
@@ -390,3 +390,26 @@ body.pre .mobilenav, body.pre .tabbar { display: none !important; }
 .ga-b.ok { background: #1E8E3E; color: #fff; } .ga-b.no { background: #D93025; color: #fff; }
 .ga-code { display: inline-block; font-size: 34px; font-weight: 800; letter-spacing: .12em; margin: 10px 0; padding: 8px 22px; border-radius: 12px; background: #FFE11B; color: #0B2E6B; }
 .galert .btn { margin-top: 6px; }
+
+/* Real phones, 25 Oct evening: the page itself scrolls (not an inner box), so Safari's address bar shrinks as on any site,
+   and nothing hides under the top bar, the tab bar or the home indicator. Reset is an icon here. */
+.resetbtn .rs-ic { display: none; }
+.shell, .sidebar, .main, .inspector { height: 100vh; height: 100dvh; }
+@media (max-width: 759px), (pointer: coarse) and (max-height: 500px) {
+  html, body { height: auto; }
+  body { min-height: 100svh; }
+  html { scroll-padding-top: 64px; scroll-padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .shell { display: block; height: auto; min-height: 100vh; }
+  .main { height: auto; min-height: 100vh; min-height: 100dvh; overflow: visible; }
+  .topbar { position: sticky; top: 0; z-index: 15; background: var(--canvas); padding-top: calc(8px + env(safe-area-inset-top)); padding-left: calc(14px + env(safe-area-inset-left)); padding-right: calc(14px + env(safe-area-inset-right)); }
+  .topbar .tools { gap: 4px; }
+  .content { padding-bottom: calc(112px + env(safe-area-inset-bottom)); }
+  .mobilenav { bottom: calc(10px + env(safe-area-inset-bottom)); left: calc(12px + env(safe-area-inset-left)); right: calc(12px + env(safe-area-inset-right)); }
+  .inspector { height: auto; top: 0; bottom: 0; padding-bottom: env(safe-area-inset-bottom); }
+  .mapbox { height: 52vh; height: 52svh; }
+  .inspector .pane, .thread, .mapsearch .results { overscroll-behavior: contain; }
+  body.kb-open .mobilenav { display: none; }
+  .resetbtn { min-width: 34px; padding: 0 8px; } .resetbtn .rs-ic { display: block; } .resetbtn .rs-t { display: none; }
+}
+body.phone .topbar { min-height: 61px; }
+@media (max-width: 400px) { .topbar .tools [data-action="share"] { display: none; } }

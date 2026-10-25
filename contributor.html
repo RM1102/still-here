@@ -15,11 +15,13 @@
 <link rel="stylesheet" href="css/apple/apple-buttons.css">
 <link rel="stylesheet" href="css/apple/apple-feedback.css">
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/tour.css">
 <style>
   /* Same shell as the public app: a sidebar of places, the update in the middle */
   .cshell { display: grid; grid-template-columns: 300px minmax(0, 1fr); height: 100vh; }
   .cside { height: 100vh; overflow-y: auto; padding: 18px 12px; border-right: 1px solid var(--hair); background: var(--group); display: flex; flex-direction: column; gap: 10px; }
   .cside .brand { padding: 4px 8px 6px; }
+  .ctour { display: flex; gap: 6px; padding: 0 8px; }
   .csearch { display: flex; align-items: center; gap: 8px; padding: 0 10px; min-height: 38px; border-radius: 10px; background: var(--fill); color: var(--label2); }
   .csearch input { flex: 1; border: 0; background: transparent; color: var(--label); font: inherit; font-size: 15px; outline: none; min-width: 0; }
   .ckinds { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -44,6 +46,7 @@
 <div class="cshell">
   <aside class="cside" aria-label="Places">
     <a class="brand" href="index.html"><span class="mark"><i></i></span><div><b>Still Here</b><span>For places and staff</span></div></a>
+    <div class="ctour"><button class="btn btn-compact btn-plain" data-tour-start="1" title="A one-minute tour of the contributor portal">Tour</button><button class="btn btn-compact" data-creset="1" title="Clear your updates and put every place back as it was">Reset</button></div>
     <label class="csearch"><span id="sicon"></span><input id="csearch" type="search" placeholder="Search places" aria-label="Search places"></label>
     <div class="ckinds" id="ckinds"></div>
     <div class="clist" id="clist"></div>
@@ -55,5 +58,6 @@
 <script src="js/icons.js"></script>
 <script src="js/data.js"></script>
 <script src="js/contributor.js"></script>
+<script src="js/tour.js"></script>
 </body>
 </html>

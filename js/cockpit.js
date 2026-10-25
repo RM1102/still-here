@@ -420,6 +420,9 @@
     else if (d.q) { S.sel = { type: "q", id: d.q }; const q = GV.queue.find(x => x.id === d.q); if (q && q.scope === "india" && S.scope === "delhi") S.scope = "india"; }
     render();
   });
+  // For the guided tour and the Reset button: open a page, or put everything back as it was at 7:10 am
+  RC.govUI = { page: p => { if (S.page !== p) { S.page = p; S.sel = null; render(); } }, reset: () => { S = def(); save(); render(); } };
+  document.addEventListener("click", e => { if (e.target.closest("[data-greset]")) RC.govUI.reset(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && S.sel) { S.sel = null; render(); } if (e.key === "Enter" && e.target.dataset && e.target.dataset.q) e.target.click(); });
   let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(render, 150); });
   render();

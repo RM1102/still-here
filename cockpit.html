@@ -14,13 +14,14 @@
 <link rel="stylesheet" href="css/apple/apple-buttons.css">
 <link rel="stylesheet" href="css/apple/apple-materials.css">
 <link rel="stylesheet" href="css/cockpit.css">
+<link rel="stylesheet" href="css/tour.css">
 </head>
 <body>
 <div class="app">
   <header class="hdr">
     <div class="brand"><span class="mark" aria-hidden="true"><i></i></span><div><b>Still Here</b><span data-help="govview" id="restricted">Government view · restricted</span></div></div>
     <nav class="tabs" id="tabs" aria-label="Pages"></nav>
-    <div class="hdr-r"><button class="btn btn-compact btn-icon btn-plain" data-theme-toggle aria-label="Light or dark" title="Light or dark"></button><span class="who" id="who"></span><span class="badge" data-help="simulated">Simulated data</span><span class="clock">Day 1 · 07:10</span></div>
+    <div class="hdr-r"><button class="btn btn-compact btn-plain" data-tour-start="1" title="A one-minute tour of the control room">Tour</button><button class="btn btn-compact" data-greset="1" title="Put every view back as it was at 7:10 am">Reset</button><button class="btn btn-compact btn-icon btn-plain" data-theme-toggle aria-label="Light or dark" title="Light or dark"></button><span class="who" id="who"></span><span class="badge" data-help="simulated">Simulated data</span><span class="clock">Day 1 · 07:10</span></div>
   </header>
   <main id="page"></main>
 </div>
@@ -30,5 +31,6 @@
 <script src="js/model.js"></script>
 <script src="js/map.js"></script>
 <script src="js/cockpit.js"></script>
+<script src="js/tour.js"></script>
 </body>
 </html>

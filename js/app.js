@@ -22,6 +22,18 @@
       mapArea: "city", mapCity: "delhi", mapState: null, mapSel: null, ti: 0, msgs: false, withMe: [], notRight: {}, called: {} };
   }
   let S = load();
+  const isNarrow = () => window.innerWidth < 760 || (matchMedia("(pointer: coarse)").matches && window.innerHeight < 500);
+  // The view (Desktop / Phone) belongs to this tab, so two Live pictures open in two tabs keep their own views
+  const TABMODE = "stillhere-mode";
+  try { const m = sessionStorage.getItem(TABMODE); if (m === "phone" || m === "desktop") S.mode = m; } catch (e) {}
+  // A link from the PDF or the walkthrough page names the view and where it came from (?view=phone&from=pdf#child).
+  // It opens that view, starts that screen from its beginning, and tells the tour; then the address is tidied.
+  const ARRIVAL = (() => { try { const q = new URLSearchParams(location.search), view = q.get("view"), from = q.get("from");
+    if (view === "phone" || view === "desktop") { S.mode = view; try { sessionStorage.setItem(TABMODE, view); } catch (e) {} }
+    if (from && (location.hash === "#child" || !location.hash)) { S.childWho = null; S.childAns = null; }
+    if (from && location.hash === "#map") Object.assign(S, { mapArea: "city", mapCity: "delhi", mapState: null, mapSel: null, ti: 0, mapLayer: "people" });
+    if (view || from) history.replaceState(null, "", location.pathname + location.hash);
+    return from ? { from, view: view || "" } : null; } catch (e) { return null; } })();
   function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.cases) return Object.assign(defaultState(), s); } catch (e) {} return defaultState(); }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
   function markStep(n) { if (!S.stepsDone.includes(n)) S.stepsDone.push(n); }
@@ -135,7 +147,7 @@
       ${disc("Where its answers come from", "The same sources as the app: your people's status, places that update themselves, staff phones at hospitals and shops, and official notices. In the real product it runs on WhatsApp's business platform, on Instagram, Telegram and Facebook Messenger, and by SMS for basic phones.")}`; };
 
   /* The child alert (24 Oct night): for a young child holding a parent's phone (STRATEGY §8) */
-  const SAY = { en: "Are you okay? Is a grown-up with you? Press the green face if a grown-up is with you. Press the red face if you are alone.", hi: "क्या तुम ठीक हो? क्या कोई बड़ा तुम्हारे साथ है? अगर कोई बड़ा साथ है तो हरा चेहरा दबाओ। अगर तुम अकेले हो तो लाल चेहरा दबाओ।" };
+  const SAY = { en: "Are you okay? Is a grown-up with you? Press the green button if a grown-up is with you. Press the red button if you are alone.", hi: "क्या तुम ठीक हो? क्या कोई बड़ा तुम्हारे साथ है? अगर कोई बड़ा साथ है तो हरा बटन दबाओ। अगर तुम अकेले हो तो लाल बटन दबाओ।" };
   V["#child"] = () => { const a = S.childAns, who = S.childWho;
     const say = `<button class="ga-say" data-action="kidsay" aria-label="Read this aloud">${I("volume-2", 18)}<span>Read aloud</span></button>`;
     return `${head("The child alert", "Part of the morning alert that reaches every phone. Whoever is holding the phone says who they are, so a child gets a child's version, read aloud.", ["#more", "More"])}
@@ -334,6 +346,7 @@
       <a class="r t" href="#ward">${tile("building-2", "blue")}<div class="tt"><b>Your ward</b><span>Water, power, official notices and local groups</span></div>${chev()}</a>
       <a class="r t" href="#radar">${tile("radar", "indigo")}<div class="tt"><b>On duty</b><span>Only for health workers, police and teachers</span></div>${chev()}</a>
       <a class="r t" href="#kit">${tile("download", "teal")}<div class="tt"><b>Offline kit</b><span>Apps and pages that work without a signal</span></div>${chev()}</a>
+      <a class="r t" href="#tour">${tile("compass", "blue")}<div class="tt"><b>Take the tour</b><span>One minute: what each part of Still Here does</span></div>${chev()}</a>
       <a class="r t" href="#about">${tile("info", "gray")}<div class="tt"><b>About this prototype</b><span>The idea, what's real, and the words used</span></div>${chev()}</a>
       <a class="r t" href="cockpit.html" target="_blank" rel="noopener">${tile("landmark", "ink")}<div class="tt"><b>Government view</b><span>The restricted control room, shown for the demo</span></div>${chev()}</a>
     </div>`;
@@ -560,7 +573,10 @@
   function thread(from, text, t, kind, gloss) { S.thread.push({ from, text, t, kind, gloss }); }
   // Log times follow the order of events: never earlier than the last entry (audit 2, N-26)
   function nextT(id, base) { const e = S.cases[id].log.slice(-1)[0]; if (!e) return base; const last = e.t, toM = x => +x.slice(0, 2) * 60 + +x.slice(3), m = Math.max(toM(base), toM(last) + 2); return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); }
-  function toast(text) { let t = document.querySelector(".fb-toast"); if (!t) { t = document.createElement("div"); t.className = "fb-toast glass"; t.setAttribute("role", "status"); document.body.appendChild(t); } t.innerHTML = `<span class="fb-icon" data-kind="success" style="color:var(--apple-green)">${I("check", 18)}</span>${esc(text)}`; t.style.display = "flex"; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = "none", 2600); }
+  function toast(text, kind) { let t = document.querySelector(".fb-toast"); if (!t) { t = document.createElement("div"); t.className = "fb-toast glass"; t.setAttribute("role", "status"); document.body.appendChild(t); } t.innerHTML = kind === "info" ? `<span class="fb-icon" data-kind="info" style="color:var(--apple-blue)">${I("info", 18)}</span>${esc(text)}` : `<span class="fb-icon" data-kind="success" style="color:var(--apple-green)">${I("check", 18)}</span>${esc(text)}`; t.style.display = "flex"; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = "none", 2600); }
+  // Read aloud (js/read-aloud.js): one line at a time, the Indian English and Hindi voices, a wait and one retry for Safari,
+  // and a note if nothing is heard. Called straight from the tap, so iPhones allow the sound.
+  function sayAll(parts) { if (!window.ReadAloud) { toast("This browser can't read aloud"); return; } ReadAloud.say(parts.map(([text, lang]) => ({ text, lang })), { onProblem: t => toast(t, "info") }); }
   function download(name, obj) { const b = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" }); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
   function caseExport(id) {
     const c = RC.cases[id], s = S.cases[id];
@@ -579,10 +595,10 @@
     checkclaim() { const q = document.getElementById("claimq"); S.claim = q ? q.value : S.claim; markStep(10); },
     bot(d) { const m = S.bot || botStart(); m.push({ t: BOTMENU.find(x => x[0] === d.v)[1].slice(2), me: true }); m.push({ t: botReply(d.v) }); S.bot = m; markStep(10); },
     kid(d) { S.childAns = d.v || null; },
-    kidwho(d) { S.childWho = d.v || null; if (!d.v) S.childAns = null; },
+    kidwho(d) { S.childWho = d.v || null; S.childAns = null; },
     kidsay() { try { const W = { en: "Who is holding this phone? Tap I'm a grown-up, or I'm a child.", hi: "यह फ़ोन किसके हाथ में है? बड़े हैं तो पहला बटन दबाओ, बच्चे हो तो दूसरा।" };
-      const T = !S.childWho ? W : S.childWho === "adult" ? { en: "Thank you. If you're safe, open Still Here and tap I'm Safe.", hi: "धन्यवाद। अगर आप सुरक्षित हैं, तो स्टिल हियर खोलें।" } : S.childAns === "alone" ? { en: "Help is coming. Stay inside and keep the door shut. Open the door only for the person who says the word mango.", hi: "मदद आ रही है। दरवाज़ा बंद रखो। सिर्फ़ उसी के लिए दरवाज़ा खोलो जो आम कहे।" } : SAY;
-      const u = new SpeechSynthesisUtterance(T.en); u.lang = "en-IN"; speechSynthesis.cancel(); speechSynthesis.speak(u); const h = new SpeechSynthesisUtterance(T.hi); h.lang = "hi-IN"; speechSynthesis.speak(h); } catch (e) {} },
+      const T = !S.childWho ? W : S.childWho === "adult" ? { en: "Thank you. If you're safe, open Still Here and tap I'm Safe.", hi: "धन्यवाद। अगर आप सुरक्षित हैं, तो स्टिल हियर खोलें।" } : S.childAns === "ok" ? { en: "Good. Ask the grown-up to tap I'm Safe on their own phone.", hi: "अच्छा। बड़े से कहो कि वे अपने फ़ोन पर आई एम सेफ़ दबाएँ।" } : S.childAns === "alone" ? { en: "Help is coming. Stay inside and keep the door shut. Open the door only for the person who says the word mango.", hi: "मदद आ रही है। दरवाज़ा बंद रखो। सिर्फ़ उसी के लिए दरवाज़ा खोलो जो आम कहे।" } : SAY;
+      sayAll([[T.en, "en-IN"], [T.hi, "hi-IN"]]); } catch (e) {} },
     report() { S.reported = true; markStep(9); },
     askby(d) { S.askBy = d.v; },
     checkin(d) { S.checkins[d.id] = true; markStep(2); const p = RC.people.find(x => x.id === d.id) || {}, how = { wa: "on WhatsApp", sms: "by SMS", both: "on WhatsApp and by SMS", call: "with an automated call" }[S.askBy || "both"];
@@ -633,12 +649,12 @@
     export(d) { download("SH-7731-case-record.json", caseExport(d.id)); toast("A copy without the address was saved"); },
     share() { const url = location.href.split("#")[0], data = { title: "Still Here", text: "Who's still here, who's alone, who's closest.", url };
       if (navigator.share) navigator.share(data).catch(() => {}); else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => toast("Link copied"), () => toast(url)); else toast(url); },
-    reset() { S = defaultState(); save(); go("#alert"); },
-    mode(d) { S.mode = d.mode; }, tab(d) { S.tab = d.tab; }, mesh() { S.mesh = !S.mesh; }
+    reset() { if (RC.tour && RC.tour.stop) RC.tour.stop(); const m = S.mode; S = defaultState(); S.mode = m; save(); go("#alert"); },
+    mode(d) { S.mode = d.mode; try { sessionStorage.setItem(TABMODE, d.mode); } catch (e) {} }, tab(d) { S.tab = d.tab; }, mesh() { S.mesh = !S.mesh; }
   };
 
   /* ---------- chrome ---------- */
-  const NAV = [["sec", "Your people"], ["#home", "Who's here", "house"], ["#cases", "Cases", "users"], ["#find", "Find someone", "search"], ["#report", "Report someone alone", "siren"], ["#with", "Who's with you", "hand-helping"], ["sec", "Around you"], ["#map", "Map", "map-pinned"], ["#help", "Help is coming", "truck"], ["#ward", "Your ward", "building-2"], ["sec", "Tools"], ["#check", "Is this true?", "circle-help"], ["#bot", "Chat bot", "message-circle"], ["#onmyown", "If you're on your own", "life-buoy"], ["#child", "Child alert", "baby"], ["#radar", "On duty", "radar"], ["#kit", "Offline kit", "download"], ["sec", "Other portals"], ["contributor.html", "Contributor portal", "building-2"], ["cockpit.html", "Government view", "landmark"], ["sec", "Help"], ["journey.html", "Phone walkthrough", "smartphone"], ["#alert", "The morning alert", "siren"], ["#about", "About Still Here", "info"]];
+  const NAV = [["sec", "Your people"], ["#home", "Who's here", "house"], ["#cases", "Cases", "users"], ["#find", "Find someone", "search"], ["#report", "Report someone alone", "siren"], ["#with", "Who's with you", "hand-helping"], ["sec", "Around you"], ["#map", "Map", "map-pinned"], ["#help", "Help is coming", "truck"], ["#ward", "Your ward", "building-2"], ["sec", "Tools"], ["#check", "Is this true?", "circle-help"], ["#bot", "Chat bot", "message-circle"], ["#onmyown", "If you're on your own", "life-buoy"], ["#child", "Child alert", "baby"], ["#radar", "On duty", "radar"], ["#kit", "Offline kit", "download"], ["sec", "Other portals"], ["contributor.html", "Contributor portal", "building-2"], ["cockpit.html", "Government view", "landmark"], ["sec", "Help"], ["#tour", "Take the tour", "compass"], ["journey.html", "Phone walkthrough", "smartphone"], ["#alert", "The morning alert", "siren"], ["#about", "About Still Here", "info"]];
   function chrome() {
     $("#nav").innerHTML = NAV.map(n => n[0] === "sec" ? `<div class="sec">${n[1]}</div>` : `<a href="${n[0]}"${n[0].indexOf("#") ? ` target="_blank" rel="noopener"` : ""}>${I(n[2], 17)}<span>${n[1]}</span></a>`).join("");
     const tabs = [["#home", "People", "house"], ["#cases", "Cases", "users"], ["#map", "Map", "map-pinned"], ["#help", "Help", "truck"]];
@@ -703,6 +719,7 @@
     const tb = $(".topbar"), avail = $(".main").clientHeight - (tb ? tb.offsetHeight : 0) - 38, h = d.offsetHeight, k = Math.max(0.55, Math.min(1, avail / h));
     d.style.transform = k < 1 ? `scale(${k.toFixed(3)})` : ""; d.style.marginBottom = k < 1 ? `${Math.round((k - 1) * h)}px` : "";
   }
+  let lastRoute = null, lastMode = null;
   function render() {
     let route = location.hash || "#alert";
     if (route === "#request") route = "#find";
@@ -711,14 +728,18 @@
     if (!S.entered && route !== "#alert" && route !== "#onmyown" && route !== "#welcome" && route !== "#child") { S.entered = true; S.welcomed = true; }
     if (S.mapArea === "delhi") { S.mapArea = "city"; S.mapCity = "delhi"; }
     if (route === "#map" && !S.mapSel && cityOf() === "delhi") S.mapSel = { kind: "ward", key: WARD.key };
-    const phone = S.mode === "phone" && window.innerWidth >= 760;
+    const phone = S.mode === "phone" && !isNarrow();
     document.body.classList.toggle("phone", phone);
     document.body.classList.toggle("pre", false);
     document.querySelectorAll("#modeseg button").forEach(b => b.classList.toggle("on", b.dataset.mode === S.mode));
     const target = phone ? $("#pview") : $("#view"), other = phone ? $("#view") : $("#pview");
+    // WebKit drops the scroll position when a screen's content is replaced, so keep it when the screen stays the same
+    const keep = [window.scrollY, $(".main").scrollTop, $("#pview").scrollTop];
     target.innerHTML = V[route](); other.innerHTML = "";
     $("#view").classList.toggle("wide", route === "#map" || route === "#help");
-    if (phone) $("#pview").scrollTop = 0; else $(".main").scrollTop = 0;
+    if (route !== lastRoute || S.mode !== lastMode) { if (phone) $("#pview").scrollTop = 0; else { $(".main").scrollTop = 0; if (isNarrow()) window.scrollTo(0, 0); } }
+    else { if (isNarrow()) window.scrollTo(0, keep[0]); $(".main").scrollTop = keep[1]; $("#pview").scrollTop = keep[2]; }
+    lastRoute = route; lastMode = S.mode;
     fitDevice();
     document.querySelectorAll(".nav a, .tabbar a, .mobilenav a").forEach(a => a.classList.toggle("on", a.getAttribute("href") === route || (route.startsWith("#case") && a.getAttribute("href") === "#cases") || ((route === "#find" || route === "#report") && a.getAttribute("href") === "#cases" && a.closest(".tabbar, .mobilenav"))));
     document.querySelectorAll(".inspector .tabs [data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === S.tab));
@@ -729,7 +750,7 @@
     if (route === "#case-meera" && S.entered) markStep(3);
     if (route === "#about") markStep(12);
     if (route === "#kit" || route === "#ward" || route === "#radar") markStep(11);
-    renderThread(); renderDemo(); save();
+    renderThread(); renderDemo(); if (!quiet) save();
   }
   document.addEventListener("click", e => {
     const t = e.target.closest("[data-action],[data-mode],[data-tab],#meshtoggle"); if (!t) return;
@@ -753,6 +774,18 @@
     else if (e.key === "Escape") { closeSearch(); e.target.blur(); } });
   document.addEventListener("pointerdown", e => { if (!e.target.closest("#mapsearch")) closeSearch(); });
   window.addEventListener("hashchange", render);
-  let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(render, 150); });
+  let rz, lastW = window.innerWidth;
+  window.addEventListener("resize", () => { if (window.innerWidth === lastW) { fitDevice(); return; } lastW = window.innerWidth; clearTimeout(rz); rz = setTimeout(render, 150); });
+  // 16: another tab changed the story (two Live pictures open at once): take its copy, keep this tab's view
+  // (it redraws without saving back, so two tabs with different views don't keep answering each other)
+  let quiet = false;
+  window.addEventListener("storage", e => { if (e.key !== KEY) return; const m = S.mode; S = load(); S.mode = m; quiet = true; render(); quiet = false; });
+  // Real phones: the window scrolls, so restore nothing on reload, and hide the tab bar while the keyboard is up
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  if (window.visualViewport) { const vv = window.visualViewport, onVV = () => document.body.classList.toggle("kb-open", document.documentElement.clientHeight - vv.height - vv.offsetTop > 100);
+    vv.addEventListener("resize", onVV); vv.addEventListener("scroll", onVV); }
+  // For the guided tour (js/tour.js): where we are, how to move, and how to press a button
+  RC.app = { route: () => (V[location.hash] ? location.hash : "#alert"), go, render, arrival: ARRIVAL, state: () => S,
+    act: (name, d) => { const fn = A[name]; if (fn) { fn(d || {}); render(); } }, isPhone: () => document.body.classList.contains("phone"), narrow: isNarrow };
   chrome(); render();
 })(window.RC);

@@ -341,3 +341,8 @@ table.t td.grp { font-size: 12.5px; font-weight: 600; color: var(--label2); back
 .qi .btn:not(.btn-prominent), table.t .btn:not(.btn-prominent), .drawer .btn:not(.btn-prominent) { background: color-mix(in srgb, var(--apple-blue) 12%, transparent); color: var(--apple-blue); }
 
 .hdr-r [data-theme-toggle] { color: var(--label2); }
+/* 25 Oct evening: with Tour and Reset in the header, the tabs scroll sideways inside the header (never the page),
+   and "Simulated data" hides on narrower laptops (the first card says it) */
+@media (max-width: 1600px) and (min-width: 701px) { .tabs { min-width: 0; overflow-x: auto; scrollbar-width: none; } .tabs::-webkit-scrollbar { display: none; } }
+@media (max-width: 1520px) { .hdr-r .badge { display: none; } }
+@media (max-width: 700px) { .kpi .d { white-space: normal; } }

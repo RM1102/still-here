@@ -85,4 +85,7 @@
     save(); render();
   });
   render();
+  // For the guided tour and the Reset button: clear every update and draft
+  RC.contrib = { reset: () => { S = { place: "clinic", upd: {}, draft: {}, added: [], kind: "all", q: "" }; save(); render(); } };
+  document.addEventListener("click", e => { if (e.target.closest("[data-creset]")) RC.contrib.reset(); });
 })(window.RC);

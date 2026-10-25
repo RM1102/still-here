@@ -156,7 +156,9 @@ window.RC = window.RC || {};
       if (se.area && pts.length) svg += `<path d="${pathOf(pts)} L${xs(pts[pts.length - 1].x)} ${ys(0)} L${xs(pts[0].x)} ${ys(0)} Z" style="fill:${se.color};opacity:.12"/>`;
       if (past.length > 1) svg += `<path d="${pathOf(past)}" style="fill:none;stroke:${se.color};stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round"/>`;
       if (fut.length > 1) svg += `<path d="${pathOf(fut)}" style="fill:none;stroke:${se.color};stroke-width:2;stroke-dasharray:5 4;stroke-linejoin:round;stroke-linecap:round"/>`;
-      const last = pts[pts.length - 1]; svg += `<text x="${xs(last.x) + 6}" y="${ys(last.y) + 4 + (si && Math.abs(ys(last.y) - ys(o.series[0].pts[o.series[0].pts.length - 1].y)) < 12 ? 12 : 0)}" class="axis strong" style="fill:var(--label)">${esc(se.name)} ${o.yfmt ? o.yfmt(last.y) : ""}</text>`;
+      // The end label sits right of the line on wide charts; on narrow ones (a phone) it ends at the line's end, inside the chart
+      const last = pts[pts.length - 1], inside = W < 520, lx = inside ? xs(last.x) - 4 : xs(last.x) + 6, ly = ys(last.y) + 4 + (si && Math.abs(ys(last.y) - ys(o.series[0].pts[o.series[0].pts.length - 1].y)) < 12 ? 12 : 0) + (inside ? (si ? 10 : -6) : 0);
+      svg += `<text x="${lx}" y="${ly}"${inside ? ' text-anchor="end"' : ""} class="axis strong" style="fill:var(--label)">${esc(se.name)} ${o.yfmt ? o.yfmt(last.y) : ""}</text>`;
     });
     if (o.marker != null) { const mx = xs(o.marker); svg += `<line x1="${mx}" x2="${mx}" y1="${T}" y2="${H - B}" class="marker"/>`;
       o.series.forEach(se => { const p = se.pts.reduce((b, q) => Math.abs(q.x - o.marker) < Math.abs(b.x - o.marker) ? q : b, se.pts[0]); svg += `<circle cx="${mx}" cy="${ys(p.y)}" r="4" style="fill:${se.color};stroke:var(--group-solid);stroke-width:2"/>`; });
