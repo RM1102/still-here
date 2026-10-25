@@ -43,13 +43,13 @@
   .lock { position: relative; height: 100%; color: #fff; text-align: center; background: linear-gradient(165deg, #0B2E6B 0%, #1F5FD6 55%, #7FB0FF 100%); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; }
   .lock .date { padding-top: 15%; font-size: 15px; font-weight: 600; opacity: .9; }
   .lock .time { font-size: 64px; font-weight: 700; letter-spacing: -.02em; line-height: 1; margin-top: 2px; }
-  .lock .note { position: absolute; left: 4%; right: 4%; top: 40%; text-align: left; color: #111; background: #F4F4F7; border-radius: 18px; padding: 10px 12px 11px; box-shadow: 0 8px 24px rgb(0 0 0 / .25); }
-  .lock .nh { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; color: #6E6E73; letter-spacing: .02em; text-transform: uppercase; }
-  .lock .nh i { display: inline-flex; width: 20px; height: 20px; border-radius: 5px; background: #D93025; align-items: center; justify-content: center; }
-  .lock .nh .ago { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 400; }
-  .lock .note b { display: block; font-size: 14px; margin-top: 6px; }
-  .lock .note span { display: block; font-size: 13px; line-height: 1.35; margin-top: 2px; }
-  .lock .note small { display: block; font-size: 12px; color: #6E6E73; margin-top: 4px; }
+  /* As an iPhone shows a government alert on the lock screen: an ordinary notification with a bare yellow triangle */
+  .lock .note { position: absolute; left: 4%; right: 4%; top: 38%; display: flex; gap: 10px; align-items: center; text-align: left; color: #111; background: #F2F2F5; border-radius: 20px; padding: 11px 13px 12px 11px; box-shadow: 0 8px 24px rgb(0 0 0 / .25); font-size: 13px; line-height: 1.32; }
+  .lock .note > svg { flex: none; }
+  .lock .note p { margin: 0; color: #111; }
+  .lock .nh { display: flex; align-items: baseline; }
+  .lock .nh b { font-weight: 600; }
+  .lock .nh span { margin-left: auto; color: #8A8A8E; font-size: 12px; }
   .lock .tools { position: absolute; left: 9%; right: 9%; bottom: 5%; display: flex; justify-content: space-between; }
   .lock .tools i { width: 42px; height: 42px; border-radius: 50%; background: rgb(0 0 0 / .28); }
   .lock .bar { position: absolute; bottom: 1.6%; left: 50%; width: 36%; height: 4px; margin-left: -18%; border-radius: 3px; background: #fff; opacity: .9; }
@@ -69,8 +69,8 @@
   <div class="steps">
     <a class="step" href="index.html#child"><div class="phone"><span class="island"></span><div class="screen">
       <div class="lock"><div class="date">Monday, 26 October</div><div class="time">6:00</div>
-        <div class="note"><div class="nh"><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></i>Emergency alert<span class="ago">now</span></div>
-          <b>Extreme alert · Government of India</b><span>At 2:32 pm yesterday, half of all people vanished. Nobody has vanished since. Tap to see who in your life is safe.</span><small>Still Here · NDMA</small></div>
+        <div class="note"><svg width="24" height="22" viewBox="0 0 24 22" aria-hidden="true"><path d="M10.3 1.6a2 2 0 0 1 3.4 0l9.6 16.6a2 2 0 0 1-1.7 3H2.4a2 2 0 0 1-1.7-3z" fill="#FFCC00"/><path d="M12 7.5v6" stroke="#111" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1.4" fill="#111"/></svg>
+          <div><p class="nh"><b>Emergency Alert</b><span>now</span></p><p>Government of India: at 2:32 pm yesterday, half of all people vanished. Nobody has vanished since. Tap to see who in your life is safe.</p></div></div>
         <div class="tools"><i></i><i></i></div><div class="bar"></div></div></div></div>
       <span class="n">1</span><b>The alert arrives</b><p>On every phone at once, even a locked one, through the same system India already uses for disaster alerts.</p><span class="live">Open it live</span></a>
     <a class="step" href="index.html#child"><div class="phone"><span class="island"></span><div class="screen"><div class="sb"><span>7:10</span><span class="sig"><i></i><i></i><i></i><i></i></span></div><img src="img/journey/1-who.png" alt="Who is holding this phone?"></div></div>
